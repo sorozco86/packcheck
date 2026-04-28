@@ -1,0 +1,14 @@
+[build]
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Increase function timeout to 26s (max on free plan)
+[functions."analyze"]
+  timeout = 26
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
