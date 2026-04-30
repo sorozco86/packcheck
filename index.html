@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PackCheck — Artwork Validation System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0f0f0f;--ink80:#2a2a2a;--ink50:#6e6e6e;--ink20:#c4c4c4;
+  --ink08:#ebebeb;--ink04:#f5f5f3;--white:#fff;--bg:#f0f0ee;
+  --red:#b5271f;--red-bg:#fdf1f0;--red-bd:#edcac7;
+  --amb:#a0540a;--amb-bg:#fdf5ed;--amb-bd:#e8cfa8;
+  --grn:#1a6840;--grn-bg:#edf7f1;--grn-bd:#aad6be;
+  --nvy:#1b3460;--nvy-bg:#eef2fb;--nvy-bd:#b8cae6;
+  --rule:1px solid var(--ink08);--sh:0 1px 4px rgba(0,0,0,.05);--shm:0 4px 16px rgba(0,0,0,.07);--r:4px;--r8:8px;
+}
+html{font-size:15px}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
+.hdr{background:var(--white);border-bottom:var(--rule);position:sticky;top:0;z-index:100}
+.hdr-in{max-width:1100px;margin:0 auto;padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:baseline;gap:14px}
+.brand-name{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;letter-spacing:-.3px}
+.brand-sep{width:1px;height:14px;background:var(--ink20)}
+.brand-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ink50)}
+.hdr-pill{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 11px;border:var(--rule);border-radius:2px;color:var(--ink50)}
+.page{max-width:1100px;margin:0 auto;padding:36px 32px 80px}
+.hero{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:26px;border-bottom:var(--rule);margin-bottom:32px}
+.hero-h{font-family:'Playfair Display',serif;font-size:clamp(26px,3vw,40px);font-weight:400;letter-spacing:-.6px;line-height:1.08}
+.hero-h em{font-style:italic;color:var(--ink50)}
+.hero-p{max-width:320px;font-size:12px;color:var(--ink50);line-height:1.78;font-weight:300;text-align:right}
+.step{display:flex;align-items:center;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ink50);margin-bottom:14px}
+.step::after{content:'';flex:1;height:1px;background:var(--ink08)}
+.apikey-panel{background:var(--white);border:var(--rule);border-radius:var(--r8);padding:16px 20px;margin-bottom:28px;box-shadow:var(--sh)}
+.apikey-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.apikey-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--ink50);white-space:nowrap}
+.apikey-input{flex:1;min-width:260px;padding:8px 12px;border:var(--rule);border-radius:var(--r);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);background:var(--ink04);outline:none}
+.apikey-save{padding:8px 16px;background:var(--ink);color:var(--white);border:none;border-radius:var(--r);font-family:'IBM Plex Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer}
+.apikey-ok{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--grn);display:none}
+.apikey-note{font-size:11px;color:var(--ink50);font-weight:300;margin-top:8px}
+.apikey-note a{color:var(--nvy)}
+.upload-grid{display:grid;grid-template-columns:1fr 32px 1fr;margin-bottom:14px;align-items:start}
+.panel{background:var(--white);border:var(--rule);border-radius:var(--r8);overflow:hidden;box-shadow:var(--sh)}
+.panel-hd{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:var(--rule)}
+.panel-lbl{font-size:12px;font-weight:600}
+.badge{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 9px;border-radius:2px;font-weight:500}
+.b-master{background:var(--nvy-bg);color:var(--nvy);border:1px solid var(--nvy-bd)}
+.b-pv{background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-bd)}
+.dz{padding:40px 24px;min-height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:background .12s;text-align:center}
+.dz:hover{background:var(--ink04)}
+.dz.drag{background:var(--nvy-bg);outline:2px dashed var(--nvy-bd);outline-offset:-8px}
+.dz-ico{width:48px;height:48px;border:var(--rule);border-radius:var(--r8);display:flex;align-items:center;justify-content:center;margin-bottom:16px;background:var(--ink04)}
+.dz-ico svg{width:20px;height:20px;color:var(--ink50)}
+.dz-p1{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:4px}
+.dz-p2{font-size:11px;color:var(--ink50);font-weight:300}
+.dz-lnk{color:var(--nvy);text-decoration:underline}
+input[type=file]{display:none}
+.prev-img{width:100%;height:240px;object-fit:contain;display:block;background:var(--ink04);padding:14px}
+.prev-pdf{width:100%;height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--ink04);gap:10px}
+.prev-pdf-name{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink50);text-align:center;padding:0 16px;word-break:break-all}
+.prev-pdf-size{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink20)}
+.fbar{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-top:var(--rule);background:var(--ink04)}
+.fnm{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink50);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.fchg{font-size:11px;color:var(--nvy);cursor:pointer;text-decoration:underline;flex-shrink:0}
+.vs-col{display:flex;align-items:center;justify-content:center;padding-top:70px}
+.vs-txt{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink20);letter-spacing:1px;writing-mode:vertical-lr}
+.info-note{display:flex;align-items:center;gap:8px;margin-bottom:22px;padding:10px 14px;background:var(--nvy-bg);border:1px solid var(--nvy-bd);border-radius:var(--r8);font-size:11px;color:var(--nvy)}
+.checks{background:var(--white);border:var(--rule);border-radius:var(--r8);padding:15px 20px;margin-bottom:22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:var(--sh)}
+.ck-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--ink50);white-space:nowrap}
+.ck-sep{width:1px;height:16px;background:var(--ink08)}
+.pills{display:flex;flex-wrap:wrap;gap:7px;flex:1}
+.pill{display:flex;align-items:center;padding:5px 12px;border:var(--rule);border-radius:2px;font-size:11px;color:var(--ink50);cursor:pointer;transition:all .12s;user-select:none;background:var(--white);font-family:'IBM Plex Sans',sans-serif}
+.pill:hover{border-color:var(--ink20);color:var(--ink)}
+.pill.on{background:var(--ink);border-color:var(--ink);color:var(--white)}
+.pill input{display:none}
+.err{display:none;align-items:flex-start;gap:10px;background:var(--red-bg);border:1px solid var(--red-bd);border-radius:var(--r8);padding:12px 16px;margin-bottom:18px;font-size:12px;color:var(--red);line-height:1.65}
+.err.on{display:flex}
+.btn-go{width:100%;padding:14px 24px;background:var(--ink);color:var(--white);border:none;border-radius:var(--r);font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:32px}
+.btn-go:hover:not(:disabled){background:var(--ink80);box-shadow:var(--shm);transform:translateY(-1px)}
+.btn-go:disabled{opacity:.3;cursor:not-allowed;transform:none}
+.loading{display:none;background:var(--white);border:var(--rule);border-radius:var(--r8);padding:52px 32px;text-align:center;box-shadow:var(--sh);margin-bottom:24px}
+.loading.on{display:block}
+.track{width:240px;height:1px;background:var(--ink08);margin:0 auto 24px;position:relative;overflow:hidden}
+.bar{position:absolute;height:100%;width:40%;background:var(--ink);animation:slide 1.4s ease-in-out infinite}
+@keyframes slide{0%{left:-40%}100%{left:140%}}
+.ld-lbl{font-size:12px;color:var(--ink50);font-weight:300;margin-bottom:8px}
+.ld-step{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink);min-height:18px;margin-bottom:4px}
+.ld-prog{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink50)}
+.results{display:none}
+.results.on{display:block}
+.res-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:14px}
+.res-ttl{font-family:'Playfair Display',serif;font-size:22px;font-weight:400;letter-spacing:-.4px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.kpis{display:flex;gap:8px}
+.kpi{display:flex;flex-direction:column;align-items:center;padding:9px 16px;border-radius:var(--r8);min-width:72px;border:1px solid}
+.kpi-n{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;line-height:1;margin-bottom:4px}
+.kpi-l{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1.2px;text-transform:uppercase;font-weight:500}
+.kpi-c{background:var(--red-bg);border-color:var(--red-bd);color:var(--red)}
+.kpi-w{background:var(--amb-bg);border-color:var(--amb-bd);color:var(--amb)}
+.kpi-m{background:var(--ink04);border-color:var(--ink08);color:var(--ink50)}
+.kpi-o{background:var(--grn-bg);border-color:var(--grn-bd);color:var(--grn)}
+.btn-rst{display:flex;align-items:center;gap:6px;padding:8px 14px;background:transparent;border:var(--rule);border-radius:var(--r);font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:var(--ink50);cursor:pointer}
+.btn-rst:hover{border-color:var(--ink20);color:var(--ink)}
+.summary{background:var(--white);border:var(--rule);border-radius:var(--r8);padding:16px 20px;margin-bottom:16px;display:flex;gap:13px;align-items:flex-start;box-shadow:var(--sh);font-size:12px;color:var(--ink80);line-height:1.78;font-weight:300}
+.sum-ico{width:28px;height:28px;border:var(--rule);border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;background:var(--ink04)}
+.sum-ico svg{width:12px;height:12px;color:var(--ink50)}
+.tbl{background:var(--white);border:var(--rule);border-radius:var(--r8);overflow:hidden;box-shadow:var(--sh);margin-bottom:16px}
+.tbl-head{display:grid;grid-template-columns:4px 105px 1fr 120px;padding:9px 18px;border-bottom:var(--rule);background:var(--ink04)}
+.th{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink50);font-weight:500}
+.drow{border-bottom:var(--rule);transition:background .1s}
+.drow:last-child{border-bottom:none}
+.drow:hover{background:var(--ink04)}
+.drow-hd{display:grid;grid-template-columns:4px 105px 1fr 120px;align-items:center;padding:13px 18px;cursor:pointer}
+.sev{width:3px;height:26px;border-radius:2px}
+.sc{background:var(--red)}.sw{background:var(--amb)}.si{background:var(--ink20)}
+.row-cat{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:1.1px;text-transform:uppercase;color:var(--ink50);padding-left:12px}
+.row-ttl{font-size:12px;font-weight:500;padding-left:14px;color:var(--ink)}
+.row-rhs{display:flex;justify-content:flex-end;align-items:center;gap:8px}
+.lv{font-family:'IBM Plex Mono',monospace;font-size:8px;padding:3px 8px;border-radius:2px;text-transform:uppercase;letter-spacing:1px;font-weight:500}
+.lv-c{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)}
+.lv-w{background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-bd)}
+.lv-i{background:var(--ink04);color:var(--ink50);border:var(--rule)}
+.chev{color:var(--ink20);font-size:10px;transition:transform .18s;display:inline-block}
+.drow-bd{display:none;padding:4px 18px 16px 26px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px}
+.cmp-cell{padding:11px 13px;border-radius:var(--r);font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.6}
+.cmp-lbl{font-size:8px;letter-spacing:1.4px;text-transform:uppercase;font-weight:500;margin-bottom:5px;opacity:.6}
+.c-orig{background:var(--nvy-bg);border:1px solid var(--nvy-bd);color:var(--nvy)}
+.c-pv{background:var(--amb-bg);border:1px solid var(--amb-bd);color:var(--amb)}
+.action{display:flex;align-items:flex-start;gap:9px;padding:10px 13px;background:var(--white);border:var(--rule);border-radius:var(--r)}
+.act-lbl{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1.4px;text-transform:uppercase;color:var(--ink50);white-space:nowrap;padding-top:1px}
+.act-txt{font-size:12px;color:var(--ink80);line-height:1.65}
+.tag-sm{font-family:'IBM Plex Mono',monospace;font-size:8px;padding:1px 6px;border-radius:2px;margin-left:5px;display:inline-block}
+.conclusion-box{background:var(--white);border:var(--rule);border-radius:var(--r8);padding:16px 20px;display:flex;gap:14px;align-items:flex-start;font-size:12px;color:var(--ink80);line-height:1.75;font-weight:300;box-shadow:var(--sh)}
+.empty{text-align:center;padding:56px 32px}
+.empty-ico{font-size:32px;margin-bottom:12px}
+.empty-ttl{font-family:'Playfair Display',serif;font-size:18px;font-weight:400;margin-bottom:6px;color:var(--grn)}
+.empty-sub{font-size:12px;color:var(--ink50);font-weight:300}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="hdr-in">
+    <div class="brand">
+      <span class="brand-name">PackCheck</span>
+      <div class="brand-sep"></div>
+      <span class="brand-tag">Artwork Validation System</span>
+    </div>
+    <span class="hdr-pill">AI · ALKON VISION</span>
+  </div>
+</header>
+<div class="page">
+  <div class="hero">
+    <h1 class="hero-h">Validación de<br><em>Artes de Packaging</em></h1>
+    <p class="hero-p">Auditoría exhaustiva ART vs PV con scoring automático, detección multilenguaje y clasificación de aprobación.</p>
+  </div>
+
+  <div class="step">00 — Configuración</div>
+  <div class="apikey-panel">
+    <div class="apikey-row">
+      <span class="apikey-lbl">API Key</span>
+      <input class="apikey-input" type="password" id="apikey-input" placeholder="sk-ant-api03-..." autocomplete="off">
+      <button class="apikey-save" onclick="saveKey()">Guardar</button>
+      <span class="apikey-ok" id="apikey-ok">✓ Configurada</span>
+    </div>
+    <div class="apikey-note">Obtenela en <a href="https://console.anthropic.com/api-keys" target="_blank">console.anthropic.com</a> → API Keys. Se guarda en este navegador (localStorage).</div>
+  </div>
+
+  <div class="step">01 — Cargar archivos</div>
+  <div class="upload-grid">
+    <div class="panel">
+      <div class="panel-hd"><span class="panel-lbl">Arte Original</span><span class="badge b-master">ART</span></div>
+      <div class="dz" id="dz-o" onclick="document.getElementById('fi-o').click()">
+        <div class="dz-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+        <div class="dz-p1">Arrastrá o <span class="dz-lnk">seleccioná</span></div>
+        <div class="dz-p2">JPG · PNG · PDF — sin límite de peso</div>
+        <input type="file" id="fi-o" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf">
+      </div>
+    </div>
+    <div class="vs-col"><div class="vs-txt">vs</div></div>
+    <div class="panel">
+      <div class="panel-hd"><span class="panel-lbl">Arte Proveedor</span><span class="badge b-pv">PV</span></div>
+      <div class="dz" id="dz-p" onclick="document.getElementById('fi-p').click()">
+        <div class="dz-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+        <div class="dz-p1">Arrastrá o <span class="dz-lnk">seleccioná</span></div>
+        <div class="dz-p2">JPG · PNG · PDF — sin límite de peso</div>
+        <input type="file" id="fi-p" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf">
+      </div>
+    </div>
+  </div>
+  <div class="info-note">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    JPG · PNG · WebP · GIF · PDF (sin límite de tamaño). Los PDFs se convierten automáticamente a imagen.
+  </div>
+
+  <div class="step">02 — Criterios de revisión</div>
+  <div class="checks">
+    <span class="ck-lbl">Revisar</span>
+    <div class="ck-sep"></div>
+    <div class="pills">
+      <label class="pill on"><input type="checkbox" value="textos" checked>Textos</label>
+      <label class="pill on"><input type="checkbox" value="colores" checked>Colores</label>
+      <label class="pill on"><input type="checkbox" value="logos" checked>Logos y Marcas</label>
+      <label class="pill on"><input type="checkbox" value="fotos" checked>Fotografías</label>
+      <label class="pill on"><input type="checkbox" value="specs" checked>Especificaciones Técnicas</label>
+      <label class="pill on"><input type="checkbox" value="traducciones" checked>Traducciones</label>
+      <label class="pill on"><input type="checkbox" value="layout" checked>Layout y Composición</label>
+      <label class="pill on"><input type="checkbox" value="datos_repetidos" checked>Datos Repetidos</label>
+      <label class="pill on"><input type="checkbox" value="consistencia_caras" checked>Consistencia Caras</label>
+      <label class="pill on"><input type="checkbox" value="legal" checked>Legal y Regulatorio</label>
+      <label class="pill on"><input type="checkbox" value="placeholders" checked>Placeholders / EAN</label>
+      <label class="pill on"><input type="checkbox" value="unidades" checked>Unidades y Formatos</label>
+      <label class="pill on"><input type="checkbox" value="tipografia" checked>Tipografía / Encoding</label>
+      <label class="pill on"><input type="checkbox" value="dieline" checked>Dieline / Corte</label>
+      <label class="pill on"><input type="checkbox" value="qr" checked>Códigos QR / Barras</label>
+      <label class="pill on"><input type="checkbox" value="comercial" checked>Coherencia Comercial</label>
+      <label class="pill on"><input type="checkbox" value="naming" checked>Naming y Modelo</label>
+      <label class="pill on"><input type="checkbox" value="jerarquia" checked>Jerarquía Visual</label>
+      <label class="pill on"><input type="checkbox" value="copy_paste" checked>Copy/Paste Errors</label>
+    </div>
+  </div>
+
+  <div class="err" id="err"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span id="err-txt"></span></div>
+
+  <div class="step">03 — Ejecutar análisis</div>
+  <button class="btn-go" id="btn-go" disabled onclick="run()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    Analizar diferencias
+  </button>
+
+  <div class="loading" id="loading">
+    <div class="track"><div class="bar"></div></div>
+    <div class="ld-lbl">Auditando artes en detalle...</div>
+    <div class="ld-step" id="ld-step">Iniciando...</div>
+    <div class="ld-prog" id="ld-prog"></div>
+  </div>
+
+  <div class="results" id="results">
+    <div class="res-hdr">
+      <div class="res-ttl" id="res-ttl"></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="kpis" id="kpis"></div>
+        <button class="btn-rst" onclick="resetAll()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+          Nuevo
+        </button>
+      </div>
+    </div>
+    <div class="summary"><div class="sum-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div><span id="sum-txt"></span></div>
+    <div class="tbl" id="tbl">
+      <div class="tbl-head">
+        <div></div>
+        <div class="th" style="padding-left:12px">Categoría</div>
+        <div class="th" style="padding-left:14px">Descripción</div>
+        <div class="th" style="text-align:right">Nivel</div>
+      </div>
+      <div id="rows"></div>
+    </div>
+    <div id="conclusion-box"></div>
+  </div>
+</div>
+
+<script>
+var fO = null, fP = null, b64O = null, b64P = null;
+
+var STEPS = [
+  'Procesando archivos...', 'Extrayendo textos y elementos...',
+  'Comparando logos y marcas...', 'Verificando especificaciones tecnicas...',
+  'Analizando colores...', 'Revisando traducciones multilenguaje...',
+  'Calculando score y clasificacion...'
+];
+
+function saveKey() {
+  var k = document.getElementById('apikey-input').value.trim();
+  if (!k) { showErr('Ingresa una API key valida.'); return; }
+  localStorage.setItem('pk_key', k);
+  document.getElementById('apikey-ok').style.display = 'inline';
+  document.getElementById('apikey-input').value = '';
+  hideErr();
+  chkReady();
+}
+
+function getKey() { return localStorage.getItem('pk_key') || ''; }
+
+window.addEventListener('load', function() {
+  if (getKey()) document.getElementById('apikey-ok').style.display = 'inline';
+});
+
+function mimeOf(f) {
+  var t = (f.type || '').toLowerCase();
+  if (t === 'application/pdf') return 'application/pdf';
+  if (t.startsWith('image/')) return t;
+  var ext = (f.name || '').split('.').pop().toLowerCase();
+  var map = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif', pdf: 'application/pdf' };
+  return map[ext] || 'image/jpeg';
+}
+
+function isPDF(f) { return mimeOf(f) === 'application/pdf'; }
+
+function initDZ(dzId, fiId, key) {
+  var dz = document.getElementById(dzId);
+  var fi = document.getElementById(fiId);
+  fi.addEventListener('change', function(e) { if (e.target.files[0]) loadF(e.target.files[0], key); });
+  dz.addEventListener('dragover', function(e) { e.preventDefault(); dz.classList.add('drag'); });
+  dz.addEventListener('dragleave', function() { dz.classList.remove('drag'); });
+  dz.addEventListener('drop', function(e) {
+    e.preventDefault(); dz.classList.remove('drag');
+    if (e.dataTransfer.files[0]) loadF(e.dataTransfer.files[0], key);
+  });
+}
+
+function loadF(file, key) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var src = e.target.result;
+    var b64 = src.split(',')[1];
+    if (key === 'o') { fO = file; b64O = b64; } else { fP = file; b64P = b64; }
+    var dzId = key === 'o' ? 'dz-o' : 'dz-p';
+    var fiId = key === 'o' ? 'fi-o' : 'fi-p';
+    var dz = document.getElementById(dzId);
+    dz.onclick = null;
+    dz.classList.remove('drag');
+    var html = '';
+    if (isPDF(file)) {
+      html = '<div class="prev-pdf">'
+        + '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#b5271f" stroke-width="1.3">'
+        + '<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>'
+        + '<polyline points="14 2 14 8 20 8"/>'
+        + '<line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>'
+        + '</svg>'
+        + '<span class="prev-pdf-name">' + esc(file.name) + '</span>'
+        + '<span class="prev-pdf-size">' + (file.size / 1024 / 1024).toFixed(1) + ' MB</span>'
+        + '</div>';
+    } else {
+      html = '<img class="prev-img" src="' + src + '" alt="">';
+    }
+    html += '<div class="fbar">'
+      + '<span class="fnm">' + esc(file.name) + '</span>'
+      + '<span class="fchg" onclick="document.getElementById(\'' + fiId + '\').click()">Cambiar</span>'
+      + '</div>'
+      + '<input type="file" id="' + fiId + '" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf">';
+    dz.innerHTML = html;
+    document.getElementById(fiId).addEventListener('change', function(ev) {
+      if (ev.target.files[0]) loadF(ev.target.files[0], key);
+    });
+    chkReady();
+  };
+  reader.readAsDataURL(file);
+}
+
+initDZ('dz-o', 'fi-o', 'o');
+initDZ('dz-p', 'fi-p', 'p');
+
+function chkReady() {
+  document.getElementById('btn-go').disabled = !(fO && fP && getKey());
+}
+
+document.querySelectorAll('.pill').forEach(function(p) {
+  p.addEventListener('click', function() { p.classList.toggle('on'); });
+});
+
+var stepTimer;
+function startSteps() {
+  var i = 0;
+  var el = document.getElementById('ld-step');
+  el.textContent = STEPS[0];
+  stepTimer = setInterval(function() { i = (i + 1) % STEPS.length; el.textContent = STEPS[i]; }, 2200);
+}
+function stopSteps() { clearInterval(stepTimer); }
+function setProg(t) { document.getElementById('ld-prog').textContent = t || ''; }
+
+async function loadPdfJs() {
+  if (window.pdfjsLib) return;
+  await new Promise(function(res, rej) {
+    var s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  await new Promise(function(r) { setTimeout(r, 200); });
+}
+
+async function pdfToJpeg(b64, label) {
+  await loadPdfJs();
+  setProg('Cargando ' + label + '...');
+  var raw = atob(b64), arr = new Uint8Array(raw.length);
+  for (var i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  var pdf = await window.pdfjsLib.getDocument({
+    data: arr,
+    cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
+    cMapPacked: true
+  }).promise;
+  setProg('Renderizando ' + pdf.numPages + ' pagina(s) de ' + label + '...');
+  var pages = [], totalH = 0, maxW = 0, SCALE = 1.2;
+  for (var p = 1; p <= pdf.numPages; p++) {
+    var page = await pdf.getPage(p);
+    var vp = page.getViewport({ scale: SCALE });
+    var cv = document.createElement('canvas');
+    cv.width = vp.width; cv.height = vp.height;
+    await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+    pages.push(cv); totalH += vp.height;
+    if (vp.width > maxW) maxW = vp.width;
+  }
+  var MAX_PX = 7600;
+  var scaleDown = 1.0;
+  if (maxW > MAX_PX) scaleDown = Math.min(scaleDown, MAX_PX / maxW);
+  if (totalH > MAX_PX) scaleDown = Math.min(scaleDown, MAX_PX / totalH);
+  var finalW = Math.floor(maxW * scaleDown);
+  var finalH = Math.floor(totalH * scaleDown);
+  var stitched = document.createElement('canvas');
+  stitched.width = finalW; stitched.height = finalH;
+  var ctx = stitched.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, finalW, finalH);
+  var y = 0;
+  pages.forEach(function(cv) {
+    var dh = Math.floor(cv.height * scaleDown);
+    ctx.drawImage(cv, 0, 0, cv.width, cv.height, 0, y, finalW, dh);
+    y += dh;
+  });
+  var MAX_B64 = 4 * 1024 * 1024, q = 0.85;
+  var result = stitched.toDataURL('image/jpeg', q).split(',')[1];
+  while (result.length > MAX_B64 && q > 0.25) {
+    q = Math.round((q - 0.08) * 100) / 100;
+    setProg('Comprimiendo ' + label + ' (' + Math.round(q * 100) + '%)...');
+    result = stitched.toDataURL('image/jpeg', q).split(',')[1];
+  }
+  setProg(label + ' listo: ' + (result.length * 0.75 / 1024 / 1024).toFixed(1) + ' MB');
+  return result;
+}
+
+async function run() {
+  var checks = Array.from(document.querySelectorAll('.pill.on input')).map(function(i) { return i.value; });
+  if (!checks.length) { showErr('Selecciona al menos un criterio.'); return; }
+  var key = getKey();
+  if (!key) { showErr('Configura tu API key en el paso 00.'); return; }
+  hideErr();
+  document.getElementById('btn-go').style.display = 'none';
+  document.getElementById('loading').classList.add('on');
+  document.getElementById('results').classList.remove('on');
+  startSteps();
+
+  try {
+    var sendO, sendMO, sendP, sendMP;
+    if (isPDF(fO)) { sendO = await pdfToJpeg(b64O, 'ART'); sendMO = 'image/jpeg'; }
+    else { sendO = b64O; sendMO = mimeOf(fO); }
+    if (isPDF(fP)) { sendP = await pdfToJpeg(b64P, 'PV'); sendMP = 'image/jpeg'; }
+    else { sendP = b64P; sendMP = mimeOf(fP); }
+
+    var totalMB = ((sendO.length + sendP.length) * 0.75 / 1024 / 1024).toFixed(1);
+    setProg('Enviando ' + totalMB + ' MB a la API...');
+
+    var checkLabels = {
+      textos: 'Textos en todos los idiomas: ortografia, gramatica, contenido, tipografias, idiomas faltantes',
+      colores: 'Colores y diseno: tonos, saturacion, brillo, fondos, degradados, logos, iconos, alineaciones',
+      logos: 'Logos, marcas registradas, simbolos y certificaciones',
+      fotos: 'Fotografias e ilustraciones: cambios en color del producto (tono, saturacion, brillo), resolucion o calidad, elementos faltantes/agregados, encuadres o recortes, reemplazos de imagen',
+      specs: 'Especificaciones tecnicas: potencia, voltaje, frecuencia, capacidad, dimensiones, certificaciones - verificar numero por numero en cada idioma',
+      traducciones: 'Consistencia multilenguaje: traducciones equivalentes, mismo significado, orden consistente, especial atencion a cirílico y alfabetos no latinos',
+      layout: 'Layout y composicion: posicion, jerarquia, margenes, alineacion, consistencia entre caras',
+      datos_repetidos: 'Consistencia de datos repetidos: todos los valores tecnicos y comerciales repetidos en distintas partes deben coincidir exactamente',
+      consistencia_caras: 'Consistencia entre caras: coherencia total entre frente, dorso y laterales del packaging',
+      legal: 'Informacion legal y regulatoria (CRITICO): textos legales, pais de origen, certificaciones y simbolos obligatorios',
+      placeholders: 'Codigos variables y placeholders: detectar placeholders, campos dinamicos, etiquetas de importador, EAN y seriales sin completar',
+      unidades: 'Unidades y formatos numericos: consistencia de unidades, separadores decimales y formatos por idioma/region',
+      tipografia: 'Tipografia y encoding multilenguaje (CRITICO): errores en caracteres especiales, encoding incorrecto, alfabetos no latinos mal renderizados',
+      dieline: 'Area de corte y troquel (dieline): margenes de seguridad, contenido critico en zonas de corte',
+      qr: 'Codigos escaneables (QR, barras): existencia, legibilidad aparente y coherencia con el producto',
+      comercial: 'Coherencia comercial: claims y mensajes deben coincidir con especificaciones tecnicas declaradas',
+      naming: 'Consistencia de naming y modelo: nombre del producto y numero de modelo identico en todo el packaging',
+      jerarquia: 'Jerarquia visual y legibilidad: contraste, tamano y visibilidad de la informacion clave',
+      copy_paste: 'Deteccion de errores de copy/paste: duplicaciones, errores de tipeo o inconsistencias repetidas en el texto'
+    };
+    var lista = checks.map(function(id) { return '  - ' + (checkLabels[id] || id); }).join('\n');
+
+    var prompt = 'Actua como un auditor ULTRA-ESTRICTO de control de calidad de packaging multilenguaje en procesos de produccion industrial.\n\n'
+      + 'IMAGEN 1 = ART (Arte Original) - fuente original correcta, aprobada por la empresa\n'
+      + 'IMAGEN 2 = PV (Print Version del proveedor) - version para validar antes de imprimir\n\n'
+      + 'OBJETIVO CRITICO: La PV debe ser IDENTICA al ART. Cualquier diferencia, por minima que sea, debe ser reportada.\n\n'
+      + 'CRITERIOS A EVALUAR:\n' + lista + '\n\n'
+      + '=== INSTRUCCIONES ESPECIALES PARA VALORES NUMERICOS Y ESPECIFICACIONES ===\n'
+      + 'PASO 1 - TRANSCRIPCION OBLIGATORIA: Antes de comparar, transcribe TODOS los valores numericos que aparecen en CADA idioma de AMBAS imagenes:\n'
+      + '  - Potencia/Power/Puissance/Leistung/etc (W)\n'
+      + '  - Velocidad en vacio/No load speed/RPM en CADA idioma\n'
+      + '  - Velocidad de cadena/cadena/chain speed (m/s)\n'
+      + '  - Longitud de barra/bar length (pulgadas o mm)\n'
+      + '  - Capacidad deposito aceite (ml)\n'
+      + '  - Voltajes y frecuencias listados\n'
+      + '  - Cualquier otro valor numerico visible\n'
+      + 'PASO 2 - COMPARACION NUMERO POR NUMERO: Compara cada valor numerico del ART contra el mismo valor en el PV, idioma por idioma.\n'
+      + 'PASO 3 - ATENCION ESPECIAL A ALFABETOS NO LATINOS: Los textos en cirílico (BG, RU), griego, arabe u otros alfabetos especiales son los MAS propensos a errores. Leerlos con MAXIMA atencion y comparar caracter por caracter.\n'
+      + 'PASO 4 - VERIFICAR CONSISTENCIA: El mismo valor numerico debe ser IDENTICO en todos los idiomas. Si en EN dice 5300 rpm, en DE, FR, ES, BG, CZ, SK, RO, HU, IT, PT, NL debe decir exactamente 5300 rpm.\n\n'
+      + '=== INSTRUCCIONES ESPECIALES PARA TEXTOS ===\n'
+      + '- Leer CADA palabra en CADA idioma, no hacer lectura diagonal\n'
+      + '- Comparar DIGITO POR DIGITO todos los numeros\n'
+      + '- Verificar que ningun idioma tenga un valor diferente al resto\n'
+      + '- Reportar CUALQUIER diferencia aunque sea un solo digito (ej: 5300 vs 4700, 1800W vs 1400W)\n'
+      + '- Verificar textos en todas las caras del packaging (frontal, lateral, posterior, tapa)\n\n'
+      + '=== INSTRUCCIONES ADICIONALES CRITICAS ===\n'
+      + 'DATOS REPETIDOS: Verificar que potencia, modelo, dimensiones y valores clave sean IDENTICOS en todas las caras y secciones donde aparecen.\n'
+      + 'LEGAL Y REGULATORIO: Verificar textos legales, pais de fabricacion (Made in China, etc), certificaciones (CE, RoHS, etc) y simbolos de reciclaje. Cualquier diferencia es CRITICA.\n'
+      + 'PLACEHOLDERS: Detectar campos sin completar como [IMPORTER NAME], [EAN CODE], [SERIAL NUMBER], etiquetas vacias o textos de relleno que no deberian estar en la version final.\n'
+      + 'UNIDADES: Verificar que los separadores decimales sean correctos por idioma/region (punto vs coma), que las unidades sean consistentes (W, rpm, m/s, ml, mm, etc).\n'
+      + 'TIPOGRAFIA Y ENCODING: Buscar caracteres corruptos, simbolos mal renderizados, letras sustituidas por caracteres incorrectos, especialmente en BG (cirílico), CZ, SK, RO, HU, PL.\n'
+      + 'QR Y CODIGOS: Verificar que el codigo QR este presente y no tenga distorsiones visibles. Verificar que el codigo de barras EAN este presente y sea legible.\n'
+      + 'COLOR DEL PRODUCTO EN FOTOS (PASO OBLIGATORIO - MUY CRITICO):\n'
+      + 'PASO A: Analiza la fotografia principal del producto en el ART. Describe con precision el color usando estos parametros: tono (ej: naranja, azul, gris), saturacion (vibrante/intenso vs apagado/desaturado), brillo (brillante vs oscuro), temperatura (calido vs frio).\n'
+      + 'PASO B: Analiza la misma fotografia del producto en el PV. Describe con los mismos parametros.\n'
+      + 'PASO C: Compara ambas descripciones. Si HAY CUALQUIER diferencia de tono, saturacion, brillo o temperatura -> es error CRITICO (-25 pts) automaticamente.\n'
+      + 'IMPORTANTE: Las imagenes pueden estar comprimidas y las diferencias de color pueden ser sutiles. Si hay la MINIMA duda de que el color es diferente, reportalo como error CRITICO. Es preferible reportar un falso positivo que omitir una diferencia real de color.\n'
+      + 'Ejemplos de errores criticos de color: naranja vibrante vs naranja oscuro/apagado, naranja calido vs naranja frio, producto con mayor contraste vs producto con menos contraste, colores de accesorios diferentes.\n'
+      + 'El resumen SIEMPRE debe incluir: ART color=[descripcion] / PV color=[descripcion] / Diferencia=[SI/NO] / Detalle=[descripcion de la diferencia si existe].\n'
+      + 'COHERENCIA COMERCIAL: Si el packaging dice 1800W, todas las referencias de potencia en todos los idiomas deben decir 1800W. Si hay claims como 80% saving, verificar que no hayan cambiado.\n'
+      + 'NAMING Y MODELO: El numero de modelo (ej: DCS1816EX) debe ser IDENTICO en todas las caras y en ambas versiones.\n'
+      + 'COPY/PASTE ERRORS: Buscar texto duplicado, frases repetidas, parrafos cortados a mitad, o bloques de texto que parecen pegados en el lugar incorrecto.\n'
+      + 'DIELINE: Verificar que no haya texto o informacion critica ubicada en zonas de corte o pliegue del packaging.\n\n'
+      + 'SCORING (parta de 100, resta por errores detectados):\n'
+      + '- Error CRITICO (-25 pts): specs tecnicas incorrectas o diferentes entre ART y PV (especialmente valores numericos), idiomas faltantes, traducciones con cambio de significado, certificaciones incorrectas, cualquier valor numerico diferente\n'
+      + '- Error MEDIO (-10 pts): cambios en textos sin afectar significado tecnico, diferencias visibles en diseno, imagenes distintas, orden incorrecto de idiomas\n'
+      + '- Error MENOR (-3 pts): detalles visuales sutiles, micro diferencias de alineacion, estetica levemente distinta sin impacto funcional\n\n'
+      + 'CLASIFICACION FINAL:\n'
+      + '- 90-100: APROBADO\n'
+      + '- 70-89: APROBADO CON OBSERVACIONES\n'
+      + '- 0-69: RECHAZADO CRITICO\n'
+      + 'REGLA ABSOLUTA: si hay al menos 1 error critico -> clasificacion RECHAZADO CRITICO automaticamente, sin importar el score total.\n\n'
+      + 'REGLAS CLAVE:\n'
+      + '- Ser EXTREMADAMENTE puntilloso\n'
+      + '- NO asumir equivalencias ni aproximaciones\n'
+      + '- Validar CADA valor numerico en CADA idioma individualmente\n'
+      + '- Prestar atencion especial a textos en cirílico, griego y otros alfabetos no latinos\n'
+      + '- Reportar TODO aunque parezca minimo\n'
+      + '- Un solo digito diferente (5300 vs 4700) es un error CRITICO\n\n'
+      + 'Responde UNICAMENTE con JSON valido puro sin backticks ni texto adicional:\n'
+      + '{"score":0,"clasificacion":"APROBADO|APROBADO CON OBSERVACIONES|RECHAZADO CRITICO","resumen":"diagnostico 3-5 lineas mencionando especificamente los valores numericos revisados","criticos":0,"advertencias":0,"menores":0,"ok":0,"diferencias":[{"nivel":"critico|advertencia|menor","categoria":"COLOR|IMAGEN|TEXTO|IDIOMA|ESPECIFICACION|CONTENIDO|LAYOUT","idioma":"ES|EN|FR|DE|IT|PT|NL|BG|CZ|SK|RO|HU|todos|na","titulo":"descripcion corta","original":"valor exacto en ART","pv":"valor exacto en PV","accion":"correccion exacta indicando el valor correcto","impacto":"tecnico|legal|visual|comercial"}],"conclusion":"si puede aprobarse y que debe corregirse obligatoriamente"}';
+
+    var resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 8000,
+        messages: [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: sendMO, data: sendO } },
+          { type: 'image', source: { type: 'base64', media_type: sendMP, data: sendP } },
+          { type: 'text', text: prompt }
+        ]}]
+      })
+    });
+
+    var txt = await resp.text();
+    if (!resp.ok) {
+      var msg = txt;
+      try { msg = JSON.parse(txt).error.message || txt; } catch(e2) {}
+      throw new Error('API ' + resp.status + ': ' + msg.slice(0, 300));
+    }
+    var data = JSON.parse(txt);
+    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+    var raw = (data.content || []).map(function(b) { return b.text || ''; }).join('');
+    var si = raw.indexOf('{'), ei = raw.lastIndexOf('}');
+    if (si === -1 || ei <= si) throw new Error('Respuesta inesperada. Intenta nuevamente.');
+    var result = JSON.parse(raw.slice(si, ei + 1));
+    stopSteps();
+    document.getElementById('loading').classList.remove('on');
+    render(result);
+
+  } catch(err) {
+    stopSteps();
+    document.getElementById('loading').classList.remove('on');
+    document.getElementById('btn-go').style.display = 'flex';
+    showErr(err.message || 'Error desconocido.');
+  }
+}
+
+function render(r) {
+  document.getElementById('results').classList.add('on');
+  var diffs = r.diferencias || [];
+  var score = typeof r.score === 'number' ? r.score : 0;
+  var clas = r.clasificacion || '';
+
+  var scoreColor = score >= 90 ? 'var(--grn)' : score >= 70 ? 'var(--amb)' : 'var(--red)';
+  var scoreBg    = score >= 90 ? 'var(--grn-bg)' : score >= 70 ? 'var(--amb-bg)' : 'var(--red-bg)';
+  var scoreBd    = score >= 90 ? 'var(--grn-bd)' : score >= 70 ? 'var(--amb-bd)' : 'var(--red-bd)';
+  var clasIcon   = score >= 90 ? '&#x2705;' : score >= 70 ? '&#x26A0;&#xFE0F;' : '&#x274C;';
+
+  document.getElementById('res-ttl').innerHTML =
+    '<span style="font-family:monospace;font-size:14px;font-weight:600;padding:5px 14px;border-radius:4px;background:' + scoreBg + ';border:1px solid ' + scoreBd + ';color:' + scoreColor + '">' + score + '/100</span>'
+    + '&nbsp;&nbsp;' + clasIcon + '&nbsp;<span style="font-size:17px">' + esc(clas) + '</span>';
+
+  document.getElementById('kpis').innerHTML =
+    '<div class="kpi kpi-c"><div class="kpi-n">' + (r.criticos || 0) + '</div><div class="kpi-l">Criticos</div></div>'
+    + '<div class="kpi kpi-w"><div class="kpi-n">' + (r.advertencias || 0) + '</div><div class="kpi-l">Medios</div></div>'
+    + '<div class="kpi kpi-m"><div class="kpi-n">' + (r.menores || 0) + '</div><div class="kpi-l">Menores</div></div>'
+    + '<div class="kpi kpi-o"><div class="kpi-n">' + (r.ok || 0) + '</div><div class="kpi-l">OK</div></div>';
+
+  document.getElementById('sum-txt').textContent = r.resumen || '';
+
+  var rows = document.getElementById('rows');
+  rows.innerHTML = '';
+
+  if (diffs.length === 0) {
+    document.getElementById('tbl').innerHTML =
+      '<div class="empty"><div class="empty-ico">&#x2713;</div>'
+      + '<div class="empty-ttl">Arte aprobado</div>'
+      + '<div class="empty-sub">No se detectaron diferencias. El arte puede proceder a impresion.</div></div>';
+  } else {
+    diffs.forEach(function(d) {
+      var n = d.nivel || 'menor';
+      var sevCls = n === 'critico' ? 'sc' : n === 'advertencia' ? 'sw' : 'si';
+      var lvCls  = n === 'critico' ? 'lv-c' : n === 'advertencia' ? 'lv-w' : 'lv-i';
+      var lvLbl  = n === 'critico' ? 'Critico' : n === 'advertencia' ? 'Medio' : 'Menor';
+      var idiomaTag = (d.idioma && d.idioma !== 'na' && d.idioma !== 'n/a')
+        ? '<span class="tag-sm" style="background:var(--nvy-bg);color:var(--nvy);border:1px solid var(--nvy-bd)">' + esc(d.idioma) + '</span>' : '';
+      var impactoTag = d.impacto
+        ? '<span class="tag-sm" style="background:var(--ink04);color:var(--ink50);border:1px solid var(--ink08)">' + esc(d.impacto) + '</span>' : '';
+      var row = document.createElement('div');
+      row.className = 'drow';
+      row.innerHTML =
+        '<div class="drow-hd" onclick="toggleRow(this)">'
+        + '<div class="sev ' + sevCls + '"></div>'
+        + '<div class="row-cat">' + esc(d.categoria || '-') + '</div>'
+        + '<div class="row-ttl">' + esc(d.titulo || 'Diferencia') + idiomaTag + impactoTag + '</div>'
+        + '<div class="row-rhs"><span class="lv ' + lvCls + '">' + lvLbl + '</span><span class="chev">&#9662;</span></div>'
+        + '</div>'
+        + '<div class="drow-bd">'
+        + '<div class="cmp">'
+        + '<div class="cmp-cell c-orig"><div class="cmp-lbl">ART - Original</div>' + esc(d.original || '-') + '</div>'
+        + '<div class="cmp-cell c-pv"><div class="cmp-lbl">PV - Proveedor</div>' + esc(d.pv || '-') + '</div>'
+        + '</div>'
+        + '<div class="action"><span class="act-lbl">Correccion</span><span class="act-txt">' + esc(d.accion || '') + '</span></div>'
+        + '</div>';
+      if (n === 'critico') row.querySelector('.drow-bd').style.display = 'block';
+      rows.appendChild(row);
+    });
+  }
+
+  var concBox = document.getElementById('conclusion-box');
+  concBox.innerHTML = '';
+  if (r.conclusion) {
+    concBox.className = 'conclusion-box';
+    concBox.innerHTML =
+      '<div style="font-family:monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink50);white-space:nowrap;padding-top:2px;flex-shrink:0">Conclusion</div>'
+      + '<div>' + esc(r.conclusion) + '</div>';
+  }
+
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function toggleRow(hd) {
+  var bd = hd.parentElement.querySelector('.drow-bd');
+  var chev = hd.querySelector('.chev');
+  if (bd.style.display === 'block') {
+    bd.style.display = 'none';
+    chev.style.transform = '';
+  } else {
+    bd.style.display = 'block';
+    chev.style.transform = 'rotate(180deg)';
+  }
+}
+
+function showErr(m) { document.getElementById('err-txt').textContent = m; document.getElementById('err').classList.add('on'); }
+function hideErr() { document.getElementById('err').classList.remove('on'); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function resetAll() {
+  fO = null; fP = null; b64O = null; b64P = null;
+  var dzData = [['dz-o','fi-o','o'], ['dz-p','fi-p','p']];
+  dzData.forEach(function(a) {
+    var dz = document.getElementById(a[0]);
+    dz.innerHTML = '<div class="dz-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div><div class="dz-p1">Arrastra o <span class="dz-lnk">selecciona</span></div><div class="dz-p2">JPG - PNG - PDF sin limite de peso</div><input type="file" id="' + a[1] + '" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf">';
+    dz.onclick = function() { document.getElementById(a[1]).click(); };
+    initDZ(a[0], a[1], a[2]);
+  });
+  document.getElementById('btn-go').style.display = 'flex';
+  document.getElementById('btn-go').disabled = true;
+  document.getElementById('results').classList.remove('on');
+  document.getElementById('conclusion-box').innerHTML = '';
+  hideErr();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+<footer style="text-align:center;padding:24px 32px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--ink20);text-transform:uppercase;border-top:var(--rule);background:var(--white)">DM AI Ops</footer>
+</body>
+</html>
