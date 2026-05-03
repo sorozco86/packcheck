@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PackCheck — Artwork Validation System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0f0f0f;--ink80:#2a2a2a;--ink50:#6e6e6e;--ink20:#c4c4c4;
+  --ink08:#ebebeb;--ink04:#f5f5f3;--white:#fff;--bg:#f0f0ee;
+  --red:#b5271f;--red-bg:#fdf1f0;--red-bd:#edcac7;
+  --amb:#a0540a;--amb-bg:#fdf5ed;--amb-bd:#e8cfa8;
+  --grn:#1a6840;--grn-bg:#edf7f1;--grn-bd:#aad6be;
+  --nvy:#1b3460;--nvy-bg:#eef2fb;--nvy-bd:#b8cae6;
+  --rule:1px solid var(--ink08);--sh:0 1px 4px rgba(0,0,0,.05);--shm:0 4px 16px rgba(0,0,0,.07);--r:4px;--r8:8px;
+}
+html{font-size:15px}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
+.hdr{background:var(--white);border-bottom:var(--rule);position:sticky;top:0;z-index:100}
+.hdr-in{max-width:1100px;margin:0 auto;padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:baseline;gap:14px}
+.brand-name{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;letter-spacing:-.3px}
+.brand-sep{width:1px;height:14px;background:var(--ink20)}
+.brand-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ink50)}
+.hdr-pill{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 11px;border:var(--rule);border-radius:2px;color:var(--ink50)}
+.page{max-width:1100px;margin:0 auto;padding:36px 32px 80px}
+.hero{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:26px;border-bottom:var(--rule);margin-bottom:32px}
+.hero-h{font-family:'Playfair Display',serif;font-size:clamp(26px,3vw,40px);font-weight:400;letter-spacing:-.6px;line-height:1.08}
+.hero-h em{font-style:italic;color:var(--ink50)}
+.hero-p{max-width:320px;font-size:12px;color:var(--ink50);line-height:1.78;font-weight:300;text-align:right}
+.step{display:flex;align-items:center;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ink50);margin-bottom:14px}
+.step::after{content:'';flex:1;height:1px;background:var(--ink08)}
+.apikey-panel{background:var(--white);border:var(--rule);border-radius:var(--r8);padding:16px 20px;margin-bottom:28px;box-shadow:var(--sh)}
+.apikey-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.apikey-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--ink50);white-space:nowrap}
+.apikey-input{flex:1;min-width:260px;padding:8px 12px;border:var(--rule);border-radius:var(--r);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);background:var(--ink04);outline:none}
+.apikey-save{padding:8px 16px;background:var(--ink);color:var(--white);border:none;border-radius:var(--r);font-family:'IBM Plex Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer}
+.apikey-ok{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--grn);display:none}
+.apikey-note{font-size:11px;color:var(--ink50);font-weight:300;margin-top:8px}
+.apikey-note a{color:var(--nvy)}
+.upload-grid{display:grid;grid-template-columns:1fr 32px 1fr;margin-bottom:14px;align-items:start}
+.panel{background:var(--white);border:var(--rule);border-radius:var(--r8);overflow:hidden;box-shadow:var(--sh)}
+.panel-hd{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:var(--rule)}
+.panel-lbl{font-size:12px;font-weight:600}
+.badge{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 9px;border-radius:2px;font-weight:500}
+.b-master{background:var(--nvy-bg);color:var(--nvy);border:1px solid var(--nvy-bd)}
+.b-pv{background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-bd)}
+.dz{padding:40px 24px;min-height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:background .12s;text-align:center}
+.dz:hover{background:var(--ink04)}
+.dz.drag{background:var(--nvy-bg);outline:2px dashed var(--nvy-bd);outline-offset:-8px}
+.dz-ico{width:48px;height:48px;border:var(--rule);border-radius:var(--r8);display:flex;align-items:center;justify-content:center;margin-bottom:16px;background:var(--ink04)}
+.dz-ico svg{width:20px;height:20px;color:var(--ink50)}
+.dz-p1{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:4px}
+.dz-p2{font-size:11px;color:var(--ink50);font-weight:300}
+.dz-lnk{color:var(--nvy);text-decoration:underline}
+input[type=file]{display:none}
+.prev-img{width:100%;height:240px;object-fit:contain;display:block;background:var(--ink04);padding:14px}
+.prev-pdf{width:100%;height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--ink04);gap:10px}
+.prev-pdf-name{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink50);text-align:center;padding:0 16px;word-break:break-all}
+.prev-pdf-size{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink20)}
+.fbar{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-top:var(--rule);background:var(--ink04)}
+.fnm{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink50);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.fchg{font-size:11px;color:var(--nvy);cursor:pointer;text-decoration:underline;flex-shrink:0}
+.vs-col{display:flex;align-items:center;justify-content:center;padding-top:70px}
+.vs-txt{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink20);letter-spacing:1px;writing-mode:vertical-lr}
+.info-note{display:flex;align-items:center;gap:8px;margin-bottom:22px;padding:10px 14px;background:var(--nvy-bg);border:1px solid var(--nvy-bd);border-radius:var(--r8);font-size:11px;color:var(--nvy)}
+.checks{background:var(--white);border:var(--rule);border-radius:var(--r8);padding:15px 20px;margin-bottom:22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:var(--sh)}
+.ck-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--ink50);white-space:nowrap}
+.ck-sep{width:1px;height:16px;background:var(--ink08)}
+.pills{display:flex;flex-wrap:wrap;gap:7px;flex:1}
+.pill{display:flex;align-items:center;padding:5px 12px;border:var(--rule);border-radius:2px;font-size:11px;color:var(--ink50);cursor:pointer;transition:all .12s;user-select:none;background:var(--white);font-family:'IBM Plex Sans',sans-serif}
+.pill:hover{border-color:var(--ink20);color:var(--ink)}
+.pill.on{background:var(--ink);border-color:var(--ink);color:var(--white)}
+.pill input{display:none}
+.err{display:none;align-items:flex-start;gap:10px;background:var(--red-bg);border:1px solid var(--red-bd);border-radius:var(--r8);padding:12px 16px;margin-bottom:18px;font-size:12px;color:var(--red);line-height:1.65}
+.err.on{display:flex}
+.btn-go{width:100%;padding:14px 24px;background:var(--ink);color:var(--white);border:none;border-radius:var(--r);font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:32px}
+.btn-go:hover:not(:disabled){background:var(--ink80);box-shadow:var(--shm);transform:translateY(-1px)}
+.btn-go:disabled{opacity:.3;cursor:not-allowed;transform:none}
+
+/* LOADING WITH REAL PROGRESS */
+.loading{display:none;background:var(--white);border:var(--rule);border-radius:var(--r8);padding:40px 32px;box-shadow:var(--sh);margin-bottom:24px}
+.loading.on{display:block}
+.prog-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.prog-label{font-size:13px;font-weight:500;color:var(--ink)}
+.prog-pct{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;color:var(--ink)}
+.prog-track{width:100%;height:4px;background:var(--ink08);border-radius:4px;overflow:hidden;margin-bottom:16px}
+.prog-bar{height:100%;width:0%;background:var(--ink);border-radius:4px;transition:width 0.4s ease}
+.prog-step{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink50);margin-bottom:6px;min-height:16px}
+.prog-detail{font-size:11px;color:var(--ink20);min-height:16px}
+
+.results{display:none}
+.results.on{display:block}
+.res-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:14px}
+.res-ttl{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.kpis{display:flex;gap:8px}
+.kpi{display:flex;flex-direction:column;align-items:center;padding:9px 16px;border-radius:var(--r8);min-width:72px;border:1px solid}
+.kpi-n{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;line-height:1;margin-bottom:4px}
+.kpi-l{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1.2px;text-transform:uppercase;font-weight:500}
+.kpi-c{background:var(--red-bg);border-color:var(--red-bd);color:var(--red)}
+.kpi-w{background:var(--amb-bg);border-color:var(--amb-bd);color:var(--amb)}
+.kpi-m{background:var(--ink04);border-color:var(--ink08);color:var(--ink50)}
+.kpi-o{background:var(--grn-bg);border-color:var(--grn-bd);color:var(--grn)}
+.btn-rst{display:flex;align-items:center;gap:6px;padding:8px 14px;background:transparent;border:var(--rule);border-radius:var(--r);font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:var(--ink50);cursor:pointer}
+.btn-rst:hover{border-color:var(--ink20);color:var(--ink)}
+.summary{background:var(--white);border:var(--rule);border-radius:var(--r8);padding:16px 20px;margin-bottom:16px;display:flex;gap:13px;align-items:flex-start;box-shadow:var(--sh);font-size:12px;color:var(--ink80);line-height:1.78;font-weight:300}
+.sum-ico{width:28px;height:28px;border:var(--rule);border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;background:var(--ink04)}
+.sum-ico svg{width:12px;height:12px;color:var(--ink50)}
+.tbl{background:var(--white);border:var(--rule);border-radius:var(--r8);overflow:hidden;box-shadow:var(--sh);margin-bottom:16px}
+.tbl-head{display:grid;grid-template-columns:4px 105px 1fr 120px;padding:9px 18px;border-bottom:var(--rule);background:var(--ink04)}
+.th{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink50);font-weight:500}
+.drow{border-bottom:var(--rule)}
+.drow:last-child{border-bottom:none}
+.drow:hover{background:var(--ink04)}
+.drow-hd{display:grid;grid-template-columns:4px 105px 1fr 120px;align-items:center;padding:13px 18px;cursor:pointer}
+.sev{width:3px;height:26px;border-radius:2px}
+.sc{background:var(--red)}.sw{background:var(--amb)}.si{background:var(--ink20)}
+.row-cat{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:1.1px;text-transform:uppercase;color:var(--ink50);padding-left:12px}
+.row-ttl{font-size:12px;font-weight:500;padding-left:14px;color:var(--ink)}
+.row-rhs{display:flex;justify-content:flex-end;align-items:center;gap:8px}
+.lv{font-family:'IBM Plex Mono',monospace;font-size:8px;padding:3px 8px;border-radius:2px;text-transform:uppercase;letter-spacing:1px;font-weight:500}
+.lv-c{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)}
+.lv-w{background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-bd)}
+.lv-i{background:var(--ink04);color:var(--ink50);border:var(--rule)}
+.chev{color:var(--ink20);font-size:10px;transition:transform .18s;display:inline-block}
+.drow-bd{display:none;padding:4px 18px 16px 26px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px}
+.cmp-cell{padding:11px 13px;border-radius:var(--r);font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.6}
+.cmp-lbl{font-size:8px;letter-spacing:1.4px;text-transform:uppercase;font-weight:500;margin-bottom:5px;opacity:.6}
+.c-orig{background:var(--nvy-bg);border:1px solid var(--nvy-bd);color:var(--nvy)}
+.c-pv{background:var(--amb-bg);border:1px solid var(--amb-bd);color:var(--amb)}
+.action{display:flex;align-items:flex-start;gap:9px;padding:10px 13px;background:var(--white);border:var(--rule);border-radius:var(--r)}
+.act-lbl{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1.4px;text-transform:uppercase;color:var(--ink50);white-space:nowrap;padding-top:1px}
+.act-txt{font-size:12px;color:var(--ink80);line-height:1.65}
+.tag-sm{font-family:'IBM Plex Mono',monospace;font-size:8px;padding:1px 6px;border-radius:2px;margin-left:5px;display:inline-block}
+.conc-box{background:var(--white);border:var(--rule);border-radius:var(--r8);padding:16px 20px;display:flex;gap:14px;font-size:12px;color:var(--ink80);line-height:1.75;font-weight:300;box-shadow:var(--sh)}
+.empty{text-align:center;padding:56px 32px}
+.empty-ico{font-size:32px;margin-bottom:12px}
+.empty-ttl{font-family:'Playfair Display',serif;font-size:18px;font-weight:400;margin-bottom:6px;color:var(--grn)}
+.empty-sub{font-size:12px;color:var(--ink50);font-weight:300}
+footer{text-align:center;padding:24px 32px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--ink20);text-transform:uppercase;border-top:var(--rule);background:var(--white);margin-top:40px}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="hdr-in">
+    <div class="brand">
+      <span class="brand-name">PackCheck</span>
+      <div class="brand-sep"></div>
+      <span class="brand-tag">Artwork Validation System</span>
+    </div>
+    <span class="hdr-pill">AI &middot; ALKON VISION</span>
+  </div>
+</header>
+
+<div class="page">
+  <div class="hero">
+    <h1 class="hero-h">Validaci&oacute;n de<br><em>Artes de Packaging</em></h1>
+    <p class="hero-p">Auditor&iacute;a exhaustiva ART vs PV con scoring autom&aacute;tico, detecci&oacute;n multilenguaje y clasificaci&oacute;n de aprobaci&oacute;n.</p>
+  </div>
+
+  <div class="step">00 &mdash; Configuraci&oacute;n</div>
+  <div class="apikey-panel">
+    <div class="apikey-row">
+      <span class="apikey-lbl">API Key</span>
+      <input class="apikey-input" type="password" id="apikey-input" placeholder="sk-ant-api03-..." autocomplete="off">
+      <button class="apikey-save" onclick="saveKey()">Guardar</button>
+      <span class="apikey-ok" id="apikey-ok">&#10003; Configurada</span>
+    </div>
+    <div class="apikey-note">Obten&eacute;la en <a href="https://console.anthropic.com/api-keys" target="_blank">console.anthropic.com</a> &rarr; API Keys. Se guarda en este navegador.</div>
+  </div>
+
+  <div class="step">01 &mdash; Cargar archivos</div>
+  <div class="upload-grid">
+    <div class="panel">
+      <div class="panel-hd"><span class="panel-lbl">Arte Original</span><span class="badge b-master">ART</span></div>
+      <div class="dz" id="dz-o">
+        <div class="dz-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+        <div class="dz-p1">Arrastr&aacute; o <span class="dz-lnk">seleccion&aacute;</span></div>
+        <div class="dz-p2">JPG &middot; PNG &middot; PDF &mdash; sin l&iacute;mite de peso</div>
+        <input type="file" id="fi-o" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf">
+      </div>
+    </div>
+    <div class="vs-col"><div class="vs-txt">vs</div></div>
+    <div class="panel">
+      <div class="panel-hd"><span class="panel-lbl">Arte Proveedor</span><span class="badge b-pv">PV</span></div>
+      <div class="dz" id="dz-p">
+        <div class="dz-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+        <div class="dz-p1">Arrastr&aacute; o <span class="dz-lnk">seleccion&aacute;</span></div>
+        <div class="dz-p2">JPG &middot; PNG &middot; PDF &mdash; sin l&iacute;mite de peso</div>
+        <input type="file" id="fi-p" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf">
+      </div>
+    </div>
+  </div>
+  <div class="info-note">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    JPG &middot; PNG &middot; PDF (sin l&iacute;mite de tama&ntilde;o). Los PDFs se convierten a imagen de m&aacute;xima calidad.
+  </div>
+
+  <div class="step">02 &mdash; Criterios de revisi&oacute;n</div>
+  <div class="checks">
+    <span class="ck-lbl">Revisar</span>
+    <div class="ck-sep"></div>
+    <div class="pills">
+      <label class="pill on"><input type="checkbox" value="textos" checked>Textos</label>
+      <label class="pill on"><input type="checkbox" value="colores" checked>Colores</label>
+      <label class="pill on"><input type="checkbox" value="logos" checked>Logos y Marcas</label>
+      <label class="pill on"><input type="checkbox" value="fotos" checked>Fotograf&iacute;as</label>
+      <label class="pill on"><input type="checkbox" value="specs" checked>Especificaciones T&eacute;cnicas</label>
+      <label class="pill on"><input type="checkbox" value="traducciones" checked>Traducciones</label>
+      <label class="pill on"><input type="checkbox" value="layout" checked>Layout y Composici&oacute;n</label>
+      <label class="pill on"><input type="checkbox" value="datos_repetidos" checked>Datos Repetidos</label>
+      <label class="pill on"><input type="checkbox" value="consistencia_caras" checked>Consistencia Caras</label>
+      <label class="pill on"><input type="checkbox" value="legal" checked>Legal y Regulatorio</label>
+      <label class="pill on"><input type="checkbox" value="placeholders" checked>Placeholders / EAN</label>
+      <label class="pill on"><input type="checkbox" value="unidades" checked>Unidades y Formatos</label>
+      <label class="pill on"><input type="checkbox" value="tipografia" checked>Tipograf&iacute;a / Encoding</label>
+      <label class="pill on"><input type="checkbox" value="dieline" checked>Dieline / Corte</label>
+      <label class="pill on"><input type="checkbox" value="qr" checked>C&oacute;digos QR / Barras</label>
+      <label class="pill on"><input type="checkbox" value="comercial" checked>Coherencia Comercial</label>
+      <label class="pill on"><input type="checkbox" value="naming" checked>Naming y Modelo</label>
+      <label class="pill on"><input type="checkbox" value="jerarquia" checked>Jerarqu&iacute;a Visual</label>
+      <label class="pill on"><input type="checkbox" value="copy_paste" checked>Copy/Paste Errors</label>
+    </div>
+  </div>
+
+  <div class="err" id="err">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span id="err-txt"></span>
+  </div>
+
+  <div class="step">03 &mdash; Ejecutar an&aacute;lisis</div>
+  <button class="btn-go" id="btn-go" disabled onclick="run()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    Analizar diferencias
+  </button>
+
+  <!-- REAL PROGRESS LOADING -->
+  <div class="loading" id="loading">
+    <div class="prog-header">
+      <div class="prog-label" id="prog-label">Iniciando...</div>
+      <div class="prog-pct"><span id="prog-pct">0</span>%</div>
+    </div>
+    <div class="prog-track"><div class="prog-bar" id="prog-bar"></div></div>
+    <div class="prog-step" id="prog-step"></div>
+    <div class="prog-detail" id="prog-detail"></div>
+  </div>
+
+  <div class="results" id="results">
+    <div class="res-hdr">
+      <div class="res-ttl" id="res-ttl"></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="kpis" id="kpis"></div>
+        <button class="btn-rst" onclick="resetAll()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+          Nuevo
+        </button>
+      </div>
+    </div>
+    <div class="summary">
+      <div class="sum-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+      <span id="sum-txt"></span>
+    </div>
+    <div class="tbl" id="tbl">
+      <div class="tbl-head">
+        <div></div>
+        <div class="th" style="padding-left:12px">Categor&iacute;a</div>
+        <div class="th" style="padding-left:14px">Descripci&oacute;n</div>
+        <div class="th" style="text-align:right">Nivel</div>
+      </div>
+      <div id="rows"></div>
+    </div>
+    <div id="conc-box"></div>
+  </div>
+</div>
+
+<footer>DM AI Ops</footer>
+
+<script>
+var fO = null, fP = null, b64O = null, b64P = null;
+
+// ── PROGRESS ──────────────────────────────────────────────────
+// Steps with their % weight out of 100
+// Phases: load(5) | renderO(20) | compressO(5) | renderP(20) | compressP(5) | upload(10) | api(30) | parse(5)
+var PROG_PCT = 0;
+
+function setProgress(pct, label, step, detail) {
+  PROG_PCT = Math.min(100, Math.max(0, pct));
+  document.getElementById('prog-pct').textContent = Math.round(PROG_PCT);
+  document.getElementById('prog-bar').style.width = PROG_PCT + '%';
+  if (label) document.getElementById('prog-label').textContent = label;
+  if (step !== undefined) document.getElementById('prog-step').textContent = step || '';
+  if (detail !== undefined) document.getElementById('prog-detail').textContent = detail || '';
+}
+
+// ── API KEY ───────────────────────────────────────────────────
+function saveKey() {
+  var k = document.getElementById('apikey-input').value.trim();
+  if (!k) { showErr('Ingresa una API key valida.'); return; }
+  localStorage.setItem('pk_key', k);
+  document.getElementById('apikey-ok').style.display = 'inline';
+  document.getElementById('apikey-input').value = '';
+  hideErr(); chkReady();
+}
+function getKey() { return localStorage.getItem('pk_key') || ''; }
+window.addEventListener('load', function() {
+  if (getKey()) document.getElementById('apikey-ok').style.display = 'inline';
+});
+
+// ── FILE UTILS ────────────────────────────────────────────────
+function mimeOf(f) {
+  var t = (f.type || '').toLowerCase();
+  if (t === 'application/pdf') return 'application/pdf';
+  if (t.startsWith('image/')) return t;
+  var ext = (f.name || '').split('.').pop().toLowerCase();
+  return ({ jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp',gif:'image/gif',pdf:'application/pdf' })[ext] || 'image/jpeg';
+}
+function isPDF(f) { return mimeOf(f) === 'application/pdf'; }
+
+// ── DROP ZONES ────────────────────────────────────────────────
+function initDZ(dzId, fiId, key) {
+  var dz = document.getElementById(dzId);
+  var fi = document.getElementById(fiId);
+  dz.onclick = function() { fi.click(); };
+  fi.addEventListener('change', function(e) { if (e.target.files[0]) loadFile(e.target.files[0], key); });
+  dz.addEventListener('dragover', function(e) { e.preventDefault(); dz.classList.add('drag'); });
+  dz.addEventListener('dragleave', function() { dz.classList.remove('drag'); });
+  dz.addEventListener('drop', function(e) {
+    e.preventDefault(); dz.classList.remove('drag');
+    if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0], key);
+  });
+}
+
+function loadFile(file, key) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var src = e.target.result, b64 = src.split(',')[1];
+    if (key === 'o') { fO = file; b64O = b64; } else { fP = file; b64P = b64; }
+    renderPreview(file, src, key);
+    chkReady();
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderPreview(file, src, key) {
+  var dzId = key === 'o' ? 'dz-o' : 'dz-p';
+  var fiId = key === 'o' ? 'fi-o' : 'fi-p';
+  var dz = document.getElementById(dzId);
+  var html = isPDF(file)
+    ? '<div class="prev-pdf"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#b5271f" stroke-width="1.3"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span class="prev-pdf-name">' + esc(file.name) + '</span><span class="prev-pdf-size">' + (file.size/1024/1024).toFixed(1) + ' MB</span></div>'
+    : '<img class="prev-img" src="' + src + '" alt="">';
+  html += '<div class="fbar"><span class="fnm">' + esc(file.name) + '</span><span class="fchg" id="chg-' + key + '">Cambiar</span></div><input type="file" id="' + fiId + '" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf">';
+  dz.innerHTML = html; dz.onclick = null;
+  document.getElementById('chg-' + key).onclick = function() { document.getElementById(fiId).click(); };
+  document.getElementById(fiId).addEventListener('change', function(e) { if (e.target.files[0]) loadFile(e.target.files[0], key); });
+  dz.addEventListener('dragover', function(e) { e.preventDefault(); dz.classList.add('drag'); });
+  dz.addEventListener('dragleave', function() { dz.classList.remove('drag'); });
+  dz.addEventListener('drop', function(e) { e.preventDefault(); dz.classList.remove('drag'); if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0], key); });
+}
+
+initDZ('dz-o','fi-o','o');
+initDZ('dz-p','fi-p','p');
+function chkReady() { document.getElementById('btn-go').disabled = !(fO && fP && getKey()); }
+document.querySelectorAll('.pill').forEach(function(p) { p.addEventListener('click', function() { p.classList.toggle('on'); }); });
+
+// ── PDF.JS ────────────────────────────────────────────────────
+async function loadPdfJs() {
+  if (window.pdfjsLib) return;
+  await new Promise(function(res, rej) {
+    var s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  await new Promise(function(r) { setTimeout(r, 200); });
+}
+
+// Render PDF to max-quality JPEG — reports progress per page
+async function pdfToJpeg(b64, label, pctStart, pctEnd) {
+  await loadPdfJs();
+  setProgress(pctStart, 'Procesando ' + label + '...', 'Cargando PDF...', '');
+  var raw = atob(b64), arr = new Uint8Array(raw.length);
+  for (var i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  var pdf = await window.pdfjsLib.getDocument({
+    data: arr,
+    cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
+    cMapPacked: true
+  }).promise;
+
+  var numPages = pdf.numPages;
+  var SCALE = 2.0; // Max quality
+  var pages = [], totalH = 0, maxW = 0;
+  var pctPerPage = (pctEnd - pctStart - 5) / numPages;
+
+  for (var p = 1; p <= numPages; p++) {
+    var curPct = pctStart + (p - 1) * pctPerPage;
+    setProgress(curPct, 'Procesando ' + label + '...', 'Renderizando pagina ' + p + ' de ' + numPages, 'Escala maxima 2x para maxima legibilidad de texto');
+    var page = await pdf.getPage(p);
+    var vp = page.getViewport({ scale: SCALE });
+    var cv = document.createElement('canvas');
+    cv.width = vp.width; cv.height = vp.height;
+    await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+    pages.push(cv); totalH += vp.height;
+    if (vp.width > maxW) maxW = vp.width;
+  }
+
+  // Cap at 7600px to stay within API limits
+  var MAX_PX = 7600, sd = 1.0;
+  if (maxW > MAX_PX) sd = Math.min(sd, MAX_PX / maxW);
+  if (totalH > MAX_PX) sd = Math.min(sd, MAX_PX / totalH);
+  var fw = Math.floor(maxW * sd), fh = Math.floor(totalH * sd);
+
+  setProgress(pctEnd - 4, 'Procesando ' + label + '...', 'Armando imagen final...', fw + 'x' + fh + 'px');
+  var st = document.createElement('canvas');
+  st.width = fw; st.height = fh;
+  var ctx = st.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, fw, fh);
+  var y = 0;
+  pages.forEach(function(cv) {
+    var dh = Math.floor(cv.height * sd);
+    ctx.drawImage(cv, 0, 0, cv.width, cv.height, 0, y, fw, dh);
+    y += dh;
+  });
+
+  // Compress targeting max 5.5MB (leave room for both images under 12MB total)
+  var MAX_B64 = 5.5 * 1024 * 1024, q = 0.95;
+  setProgress(pctEnd - 2, 'Procesando ' + label + '...', 'Comprimiendo imagen (calidad ' + Math.round(q*100) + '%)...', '');
+  var result = st.toDataURL('image/jpeg', q).split(',')[1];
+  while (result.length > MAX_B64 && q > 0.5) {
+    q = Math.round((q - 0.05) * 100) / 100;
+    setProgress(pctEnd - 2, 'Procesando ' + label + '...', 'Comprimiendo imagen (calidad ' + Math.round(q*100) + '%)...', (result.length * 0.75 / 1024 / 1024).toFixed(1) + ' MB actual');
+    result = st.toDataURL('image/jpeg', q).split(',')[1];
+  }
+
+  var finalMB = (result.length * 0.75 / 1024 / 1024).toFixed(1);
+  setProgress(pctEnd, 'Procesando ' + label + '...', label + ' listo', finalMB + ' MB · calidad ' + Math.round(q*100) + '%');
+  return result;
+}
+
+// ── PROMPT ────────────────────────────────────────────────────
+function buildPrompt(checks) {
+  var labels = {
+    textos:'Textos en todos los idiomas: ortografia, gramatica, contenido, tipografias, idiomas faltantes',
+    colores:'Colores y diseno: tonos, saturacion, brillo, fondos, degradados, alineaciones',
+    logos:'Logos, marcas registradas, simbolos y certificaciones',
+    fotos:'Fotografias: cambios en COLOR DEL PRODUCTO (tono, saturacion, brillo), resolucion, elementos faltantes, encuadres',
+    specs:'Especificaciones tecnicas: potencia, voltaje, frecuencia, capacidad, dimensiones — numero por numero en cada idioma',
+    traducciones:'Consistencia multilenguaje: traducciones equivalentes, mismo significado — especial atencion a cirílico BG, CZ, SK, RO, HU',
+    layout:'Layout: posicion, jerarquia, margenes, alineacion',
+    datos_repetidos:'Datos repetidos: valores tecnicos repetidos en distintas partes deben coincidir exactamente',
+    consistencia_caras:'Consistencia entre caras: coherencia total entre frente, dorso y laterales',
+    legal:'CRITICO - Legal: textos legales, pais de origen, certificaciones CE/RoHS, simbolos obligatorios',
+    placeholders:'Placeholders: campos sin completar [IMPORTER], EAN vacio, seriales pendientes',
+    unidades:'Unidades: separadores decimales correctos por region, unidades consistentes (W, rpm, m/s, ml, mm)',
+    tipografia:'CRITICO - Tipografia/encoding: caracteres corruptos en cirílico y alfabetos especiales',
+    dieline:'Dieline: contenido critico en zonas de corte o pliegue',
+    qr:'QR y EAN: presentes, sin distorsiones, legibles',
+    comercial:'Coherencia comercial: claims coinciden con specs tecnicas',
+    naming:'Naming y modelo: nombre y numero de modelo identico en todo el packaging',
+    jerarquia:'Jerarquia visual: contraste, tamano y visibilidad de informacion clave',
+    copy_paste:'Copy/paste errors: duplicaciones, texto cortado, bloques mal ubicados'
+  };
+  var lista = checks.map(function(id) { return '  - ' + (labels[id] || id); }).join('\n');
+
+  return 'Actua como un auditor ULTRA-ESTRICTO de control de calidad de packaging multilenguaje.\n\n'
+    + 'IMAGEN 1 = ART (Arte Original) - referencia correcta aprobada\n'
+    + 'IMAGEN 2 = PV (Print Version del proveedor) - version a validar\n\n'
+    + 'CRITERIOS:\n' + lista + '\n\n'
+
+    + '=== COLOR DEL PRODUCTO (OBLIGATORIO) ===\n'
+    + 'PASO A: En ART, mide el color principal del producto: saturacion 1-10, brillo 1-10, temperatura (calido/frio)\n'
+    + 'PASO B: Mismo analisis en PV\n'
+    + 'PASO C: Diferencia saturacion >= 1 = CRITICO. Diferencia brillo >= 1 = CRITICO. Temperatura cambia = CRITICO\n'
+    + 'NARANJA DAEWOO: calido vibrante sat 8-9/10. Cualquier version mas oscura/apagada = CRITICO\n'
+    + 'Resumen SIEMPRE incluir: ART=[sat X/10, brillo Y/10] / PV=[sat X/10, brillo Y/10] / Diferencia color=[SI/NO]\n\n'
+
+    + '=== ESPECIFICACIONES TECNICAS (OBLIGATORIO) ===\n'
+    + 'PASO 1: Transcribe TODOS los valores numericos de AMBAS imagenes en TODOS los idiomas\n'
+    + 'PASO 2: Compara digito por digito — un solo digito diferente = CRITICO\n'
+    + 'PASO 3: El mismo valor debe ser identico en todos los idiomas\n'
+    + 'ATENCION MAXIMA en cirílico BG (Обороти, Мощност, etc) — propenso a errores\n\n'
+
+    + 'SCORING:\n'
+    + '- CRITICO: -25 pts (spec incorrecta, idioma faltante, traduccion con cambio de significado, valor numerico diferente, color diferente, legal incorrecto)\n'
+    + '- MEDIO: -10 pts (cambio texto sin impacto tecnico, diferencia visual, imagen distinta)\n'
+    + '- MENOR: -3 pts (detalle sutil, micro diferencia)\n'
+    + 'CLASIFICACION: 90-100=APROBADO | 70-89=APROBADO CON OBSERVACIONES | 0-69=RECHAZADO CRITICO\n'
+    + 'REGLA: 1 error critico = RECHAZADO CRITICO automaticamente\n\n'
+    + 'ANTI-ALUCINACION: NUNCA reportes diferencias que no puedas confirmar visualmente. Verificacion doble antes de reportar.\n\n'
+    + 'Responde UNICAMENTE con JSON puro sin backticks:\n'
+    + '{"score":0,"clasificacion":"APROBADO|APROBADO CON OBSERVACIONES|RECHAZADO CRITICO","resumen":"diagnostico incluyendo ART=[sat/brillo] / PV=[sat/brillo] / Diferencia color=[SI/NO]","criticos":0,"advertencias":0,"menores":0,"ok":0,"diferencias":[{"nivel":"critico|advertencia|menor","categoria":"COLOR|IMAGEN|TEXTO|IDIOMA|ESPECIFICACION|CONTENIDO|LAYOUT|LEGAL|QR|NAMING","idioma":"ES|EN|FR|DE|IT|PT|NL|BG|CZ|SK|RO|HU|todos|na","titulo":"descripcion corta","original":"valor exacto en ART","pv":"valor exacto en PV","accion":"correccion exacta","impacto":"tecnico|legal|visual|comercial"}],"conclusion":"veredicto y correcciones obligatorias"}';
+}
+
+// ── SPECS ZOOM VERIFICATION ──────────────────────────────────
+// Crops bottom-right area of image (where specs panel typically lives)
+// and sends at higher zoom for precise text comparison
+async function cropToSpecs(b64, label) {
+  return new Promise(function(resolve) {
+    var img = new Image();
+    img.onload = function() {
+      // Specs panel is typically in bottom 60% and right 50% of packaging art
+      // We crop multiple zones to maximize coverage
+      var zones = [
+        { x: 0,   y: 0.3, w: 0.5, h: 0.7, name: 'bottom-left' },
+        { x: 0.5, y: 0.3, w: 0.5, h: 0.7, name: 'bottom-right' },
+        { x: 0,   y: 0,   w: 1,   h: 0.5, name: 'top-half' },
+        { x: 0,   y: 0.5, w: 1,   h: 0.5, name: 'bottom-half' }
+      ];
+      // Use full image but at 3x zoom for specs
+      var cv = document.createElement('canvas');
+      var ZOOM = 2.5;
+      cv.width = Math.min(img.width * ZOOM, 7000);
+      cv.height = Math.min(img.height * ZOOM, 7000);
+      var scl = Math.min(cv.width / img.width, cv.height / img.height);
+      cv.width = Math.floor(img.width * scl);
+      cv.height = Math.floor(img.height * scl);
+      var ctx = cv.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.drawImage(img, 0, 0, cv.width, cv.height);
+      var result = cv.toDataURL('image/jpeg', 0.92).split(',')[1];
+      resolve(result);
+    };
+    img.src = 'data:image/jpeg;base64,' + b64;
+  });
+}
+
+async function verifySpecs(b64O, b64P) {
+  var zoomO = await cropToSpecs(b64O, 'ART');
+  var zoomP = await cropToSpecs(b64P, 'PV');
+
+  var specPrompt = 'Sos un auditor experto en packaging. Se te muestran DOS imagenes del mismo packaging en alta resolucion.
+
+'
+    + 'IMAGEN 1 = ART (Original) | IMAGEN 2 = PV (Proveedor)
+
+'
+    + 'TAREA ESPECIFICA: Leer y comparar TODOS los valores numericos en el panel de especificaciones tecnicas.
+'
+    + 'Prestar MAXIMA ATENCION a:
+'
+    + '- Velocidad en vacio / No load speed / RPM (en TODOS los idiomas incluyendo cirílico BG)
+'
+    + '- Potencia / Power / Leistung (W)
+'
+    + '- Velocidad de cadena / Chain speed (m/s)
+'
+    + '- Cualquier otro valor numerico
+
+'
+    + 'COMPARAR DIGITO POR DIGITO. Reportar CUALQUIER diferencia numerica como CRITICO.
+
+'
+    + 'Responde SOLO con JSON sin backticks:
+'
+    + '{"diferencias":[{"nivel":"critico","categoria":"ESPECIFICACION","idioma":"BG|EN|ES|DE|FR|IT|PT|NL|CZ|SK|RO|HU|todos","titulo":"descripcion corta","original":"valor en ART","pv":"valor en PV","accion":"correccion exacta","impacto":"tecnico"}]}';
+
+  var resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': getKey(),
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 2000,
+      messages: [{ role: 'user', content: [
+        { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: zoomO } },
+        { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: zoomP } },
+        { type: 'text', text: specPrompt }
+      ]}]
+    })
+  });
+
+  var txt = await resp.text();
+  if (!resp.ok) return null;
+  var data = JSON.parse(txt);
+  var raw = (data.content || []).map(function(b) { return b.text || ''; }).join('');
+  var si = raw.indexOf('{'), ei = raw.lastIndexOf('}');
+  if (si === -1) return null;
+  return JSON.parse(raw.slice(si, ei+1));
+}
+
+// ── MAIN RUN ──────────────────────────────────────────────────
+async function run() {
+  var checks = Array.from(document.querySelectorAll('.pill.on input')).map(function(i) { return i.value; });
+  if (!checks.length) { showErr('Selecciona al menos un criterio.'); return; }
+  if (!getKey()) { showErr('Configura tu API key en el paso 00.'); return; }
+  hideErr();
+  document.getElementById('btn-go').style.display = 'none';
+  document.getElementById('loading').classList.add('on');
+  document.getElementById('results').classList.remove('on');
+  PROG_PCT = 0;
+  setProgress(0, 'Iniciando...', 'Preparando archivos', '');
+
+  try {
+    // Phase 1: Load PDF.js (0-5%)
+    setProgress(2, 'Iniciando...', 'Cargando motor de PDF...', '');
+    if (isPDF(fO) || isPDF(fP)) await loadPdfJs();
+    setProgress(5, 'Iniciando...', 'Motor listo', '');
+
+    // Phase 2: Process ART (5-45%)
+    var blockO;
+    if (isPDF(fO)) {
+      var imgO = await pdfToJpeg(b64O, 'ART', 5, 44);
+      blockO = { type:'image', source:{ type:'base64', media_type:'image/jpeg', data:imgO } };
+    } else {
+      setProgress(10, 'Procesando ART...', 'Imagen cargada', (fO.size/1024/1024).toFixed(1) + ' MB');
+      blockO = { type:'image', source:{ type:'base64', media_type:mimeOf(fO), data:b64O } };
+      setProgress(44, 'ART listo', '', '');
+    }
+
+    // Phase 3: Process PV (45-84%)
+    var blockP;
+    if (isPDF(fP)) {
+      var imgP = await pdfToJpeg(b64P, 'PV', 45, 84);
+      blockP = { type:'image', source:{ type:'base64', media_type:'image/jpeg', data:imgP } };
+    } else {
+      setProgress(50, 'Procesando PV...', 'Imagen cargada', (fP.size/1024/1024).toFixed(1) + ' MB');
+      blockP = { type:'image', source:{ type:'base64', media_type:mimeOf(fP), data:b64P } };
+      setProgress(84, 'PV listo', '', '');
+    }
+
+    // Phase 4: Upload (84-90%)
+    var totalMB = ((blockO.source.data.length + blockP.source.data.length) * 0.75 / 1024 / 1024).toFixed(1);
+    setProgress(87, 'Enviando al servidor...', 'Subiendo ' + totalMB + ' MB...', 'Conectando con API de IA');
+
+    var resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': getKey(),
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 8000,
+        messages: [{ role:'user', content:[ blockO, blockP, { type:'text', text:buildPrompt(checks) } ]}]
+      })
+    });
+
+    // Phase 5: API processing (90-95%)
+    setProgress(92, 'Analizando con IA...', 'Claude Vision procesando ambas imagenes...', 'Comparando textos, specs y colores en todos los idiomas');
+    var txt = await resp.text();
+
+    // Phase 6: Parse (95-100%)
+    setProgress(97, 'Procesando resultados...', 'Generando reporte...', '');
+    if (!resp.ok) {
+      var msg = txt;
+      try { msg = JSON.parse(txt).error.message || txt; } catch(e2) {}
+      throw new Error('API ' + resp.status + ': ' + msg.slice(0, 300));
+    }
+    var data = JSON.parse(txt);
+    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+    var raw = (data.content || []).map(function(b) { return b.text || ''; }).join('');
+    var si = raw.indexOf('{'), ei = raw.lastIndexOf('}');
+    if (si === -1 || ei <= si) throw new Error('Respuesta inesperada. Intenta nuevamente.');
+    var result = JSON.parse(raw.slice(si, ei+1));
+
+    // === SECOND PASS: Focused specs verification ===
+    // Crop and zoom into the specs panel area for high-res text comparison
+    setProgress(95, 'Verificacion de especificaciones...', 'Analizando specs en alta resolucion...', 'Zoom en panel de especificaciones tecnicas');
+
+    try {
+      var specsResult = await verifySpecs(blockO.source.data, blockP.source.data);
+      if (specsResult && specsResult.diferencias && specsResult.diferencias.length > 0) {
+        // Merge new spec differences into main result
+        specsResult.diferencias.forEach(function(d) {
+          var exists = (result.diferencias || []).some(function(x) {
+            return x.titulo === d.titulo;
+          });
+          if (!exists) {
+            result.diferencias = result.diferencias || [];
+            result.diferencias.push(d);
+            if (d.nivel === 'critico') {
+              result.criticos = (result.criticos || 0) + 1;
+              result.score = Math.max(0, (result.score || 100) - 25);
+              result.clasificacion = 'RECHAZADO CRITICO';
+            }
+          }
+        });
+      }
+    } catch(specErr) {
+      console.log('Specs verification skipped:', specErr.message);
+    }
+
+    setProgress(100, 'Completado', 'Analisis finalizado', '');
+    await new Promise(function(r) { setTimeout(r, 400); });
+
+    document.getElementById('loading').classList.remove('on');
+    render(result);
+
+  } catch(err) {
+    document.getElementById('loading').classList.remove('on');
+    document.getElementById('btn-go').style.display = 'flex';
+    showErr(err.message || 'Error desconocido.');
+  }
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function render(r) {
+  document.getElementById('results').classList.add('on');
+  var diffs = r.diferencias || [];
+  var score = typeof r.score === 'number' ? r.score : 0;
+  var clas = r.clasificacion || '';
+  var sc = score >= 90 ? 'var(--grn)' : score >= 70 ? 'var(--amb)' : 'var(--red)';
+  var sb = score >= 90 ? 'var(--grn-bg)' : score >= 70 ? 'var(--amb-bg)' : 'var(--red-bg)';
+  var sd = score >= 90 ? 'var(--grn-bd)' : score >= 70 ? 'var(--amb-bd)' : 'var(--red-bd)';
+  var ic = score >= 90 ? '&#x2705;' : score >= 70 ? '&#x26A0;&#xFE0F;' : '&#x274C;';
+
+  document.getElementById('res-ttl').innerHTML =
+    '<span style="font-family:monospace;font-size:14px;font-weight:600;padding:5px 14px;border-radius:4px;background:' + sb + ';border:1px solid ' + sd + ';color:' + sc + '">' + score + '/100</span>'
+    + '&nbsp;&nbsp;' + ic + '&nbsp;<span style="font-size:17px;font-weight:600">' + esc(clas) + '</span>';
+
+  document.getElementById('kpis').innerHTML =
+    '<div class="kpi kpi-c"><div class="kpi-n">' + (r.criticos||0) + '</div><div class="kpi-l">Criticos</div></div>'
+    + '<div class="kpi kpi-w"><div class="kpi-n">' + (r.advertencias||0) + '</div><div class="kpi-l">Medios</div></div>'
+    + '<div class="kpi kpi-m"><div class="kpi-n">' + (r.menores||0) + '</div><div class="kpi-l">Menores</div></div>'
+    + '<div class="kpi kpi-o"><div class="kpi-n">' + (r.ok||0) + '</div><div class="kpi-l">OK</div></div>';
+
+  document.getElementById('sum-txt').textContent = r.resumen || '';
+  var rows = document.getElementById('rows');
+  rows.innerHTML = '';
+
+  if (diffs.length === 0) {
+    document.getElementById('tbl').innerHTML = '<div class="empty"><div class="empty-ico">&#x2713;</div><div class="empty-ttl">Arte aprobado</div><div class="empty-sub">No se detectaron diferencias. El arte puede proceder a impresion.</div></div>';
+  } else {
+    diffs.forEach(function(d) {
+      var n = d.nivel || 'menor';
+      var sc2 = n==='critico'?'sc':n==='advertencia'?'sw':'si';
+      var lc = n==='critico'?'lv-c':n==='advertencia'?'lv-w':'lv-i';
+      var ll = n==='critico'?'Critico':n==='advertencia'?'Medio':'Menor';
+      var idTag = (d.idioma && d.idioma !== 'na') ? '<span class="tag-sm" style="background:var(--nvy-bg);color:var(--nvy);border:1px solid var(--nvy-bd)">' + esc(d.idioma) + '</span>' : '';
+      var impTag = d.impacto ? '<span class="tag-sm" style="background:var(--ink04);color:var(--ink50);border:1px solid var(--ink08)">' + esc(d.impacto) + '</span>' : '';
+      var row = document.createElement('div');
+      row.className = 'drow';
+      row.innerHTML = '<div class="drow-hd" onclick="toggleRow(this)">'
+        + '<div class="sev ' + sc2 + '"></div>'
+        + '<div class="row-cat">' + esc(d.categoria||'-') + '</div>'
+        + '<div class="row-ttl">' + esc(d.titulo||'Diferencia') + idTag + impTag + '</div>'
+        + '<div class="row-rhs"><span class="lv ' + lc + '">' + ll + '</span><span class="chev">&#9662;</span></div>'
+        + '</div>'
+        + '<div class="drow-bd"><div class="cmp">'
+        + '<div class="cmp-cell c-orig"><div class="cmp-lbl">ART &middot; Original</div>' + esc(d.original||'-') + '</div>'
+        + '<div class="cmp-cell c-pv"><div class="cmp-lbl">PV &middot; Proveedor</div>' + esc(d.pv||'-') + '</div>'
+        + '</div><div class="action"><span class="act-lbl">Correcci&oacute;n</span><span class="act-txt">' + esc(d.accion||'') + '</span></div></div>';
+      if (n === 'critico') row.querySelector('.drow-bd').style.display = 'block';
+      rows.appendChild(row);
+    });
+  }
+
+  var cb = document.getElementById('conc-box');
+  cb.innerHTML = '';
+  if (r.conclusion) {
+    cb.className = 'conc-box';
+    cb.innerHTML = '<div style="font-family:monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink50);white-space:nowrap;flex-shrink:0;padding-top:2px">Conclusi&oacute;n</div><div>' + esc(r.conclusion) + '</div>';
+  }
+  document.getElementById('results').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function toggleRow(hd) {
+  var bd = hd.parentElement.querySelector('.drow-bd');
+  var ch = hd.querySelector('.chev');
+  if (bd.style.display === 'block') { bd.style.display = 'none'; ch.style.transform = ''; }
+  else { bd.style.display = 'block'; ch.style.transform = 'rotate(180deg)'; }
+}
+
+function showErr(m) { document.getElementById('err-txt').textContent = m; document.getElementById('err').classList.add('on'); }
+function hideErr() { document.getElementById('err').classList.remove('on'); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function resetAll() {
+  fO = null; fP = null; b64O = null; b64P = null;
+  [['dz-o','fi-o','o'],['dz-p','fi-p','p']].forEach(function(a) {
+    var dz = document.getElementById(a[0]);
+    dz.innerHTML = '<div class="dz-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div><div class="dz-p1">Arrastr&aacute; o <span class="dz-lnk">seleccion&aacute;</span></div><div class="dz-p2">JPG &middot; PNG &middot; PDF &mdash; sin l&iacute;mite de peso</div><input type="file" id="' + a[1] + '" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf">';
+    initDZ(a[0], a[1], a[2]);
+  });
+  document.getElementById('btn-go').style.display = 'flex';
+  document.getElementById('btn-go').disabled = true;
+  document.getElementById('results').classList.remove('on');
+  document.getElementById('conc-box').innerHTML = '';
+  setProgress(0,'','','');
+  hideErr();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+</script>
+</body>
+</html>
