@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PackCheck — Artwork Validation System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0f0f0f;--ink80:#2a2a2a;--ink50:#6e6e6e;--ink20:#c4c4c4;
+  --ink08:#ebebeb;--ink04:#f5f5f3;--white:#fff;--bg:#f0f0ee;
+  --red:#b5271f;--red-bg:#fdf1f0;--red-bd:#edcac7;
+  --amb:#a0540a;--amb-bg:#fdf5ed;--amb-bd:#e8cfa8;
+  --grn:#1a6840;--grn-bg:#edf7f1;--grn-bd:#aad6be;
+  --nvy:#1b3460;--nvy-bg:#eef2fb;--nvy-bd:#b8cae6;
+  --rule:1px solid var(--ink08);--sh:0 1px 4px rgba(0,0,0,.05);--shm:0 4px 16px rgba(0,0,0,.07);--r:4px;--r8:8px;
+}
+html{font-size:15px}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
+.hdr{background:var(--white);border-bottom:var(--rule);position:sticky;top:0;z-index:100}
+.hdr-in{max-width:1100px;margin:0 auto;padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:baseline;gap:14px}
+.brand-name{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;letter-spacing:-.3px}
+.brand-sep{width:1px;height:14px;background:var(--ink20)}
+.brand-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ink50)}
+.hdr-pill{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 11px;border:var(--rule);border-radius:2px;color:var(--ink50)}
+.page{max-width:1100px;margin:0 auto;padding:36px 32px 80px}
+.hero{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:26px;border-bottom:var(--rule);margin-bottom:32px}
+.hero-h{font-family:'Playfair Display',serif;font-size:clamp(26px,3vw,40px);font-weight:400;letter-spacing:-.6px;line-height:1.08}
+.hero-h em{font-style:italic;color:var(--ink50)}
+.hero-p{max-width:320px;font-size:12px;color:var(--ink50);line-height:1.78;font-weight:300;text-align:right}
+.step{display:flex;align-items:center;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ink50);margin-bottom:14px}
+.step::after{content:'';flex:1;height:1px;background:var(--ink08)}
+.apikey-panel{background:var(--white);border:var(--rule);border-radius:var(--r8);padding:16px 20px;margin-bottom:28px;box-shadow:var(--sh)}
+.apikey-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.apikey-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--ink50);white-space:nowrap}
+.apikey-input{flex:1;min-width:260px;padding:8px 12px;border:var(--rule);border-radius:var(--r);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);background:var(--ink04);outline:none}
+.apikey-save{padding:8px 16px;background:var(--ink);color:var(--white);border:none;border-radius:var(--r);font-family:'IBM Plex Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer}
+.apikey-ok{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--grn);display:none}
+.apikey-note{font-size:11px;color:var(--ink50);font-weight:300;margin-top:8px}
+.apikey-note a{color:var(--nvy)}
+.upload-grid{display:grid;grid-template-columns:1fr 32px 1fr;margin-bottom:14px;align-items:start}
+.panel{background:var(--white);border:var(--rule);border-radius:var(--r8);overflow:hidden;box-shadow:var(--sh)}
+.panel-hd{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:var(--rule)}
+.panel-lbl{font-size:12px;font-weight:600}
+.badge{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 9px;border-radius:2px;font-weight:500}
+.b-master{background:var(--nvy-bg);color:var(--nvy);border:1px solid var(--nvy-bd)}
+.b-pv{background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-bd)}
+.dz{padding:40px 24px;min-height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:background .12s;text-align:center}
+.dz:hover{background:var(--ink04)}
+.dz.drag{background:var(--nvy-bg);outline:2px dashed var(--nvy-bd);outline-offset:-8px}
+.dz-ico{width:48px;height:48px;border:var(--rule);border-radius:var(--r8);display:flex;align-items:center;justify-content:center;margin-bottom:16px;background:var(--ink04)}
+.dz-ico svg{width:20px;height:20px;color:var(--ink50)}
+.dz-p1{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:4px}
+.dz-p2{font-size:11px;color:var(--ink50);font-weight:300}
+.dz-lnk{color:var(--nvy);text-decoration:underline}
+.prev-img{width:100%;height:240px;object-fit:contain;display:block;background:var(--ink04);padding:14px}
+.prev-pdf{width:100%;height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--ink04);gap:10px}
+.prev-pdf-name{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink50);text-align:center;padding:0 16px;word-break:break-all}
+.prev-pdf-size{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink20)}
+.fbar{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-top:var(--rule);background:var(--ink04)}
+.fnm{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink50);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.fchg{font-size:11px;color:var(--nvy);cursor:pointer;text-decoration:underline;flex-shrink:0}
+.vs-col{display:flex;align-items:center;justify-content:center;padding-top:70px}
+.vs-txt{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink20);letter-spacing:1px;writing-mode:vertical-lr}
+.info-note{display:flex;align-items:center;gap:8px;margin-bottom:22px;padding:10px 14px;background:var(--nvy-bg);border:1px solid var(--nvy-bd);border-radius:var(--r8);font-size:11px;color:var(--nvy)}
+.checks{background:var(--white);border:var(--rule);border-radius:var(--r8);padding:15px 20px;margin-bottom:22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:var(--sh)}
+.ck-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--ink50);white-space:nowrap}
+.ck-sep{width:1px;height:16px;background:var(--ink08)}
+.pills{display:flex;flex-wrap:wrap;gap:7px;flex:1}
+.pill{display:flex;align-items:center;padding:5px 12px;border:var(--rule);border-radius:2px;font-size:11px;color:var(--ink50);cursor:pointer;transition:all .12s;user-select:none;background:var(--white);font-family:'IBM Plex Sans',sans-serif}
+.pill:hover{border-color:var(--ink20);color:var(--ink)}
+.pill.on{background:var(--ink);border-color:var(--ink);color:var(--white)}
+.pill input{display:none}
+.err{display:none;align-items:flex-start;gap:10px;background:var(--red-bg);border:1px solid var(--red-bd);border-radius:var(--r8);padding:12px 16px;margin-bottom:18px;font-size:12px;color:var(--red);line-height:1.65}
+.err.on{display:flex}
+.btn-go{width:100%;padding:14px 24px;background:var(--ink);color:var(--white);border:none;border-radius:var(--r);font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:32px}
+.btn-go:hover:not(:disabled){background:var(--ink80);box-shadow:var(--shm);transform:translateY(-1px)}
+.btn-go:disabled{opacity:.3;cursor:not-allowed;transform:none}
+.loading{display:none;background:var(--white);border:var(--rule);border-radius:var(--r8);padding:40px 32px;box-shadow:var(--sh);margin-bottom:24px}
+.loading.on{display:block}
+.prog-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.prog-label{font-size:13px;font-weight:500;color:var(--ink)}
+.prog-pct{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;color:var(--ink)}
+.prog-track{width:100%;height:4px;background:var(--ink08);border-radius:4px;overflow:hidden;margin-bottom:16px}
+.prog-bar{height:100%;width:0%;background:var(--ink);border-radius:4px;transition:width 0.5s ease}
+.prog-step{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink50);margin-bottom:6px;min-height:16px}
+.prog-detail{font-size:11px;color:var(--ink20);min-height:16px}
+.results{display:none}
+.results.on{display:block}
+.res-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:14px}
+.res-ttl{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.kpis{display:flex;gap:8px}
+.kpi{display:flex;flex-direction:column;align-items:center;padding:9px 16px;border-radius:var(--r8);min-width:72px;border:1px solid}
+.kpi-n{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;line-height:1;margin-bottom:4px}
+.kpi-l{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1.2px;text-transform:uppercase;font-weight:500}
+.kpi-c{background:var(--red-bg);border-color:var(--red-bd);color:var(--red)}
+.kpi-w{background:var(--amb-bg);border-color:var(--amb-bd);color:var(--amb)}
+.kpi-m{background:var(--ink04);border-color:var(--ink08);color:var(--ink50)}
+.kpi-o{background:var(--grn-bg);border-color:var(--grn-bd);color:var(--grn)}
+.btn-rst{display:flex;align-items:center;gap:6px;padding:8px 14px;background:transparent;border:var(--rule);border-radius:var(--r);font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:var(--ink50);cursor:pointer}
+.btn-rst:hover{border-color:var(--ink20);color:var(--ink)}
+.summary{background:var(--white);border:var(--rule);border-radius:var(--r8);padding:16px 20px;margin-bottom:16px;display:flex;gap:13px;align-items:flex-start;box-shadow:var(--sh);font-size:12px;color:var(--ink80);line-height:1.78;font-weight:300}
+.sum-ico{width:28px;height:28px;border:var(--rule);border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;background:var(--ink04)}
+.sum-ico svg{width:12px;height:12px;color:var(--ink50)}
+.tbl{background:var(--white);border:var(--rule);border-radius:var(--r8);overflow:hidden;box-shadow:var(--sh);margin-bottom:16px}
+.tbl-head{display:grid;grid-template-columns:4px 105px 1fr 120px;padding:9px 18px;border-bottom:var(--rule);background:var(--ink04)}
+.th{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink50);font-weight:500}
+.drow{border-bottom:var(--rule)}
+.drow:last-child{border-bottom:none}
+.drow:hover{background:var(--ink04)}
+.drow-hd{display:grid;grid-template-columns:4px 105px 1fr 120px;align-items:center;padding:13px 18px;cursor:pointer}
+.sev{width:3px;height:26px;border-radius:2px}
+.sc{background:var(--red)}.sw{background:var(--amb)}.si{background:var(--ink20)}
+.row-cat{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:1.1px;text-transform:uppercase;color:var(--ink50);padding-left:12px}
+.row-ttl{font-size:12px;font-weight:500;padding-left:14px;color:var(--ink)}
+.row-rhs{display:flex;justify-content:flex-end;align-items:center;gap:8px}
+.lv{font-family:'IBM Plex Mono',monospace;font-size:8px;padding:3px 8px;border-radius:2px;text-transform:uppercase;letter-spacing:1px;font-weight:500}
+.lv-c{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)}
+.lv-w{background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-bd)}
+.lv-i{background:var(--ink04);color:var(--ink50);border:var(--rule)}
+.chev{color:var(--ink20);font-size:10px;transition:transform .18s;display:inline-block}
+.drow-bd{display:none;padding:4px 18px 16px 26px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px}
+.cmp-cell{padding:11px 13px;border-radius:var(--r);font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.6}
+.cmp-lbl{font-size:8px;letter-spacing:1.4px;text-transform:uppercase;font-weight:500;margin-bottom:5px;opacity:.6}
+.c-orig{background:var(--nvy-bg);border:1px solid var(--nvy-bd);color:var(--nvy)}
+.c-pv{background:var(--amb-bg);border:1px solid var(--amb-bd);color:var(--amb)}
+.action{display:flex;align-items:flex-start;gap:9px;padding:10px 13px;background:var(--white);border:var(--rule);border-radius:var(--r)}
+.act-lbl{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1.4px;text-transform:uppercase;color:var(--ink50);white-space:nowrap;padding-top:1px}
+.act-txt{font-size:12px;color:var(--ink80);line-height:1.65}
+.tag-sm{font-family:'IBM Plex Mono',monospace;font-size:8px;padding:1px 6px;border-radius:2px;margin-left:5px;display:inline-block}
+.conc-box{background:var(--white);border:var(--rule);border-radius:var(--r8);padding:16px 20px;display:flex;gap:14px;font-size:12px;color:var(--ink80);line-height:1.75;font-weight:300;box-shadow:var(--sh)}
+.empty{text-align:center;padding:56px 32px}
+.empty-ico{font-size:32px;margin-bottom:12px}
+.empty-ttl{font-family:'Playfair Display',serif;font-size:18px;font-weight:400;margin-bottom:6px;color:var(--grn)}
+.empty-sub{font-size:12px;color:var(--ink50);font-weight:300}
+footer{text-align:center;padding:24px 32px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--ink20);text-transform:uppercase;border-top:var(--rule);background:var(--white);margin-top:40px}
+input[type=file]{display:none}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="hdr-in">
+    <div class="brand">
+      <span class="brand-name">PackCheck</span>
+      <div class="brand-sep"></div>
+      <span class="brand-tag">Artwork Validation System</span>
+    </div>
+    <span class="hdr-pill">AI &middot; ALKON VISION</span>
+  </div>
+</header>
+
+<div class="page">
+  <div class="hero">
+    <h1 class="hero-h">Validaci&oacute;n de<br><em>Artes de Packaging</em></h1>
+    <p class="hero-p">Auditor&iacute;a exhaustiva ART vs PV. An&aacute;lisis en dos pasadas: vista completa + zoom en specs.</p>
+  </div>
+
+  <div class="step">00 &mdash; Configuraci&oacute;n</div>
+  <div class="apikey-panel">
+    <div class="apikey-row">
+      <span class="apikey-lbl">API Key</span>
+      <input class="apikey-input" type="password" id="apikey-input" placeholder="sk-ant-api03-..." autocomplete="off">
+      <button class="apikey-save" onclick="saveKey()">Guardar</button>
+      <span class="apikey-ok" id="apikey-ok">&#10003; Configurada</span>
+    </div>
+    <div class="apikey-note">Obten&eacute;la en <a href="https://console.anthropic.com/api-keys" target="_blank">console.anthropic.com</a> &rarr; API Keys.</div>
+  </div>
+
+  <div class="step">01 &mdash; Cargar archivos</div>
+  <div class="upload-grid">
+    <div class="panel">
+      <div class="panel-hd"><span class="panel-lbl">Arte Original</span><span class="badge b-master">ART</span></div>
+      <div id="dz-o" class="dz">
+        <div class="dz-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+        <div class="dz-p1">Arrastr&aacute; o <span class="dz-lnk">seleccion&aacute;</span></div>
+        <div class="dz-p2">JPG &middot; PNG &middot; PDF &mdash; sin l&iacute;mite de peso</div>
+      </div>
+      <input type="file" id="fi-o" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf">
+    </div>
+    <div class="vs-col"><div class="vs-txt">vs</div></div>
+    <div class="panel">
+      <div class="panel-hd"><span class="panel-lbl">Arte Proveedor</span><span class="badge b-pv">PV</span></div>
+      <div id="dz-p" class="dz">
+        <div class="dz-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+        <div class="dz-p1">Arrastr&aacute; o <span class="dz-lnk">seleccion&aacute;</span></div>
+        <div class="dz-p2">JPG &middot; PNG &middot; PDF &mdash; sin l&iacute;mite de peso</div>
+      </div>
+      <input type="file" id="fi-p" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf">
+    </div>
+  </div>
+
+  <div class="info-note">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    JPG &middot; PNG &middot; PDF. An&aacute;lisis en 2 pasadas: vista completa del arte + zoom 3x en panel de especificaciones t&eacute;cnicas.
+  </div>
+
+  <div class="step">02 &mdash; Criterios de revisi&oacute;n</div>
+  <div class="checks">
+    <span class="ck-lbl">Revisar</span>
+    <div class="ck-sep"></div>
+    <div class="pills">
+      <label class="pill on"><input type="checkbox" value="textos" checked>Textos</label>
+      <label class="pill on"><input type="checkbox" value="colores" checked>Colores</label>
+      <label class="pill on"><input type="checkbox" value="logos" checked>Logos y Marcas</label>
+      <label class="pill on"><input type="checkbox" value="fotos" checked>Fotograf&iacute;as</label>
+      <label class="pill on"><input type="checkbox" value="specs" checked>Especificaciones T&eacute;cnicas</label>
+      <label class="pill on"><input type="checkbox" value="traducciones" checked>Traducciones</label>
+      <label class="pill on"><input type="checkbox" value="layout" checked>Layout y Composici&oacute;n</label>
+      <label class="pill on"><input type="checkbox" value="datos_repetidos" checked>Datos Repetidos</label>
+      <label class="pill on"><input type="checkbox" value="consistencia_caras" checked>Consistencia Caras</label>
+      <label class="pill on"><input type="checkbox" value="legal" checked>Legal y Regulatorio</label>
+      <label class="pill on"><input type="checkbox" value="placeholders" checked>Placeholders / EAN</label>
+      <label class="pill on"><input type="checkbox" value="unidades" checked>Unidades y Formatos</label>
+      <label class="pill on"><input type="checkbox" value="tipografia" checked>Tipograf&iacute;a / Encoding</label>
+      <label class="pill on"><input type="checkbox" value="dieline" checked>Dieline / Corte</label>
+      <label class="pill on"><input type="checkbox" value="qr" checked>C&oacute;digos QR / Barras</label>
+      <label class="pill on"><input type="checkbox" value="comercial" checked>Coherencia Comercial</label>
+      <label class="pill on"><input type="checkbox" value="naming" checked>Naming y Modelo</label>
+      <label class="pill on"><input type="checkbox" value="jerarquia" checked>Jerarqu&iacute;a Visual</label>
+      <label class="pill on"><input type="checkbox" value="copy_paste" checked>Copy/Paste Errors</label>
+    </div>
+  </div>
+
+  <div class="err" id="err">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span id="err-txt"></span>
+  </div>
+
+  <div class="step">03 &mdash; Ejecutar an&aacute;lisis</div>
+  <button class="btn-go" id="btn-go" disabled onclick="run()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    Analizar diferencias
+  </button>
+
+  <div class="loading" id="loading">
+    <div class="prog-header">
+      <div class="prog-label" id="prog-label">Iniciando...</div>
+      <div class="prog-pct"><span id="prog-pct">0</span>%</div>
+    </div>
+    <div class="prog-track"><div class="prog-bar" id="prog-bar"></div></div>
+    <div class="prog-step" id="prog-step"></div>
+    <div class="prog-detail" id="prog-detail"></div>
+  </div>
+
+  <div class="results" id="results">
+    <div class="res-hdr">
+      <div class="res-ttl" id="res-ttl"></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="kpis" id="kpis"></div>
+        <button class="btn-rst" onclick="resetAll()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+          Nuevo
+        </button>
+      </div>
+    </div>
+    <div class="summary">
+      <div class="sum-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+      <span id="sum-txt"></span>
+    </div>
+    <div class="tbl" id="tbl">
+      <div class="tbl-head">
+        <div></div>
+        <div class="th" style="padding-left:12px">Categor&iacute;a</div>
+        <div class="th" style="padding-left:14px">Descripci&oacute;n</div>
+        <div class="th" style="text-align:right">Nivel</div>
+      </div>
+      <div id="rows"></div>
+    </div>
+    <div id="conc-box"></div>
+  </div>
+</div>
+
+<footer>DM AI Ops</footer>
+
+<script>
+var fO = null, fP = null, b64O = null, b64P = null;
+
+// ── PROGRESS ─────────────────────────────────────────────────
+function setProgress(pct, label, step, detail) {
+  pct = Math.min(100, Math.max(0, pct));
+  document.getElementById('prog-pct').textContent = Math.round(pct);
+  document.getElementById('prog-bar').style.width = pct + '%';
+  if (label !== undefined) document.getElementById('prog-label').textContent = label;
+  if (step !== undefined) document.getElementById('prog-step').textContent = step || '';
+  if (detail !== undefined) document.getElementById('prog-detail').textContent = detail || '';
+}
+
+// ── API KEY ───────────────────────────────────────────────────
+function saveKey() {
+  var k = document.getElementById('apikey-input').value.trim();
+  if (!k) { showErr('Ingresa una API key valida.'); return; }
+  localStorage.setItem('pk_key', k);
+  document.getElementById('apikey-ok').style.display = 'inline';
+  document.getElementById('apikey-input').value = '';
+  hideErr(); chkReady();
+}
+function getKey() { return localStorage.getItem('pk_key') || ''; }
+
+window.addEventListener('load', function() {
+  if (getKey()) document.getElementById('apikey-ok').style.display = 'inline';
+  bindDZ('dz-o', 'fi-o', 'o');
+  bindDZ('dz-p', 'fi-p', 'p');
+});
+
+// ── FILE UTILS ────────────────────────────────────────────────
+function mimeOf(f) {
+  var t = (f.type || '').toLowerCase();
+  if (t === 'application/pdf') return 'application/pdf';
+  if (t.startsWith('image/')) return t;
+  var m = {jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp',gif:'image/gif',pdf:'application/pdf'};
+  return m[(f.name||'').split('.').pop().toLowerCase()] || 'image/jpeg';
+}
+function isPDF(f) { return mimeOf(f) === 'application/pdf'; }
+function chkReady() { document.getElementById('btn-go').disabled = !(fO && fP && getKey()); }
+
+// ── DROP ZONES ────────────────────────────────────────────────
+function bindDZ(dzId, fiId, key) {
+  var dz = document.getElementById(dzId);
+  var fi = document.getElementById(fiId);
+  dz.onclick = function(e) { if (!e.target.classList.contains('fchg')) fi.click(); };
+  fi.onchange = function(e) { if (e.target.files && e.target.files[0]) handleFile(e.target.files[0], key); };
+  dz.ondragover = function(e) { e.preventDefault(); dz.classList.add('drag'); };
+  dz.ondragleave = function() { dz.classList.remove('drag'); };
+  dz.ondrop = function(e) {
+    e.preventDefault(); dz.classList.remove('drag');
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0], key);
+  };
+}
+
+function handleFile(file, key) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var b64 = e.target.result.split(',')[1];
+    if (key === 'o') { fO = file; b64O = b64; } else { fP = file; b64P = b64; }
+    updatePreview(file, e.target.result, key);
+    chkReady();
+  };
+  reader.readAsDataURL(file);
+}
+
+function updatePreview(file, src, key) {
+  var dz = document.getElementById('dz-' + key);
+  var fiId = 'fi-' + key;
+  dz.style.padding = '0'; dz.style.cursor = 'default';
+  dz.classList.remove('drag');
+  if (isPDF(file)) {
+    dz.innerHTML = '<div class="prev-pdf">'
+      + '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#b5271f" stroke-width="1.3"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'
+      + '<span class="prev-pdf-name">' + esc(file.name) + '</span>'
+      + '<span class="prev-pdf-size">' + (file.size/1024/1024).toFixed(1) + ' MB</span></div>'
+      + '<div class="fbar"><span class="fnm">' + esc(file.name) + '</span>'
+      + '<span class="fchg" onclick="document.getElementById(\'' + fiId + '\').click()">Cambiar</span></div>';
+  } else {
+    dz.innerHTML = '<img class="prev-img" src="' + src + '" alt="">'
+      + '<div class="fbar"><span class="fnm">' + esc(file.name) + '</span>'
+      + '<span class="fchg" onclick="document.getElementById(\'' + fiId + '\').click()">Cambiar</span></div>';
+  }
+}
+
+document.querySelectorAll('.pill').forEach(function(p) { p.addEventListener('click', function() { p.classList.toggle('on'); }); });
+
+// ── PDF.JS ────────────────────────────────────────────────────
+async function loadPdfJs() {
+  if (window.pdfjsLib) return;
+  await new Promise(function(res, rej) {
+    var s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  await new Promise(function(r) { setTimeout(r, 200); });
+}
+
+// Render PDF to JPEG with given scale, returns base64
+async function renderPDF(b64, scale, label, pStart, pEnd) {
+  var raw = atob(b64), arr = new Uint8Array(raw.length);
+  for (var i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  var pdf = await window.pdfjsLib.getDocument({
+    data: arr,
+    cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
+    cMapPacked: true
+  }).promise;
+  var numPages = pdf.numPages;
+  var pages = [], totalH = 0, maxW = 0;
+  var pPerPage = pEnd ? (pEnd - pStart - 4) / numPages : 0;
+
+  for (var p = 1; p <= numPages; p++) {
+    if (pStart) setProgress(pStart + (p-1)*pPerPage, 'Procesando ' + label + '...', 'Pagina ' + p + ' / ' + numPages + ' — escala ' + scale + 'x', '');
+    var page = await pdf.getPage(p);
+    var vp = page.getViewport({ scale: scale });
+    var cv = document.createElement('canvas');
+    cv.width = vp.width; cv.height = vp.height;
+    await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+    pages.push(cv); totalH += vp.height;
+    if (vp.width > maxW) maxW = vp.width;
+  }
+
+  // Cap at API limit
+  var MAX_PX = 7800, sd = 1.0;
+  if (maxW > MAX_PX) sd = Math.min(sd, MAX_PX / maxW);
+  if (totalH > MAX_PX) sd = Math.min(sd, MAX_PX / totalH);
+  var fw = Math.floor(maxW * sd), fh = Math.floor(totalH * sd);
+
+  var st = document.createElement('canvas');
+  st.width = fw; st.height = fh;
+  var ctx = st.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, fw, fh);
+  var y = 0;
+  pages.forEach(function(cv) {
+    var dh = Math.floor(cv.height * sd);
+    ctx.drawImage(cv, 0, 0, cv.width, cv.height, 0, y, fw, dh);
+    y += dh;
+  });
+
+  // Target max 4MB for safety
+  var MAX_B64 = 4 * 1024 * 1024, q = 0.92;
+  var result = st.toDataURL('image/jpeg', q).split(',')[1];
+  while (result.length > MAX_B64 && q > 0.4) {
+    q = Math.round((q - 0.06) * 100) / 100;
+    result = st.toDataURL('image/jpeg', q).split(',')[1];
+  }
+  // Store page offsets so we can screenshot individual pages later
+  var pageOffsets = [];
+  var yOff = 0;
+  pages.forEach(function(cv) {
+    var dh = Math.floor(cv.height * sd);
+    pageOffsets.push({ y: yOff, h: dh });
+    yOff += dh;
+  });
+  if (pEnd) setProgress(pEnd, label + ' listo', (result.length*0.75/1024/1024).toFixed(1) + ' MB, calidad ' + Math.round(q*100) + '%', '');
+  return { b64: result, canvas: st, q: q, pageOffsets: pageOffsets, numPages: numPages };
+}
+
+// Crop a region from a rendered canvas and return base64
+function cropCanvas(canvas, x, y, w, h, zoom) {
+  var sw = Math.floor(canvas.width * w);
+  var sh = Math.floor(canvas.height * h);
+  var sx = Math.floor(canvas.width * x);
+  var sy = Math.floor(canvas.height * y);
+  // Zoom the crop
+  var dw = Math.min(sw * zoom, 7800);
+  var dh = Math.min(sh * zoom, 7800);
+  var scale = Math.min(dw / sw, dh / sh);
+  var cv = document.createElement('canvas');
+  cv.width = Math.floor(sw * scale);
+  cv.height = Math.floor(sh * scale);
+  var ctx = cv.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.drawImage(canvas, sx, sy, sw, sh, 0, 0, cv.width, cv.height);
+  var result = cv.toDataURL('image/jpeg', 0.95).split(',')[1];
+  // Keep under 4MB
+  var q = 0.95;
+  while (result.length > 4*1024*1024 && q > 0.4) {
+    q -= 0.05;
+    result = cv.toDataURL('image/jpeg', q).split(',')[1];
+  }
+  return result;
+}
+
+// ── DIRECT BROWSER API CALL ──────────────────────────────────
+// Calls Anthropic directly from browser — no proxy timeout issues
+async function callProxy(content, maxTokens) {
+  var resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': getKey(),
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-5',
+      max_tokens: maxTokens || 8000,
+      messages: [{ role: 'user', content: content }]
+    })
+  });
+  var txt = await resp.text();
+  if (!resp.ok) {
+    var msg = txt; try { msg = JSON.parse(txt).error.message || txt; } catch(e) {}
+    throw new Error('API ' + resp.status + ': ' + msg.slice(0, 300));
+  }
+  var data = JSON.parse(txt);
+  if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+  return (data.content || []).map(function(b) { return b.text || ''; }).join('');
+}
+
+// ── PROMPTS ───────────────────────────────────────────────────
+function buildMainPrompt(checks) {
+  var labels = {
+    textos:'Textos en todos los idiomas: ortografia, gramatica, contenido, idiomas faltantes',
+    colores:'Colores: tonos, saturacion, brillo, fondos, degradados',
+    logos:'Logos, marcas registradas, simbolos y certificaciones',
+    fotos:'Fotografias: COLOR DEL PRODUCTO (tono sat 1-10, brillo 1-10), resolucion, elementos',
+    specs:'Especificaciones tecnicas: potencia W, RPM, velocidad, capacidad, dimensiones — numero por numero en cada idioma incluyendo cirílico BG',
+    traducciones:'Multilenguaje: traducciones equivalentes, atencion especial BG, CZ, SK, RO, HU',
+    layout:'Layout: posicion, jerarquia, margenes, alineacion entre caras',
+    datos_repetidos:'Datos repetidos: valores en distintas caras deben coincidir exactamente',
+    consistencia_caras:'Consistencia entre caras: frente, dorso y laterales',
+    legal:'CRITICO - Legal: textos legales, pais de origen, certificaciones CE/RoHS',
+    placeholders:'Placeholders: campos sin completar, EAN vacio, seriales pendientes',
+    unidades:'Unidades: separadores decimales, W/rpm/m-s/ml/mm consistentes',
+    tipografia:'CRITICO - Tipografia/encoding: caracteres corruptos en cirílico',
+    dieline:'Dieline: contenido en zonas de corte',
+    qr:'QR y EAN: presentes y legibles',
+    comercial:'Coherencia comercial: claims = specs tecnicas',
+    naming:'Naming: modelo identico en todo el packaging',
+    jerarquia:'Jerarquia visual: contraste y visibilidad',
+    copy_paste:'Copy/paste: duplicaciones, texto cortado'
+  };
+  var lista = checks.map(function(id) { return '  - ' + (labels[id]||id); }).join('\n');
+  return 'Actua como auditor ULTRA-ESTRICTO de QA de packaging multilenguaje.\n\n'
+    + 'IMAGEN 1 = ART (Original correcta) | IMAGEN 2 = PV (a validar)\n\n'
+    + 'CRITERIOS:\n' + lista + '\n\n'
+    + '=== COLOR PRODUCTO (OBLIGATORIO) ===\n'
+    + 'PASO A: ART — color del producto fotografiado: saturacion 1-10, brillo 1-10, temperatura\n'
+    + 'PASO B: PV — mismos parametros\n'
+    + 'PASO C: diferencia >= 1 punto = CRITICO\n'
+    + 'Resumen SIEMPRE: ART=[sat X/10, brillo Y/10] / PV=[sat X/10, brillo Y/10] / Diferencia=[SI/NO]\n\n'
+    + '=== SPECS TECNICAS (OBLIGATORIO) ===\n'
+    + 'Transcribir y comparar digito por digito todos los valores en todos los idiomas.\n'
+    + 'ATENCION MAXIMA: BG Обороти на празен ход, CZ Otacky, SK Otacky, RO Turatie, HU Uresjárati\n'
+    + 'Un digito diferente = CRITICO\n\n'
+    + 'SCORING: CRITICO=-25 | MEDIO=-10 | MENOR=-3 (parte de 100)\n'
+    + 'CLASIFICACION: 90-100=APROBADO | 70-89=APROBADO CON OBSERVACIONES | 0-69=RECHAZADO CRITICO\n'
+    + 'REGLA: 1 critico = RECHAZADO CRITICO automaticamente\n'
+    + 'REGLAS ANTI-ALUCINACION (CRITICO):\n'
+    + '- NUNCA reportes una diferencia si no podes citar el texto EXACTO que viste en cada documento\n'
+    + '- Si el screenshot o imagen no muestra claramente la diferencia, NO la reportes\n'
+    + '- Para cada diferencia reportada, el campo original= debe contener el texto LITERAL del ART y pv= el texto LITERAL del PV\n'
+    + '- NO uses frases como "pagina muestra celdas vacias" o "deberia aparecer" — solo reporta lo que VES\n'
+    + '- NO inferis diferencias a partir de lo que falta — solo reporta diferencias entre texto presente en ambos\n'
+    + '- Verificacion doble obligatoria: antes de agregar una diferencia, confirma que podes ver el valor en ART Y el valor diferente en PV\n'
+    + '- pagina_art y pagina_pv deben ser la pagina exacta donde VISTE el texto, no una estimacion\n\n'
+    + 'Responde SOLO con JSON puro sin backticks:\n'
+    + '{"score":0,"clasificacion":"APROBADO|APROBADO CON OBSERVACIONES|RECHAZADO CRITICO",'
+    + '"resumen":"diagnostico incluyendo ART=[sat/brillo]/PV=[sat/brillo]/Diferencia color=[SI/NO]",'
+    + '"criticos":0,"advertencias":0,"menores":0,"ok":0,'
+    + '"diferencias":[{"nivel":"critico|advertencia|menor","categoria":"COLOR|IMAGEN|TEXTO|IDIOMA|ESPECIFICACION|CONTENIDO|LAYOUT|LEGAL|QR|NAMING",'
+    + '"idioma":"ES|EN|FR|DE|IT|PT|NL|BG|CZ|SK|RO|HU|todos|na","titulo":"titulo corto",'
+    + '"pagina_art":"pagina en ART donde aparece (numero entero) o null","pagina_pv":"pagina en PV donde aparece (numero entero) o null","original":"valor exacto en ART","pv":"valor exacto en PV","accion":"correccion exacta","impacto":"tecnico|legal|visual|comercial"}],'
+    + '"conclusion":"veredicto y correcciones obligatorias"}';
+}
+
+var SPECS_PROMPT = 'Sos un auditor experto en packaging. Dos imagenes en ZOOM 3x del panel de especificaciones tecnicas.\n'
+  + 'IMAGEN 1 = ART | IMAGEN 2 = PV\n\n'
+  + 'TAREA: Leer y comparar TODOS los valores numericos. Especialmente:\n'
+  + '- EN: No load speed | DE: Leerlaufdrehzahl | ES: Velocidad en vacio\n'
+  + '- FR: Vitesse a vide | IT: Velocita a vuoto | PT: Velocidade em vazio\n'
+  + '- NL: Onbelast toerental | HU: Uresjárati fordulatszam\n'
+  + '- BG: Обороти на празен ход (CIRÍLICO — MAXIMA ATENCION — comparar 5300 vs 4700 etc)\n'
+  + '- CZ: Otacky naprazdno | SK: Otacky naprazdno | RO: Turatie in gol\n'
+  + '- Potencia W en todos | Velocidad cadena m/s en todos\n\n'
+  + 'Compara DIGITO POR DIGITO entre ART y PV.\n'
+  + 'Si no hay diferencias: {"diferencias":[]}\n'
+  + 'ANTI-ALUCINACION: solo reporta valores que puedas leer LITERALMENTE en ambas imagenes. Si no podes leer el valor claramente, no lo reportes.\n'
+  + 'Responde SOLO con JSON sin backticks:\n'
+  + '{"diferencias":[{"nivel":"critico","categoria":"ESPECIFICACION","idioma":"BG","titulo":"RPM diferente BG","original":"5300 ob/min","pv":"4700 ob/min","accion":"Corregir a 5300","impacto":"tecnico"}]}';
+
+// ── MAIN RUN ──────────────────────────────────────────────────
+async function run() {
+  var checks = Array.from(document.querySelectorAll('.pill.on input')).map(function(i){return i.value;});
+  if (!checks.length) { showErr('Selecciona al menos un criterio.'); return; }
+  if (!getKey()) { showErr('Configura tu API key en el paso 00.'); return; }
+  hideErr();
+  document.getElementById('btn-go').style.display = 'none';
+  document.getElementById('loading').classList.add('on');
+  document.getElementById('results').classList.remove('on');
+  setProgress(0, 'Iniciando...', '', '');
+
+  try {
+    // ── STEP 1: Load PDF.js (0-3%)
+    setProgress(2, 'Preparando...', 'Cargando motor de renderizado...', '');
+    if (isPDF(fO) || isPDF(fP)) await loadPdfJs();
+
+    // ── STEP 2: Render ART at scale 1.8 (3-30%)
+    var canvasO = null, imgO, pageOffsetsO = [], numPagesO = 1;
+    if (isPDF(fO)) {
+      var resO = await renderPDF(b64O, 1.8, 'ART', 3, 28);
+      imgO = resO.b64; canvasO = resO.canvas;
+      pageOffsetsO = resO.pageOffsets || []; numPagesO = resO.numPages || 1;
+    } else {
+      imgO = b64O;
+      setProgress(28, 'ART cargado', (fO.size/1024/1024).toFixed(1)+' MB', '');
+    }
+
+    // ── STEP 3: Render PV at scale 1.8 (30-57%)
+    var canvasP = null, imgP, pageOffsetsP = [], numPagesP = 1;
+    if (isPDF(fP)) {
+      var resP = await renderPDF(b64P, 1.8, 'PV', 30, 55);
+      imgP = resP.b64; canvasP = resP.canvas;
+      pageOffsetsP = resP.pageOffsets || []; numPagesP = resP.numPages || 1;
+    } else {
+      imgP = b64P;
+      setProgress(55, 'PV cargado', (fP.size/1024/1024).toFixed(1)+' MB', '');
+    }
+
+    // ── STEP 4: First API call — full art comparison (57-80%)
+    setProgress(57, 'Analisis completo...', 'Enviando vistas completas a Claude Vision...', ((imgO.length+imgP.length)*0.75/1024/1024).toFixed(1)+' MB total');
+
+    var progTimer = setInterval(function() {
+      var cur = parseFloat(document.getElementById('prog-pct').textContent);
+      if (cur < 78) setProgress(cur + 0.4, undefined, undefined, undefined);
+    }, 800);
+
+    var raw1 = await callProxy([
+      { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imgO } },
+      { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imgP } },
+      { type: 'text', text: buildMainPrompt(checks) }
+    ], 8000);
+    clearInterval(progTimer);
+
+    setProgress(80, 'Parseando resultado...', '', '');
+    var si = raw1.indexOf('{'), ei = raw1.lastIndexOf('}');
+    if (si === -1 || ei <= si) throw new Error('Respuesta inesperada en analisis principal.');
+    var result = JSON.parse(raw1.slice(si, ei+1));
+
+    // ── STEP 5: Second API call — zoom on specs panel (80-97%)
+    setProgress(82, 'Verificacion de specs...', 'Zoom 3x en panel de especificaciones...', 'Atencion especial en cirílico BG');
+
+    try {
+      var specImgO, specImgP;
+
+      if (canvasO) {
+        // Crop specs panel: bottom-right area of the layout (where specs grid lives)
+        // For this packaging layout the specs panel is in the lower portion
+        specImgO = cropCanvas(canvasO, 0, 0.35, 1.0, 0.65, 3.0);
+      } else {
+        // For regular images, create zoomed version
+        specImgO = await zoomImage(imgO, 2.5);
+      }
+
+      if (canvasP) {
+        specImgP = cropCanvas(canvasP, 0, 0.35, 1.0, 0.65, 3.0);
+      } else {
+        specImgP = await zoomImage(imgP, 2.5);
+      }
+
+      setProgress(86, 'Analizando specs en zoom...', 'Comparando valores numericos digito por digito...', '');
+
+      var progTimer2 = setInterval(function() {
+        var cur2 = parseFloat(document.getElementById('prog-pct').textContent);
+        if (cur2 < 95) setProgress(cur2 + 0.5, undefined, undefined, undefined);
+      }, 800);
+
+      var raw2 = await callProxy([
+        { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: specImgO } },
+        { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: specImgP } },
+        { type: 'text', text: SPECS_PROMPT }
+      ], 3000);
+      clearInterval(progTimer2);
+
+      var si2 = raw2.indexOf('{'), ei2 = raw2.lastIndexOf('}');
+      if (si2 !== -1 && ei2 > si2) {
+        var specs = JSON.parse(raw2.slice(si2, ei2+1));
+        if (specs.diferencias && specs.diferencias.length > 0) {
+          specs.diferencias.forEach(function(d) {
+            var dup = (result.diferencias||[]).some(function(x) {
+              return x.original === d.original && x.pv === d.pv;
+            });
+            if (!dup) {
+              result.diferencias = result.diferencias || [];
+              result.diferencias.push(d);
+              if (d.nivel === 'critico') {
+                result.criticos = (result.criticos||0) + 1;
+                result.score = Math.max(0, (result.score||100) - 25);
+                result.clasificacion = 'RECHAZADO CRITICO';
+              }
+            }
+          });
+        }
+      }
+    } catch(specErr) {
+      console.log('Specs pass error (non-fatal):', specErr.message);
+    }
+
+    setProgress(100, 'Analisis completado', '', '');
+    await new Promise(function(r){setTimeout(r,400);});
+    document.getElementById('loading').classList.remove('on');
+    render(result, {
+      canvasO: canvasO, canvasP: canvasP,
+      pageOffsetsO: pageOffsetsO, pageOffsetsP: pageOffsetsP,
+      isPdfO: isPDF(fO), isPdfP: isPDF(fP)
+    });
+
+  } catch(err) {
+    document.getElementById('loading').classList.remove('on');
+    document.getElementById('btn-go').style.display = 'flex';
+    showErr(err.message || 'Error desconocido.');
+  }
+}
+
+// Zoom a base64 image
+async function zoomImage(b64, zoom) {
+  return new Promise(function(resolve) {
+    var img = new Image();
+    img.onload = function() {
+      var maxPx = 7800;
+      var w = Math.min(img.width * zoom, maxPx);
+      var h = Math.min(img.height * zoom, maxPx);
+      var scale = Math.min(w / img.width, h / img.height);
+      var cv = document.createElement('canvas');
+      cv.width = Math.floor(img.width * scale);
+      cv.height = Math.floor(img.height * scale);
+      var ctx = cv.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.drawImage(img, 0, 0, cv.width, cv.height);
+      var q = 0.92, result = cv.toDataURL('image/jpeg', q).split(',')[1];
+      while (result.length > 4*1024*1024 && q > 0.4) { q -= 0.05; result = cv.toDataURL('image/jpeg', q).split(',')[1]; }
+      resolve(result);
+    };
+    img.src = 'data:image/jpeg;base64,' + b64;
+  });
+}
+
+// ── SCREENSHOT HELPER ────────────────────────────────────────
+// Given a canvas and page offsets, crop the page and return thumbnail b64
+function getPageThumb(canvas, pageOffsets, pageNum) {
+  if (!canvas || !pageOffsets || !pageOffsets.length) return null;
+  var idx = (pageNum || 1) - 1;
+  if (idx < 0 || idx >= pageOffsets.length) idx = 0;
+  var off = pageOffsets[idx];
+  if (!off) return null;
+  var cv = document.createElement('canvas');
+  // Thumbnail width max 400px
+  var thumbW = Math.min(canvas.width, 500);
+  var scale = thumbW / canvas.width;
+  cv.width = thumbW;
+  cv.height = Math.floor(off.h * scale);
+  if (cv.height < 1) return null;
+  var ctx2 = cv.getContext('2d');
+  ctx2.fillStyle = '#fff';
+  ctx2.fillRect(0, 0, cv.width, cv.height);
+  ctx2.drawImage(canvas, 0, off.y, canvas.width, off.h, 0, 0, cv.width, cv.height);
+  return cv.toDataURL('image/jpeg', 0.85);
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function render(r, ctx) {
+  ctx = ctx || {};
+  document.getElementById('results').classList.add('on');
+  var diffs = r.diferencias||[], score = typeof r.score==='number'?Math.max(0,r.score):0, clas = r.clasificacion||'';
+  var sc = score>=90?'var(--grn)':score>=70?'var(--amb)':'var(--red)';
+  var sb = score>=90?'var(--grn-bg)':score>=70?'var(--amb-bg)':'var(--red-bg)';
+  var sd2 = score>=90?'var(--grn-bd)':score>=70?'var(--amb-bd)':'var(--red-bd)';
+  var ic = score>=90?'&#x2705;':score>=70?'&#x26A0;&#xFE0F;':'&#x274C;';
+
+  document.getElementById('res-ttl').innerHTML =
+    '<span style="font-family:monospace;font-size:14px;font-weight:600;padding:5px 14px;border-radius:4px;background:'+sb+';border:1px solid '+sd2+';color:'+sc+'">'+score+'/100</span>'
+    +'&nbsp;&nbsp;'+ic+'&nbsp;<span style="font-size:17px;font-weight:600">'+esc(clas)+'</span>';
+
+  document.getElementById('kpis').innerHTML =
+    '<div class="kpi kpi-c"><div class="kpi-n">'+(r.criticos||0)+'</div><div class="kpi-l">Criticos</div></div>'
+    +'<div class="kpi kpi-w"><div class="kpi-n">'+(r.advertencias||0)+'</div><div class="kpi-l">Medios</div></div>'
+    +'<div class="kpi kpi-m"><div class="kpi-n">'+(r.menores||0)+'</div><div class="kpi-l">Menores</div></div>'
+    +'<div class="kpi kpi-o"><div class="kpi-n">'+(r.ok||0)+'</div><div class="kpi-l">OK</div></div>';
+
+  document.getElementById('sum-txt').textContent = r.resumen||'';
+  var rows = document.getElementById('rows');
+  rows.innerHTML = '';
+
+  if (diffs.length === 0) {
+    document.getElementById('tbl').innerHTML = '<div class="empty"><div class="empty-ico">&#x2713;</div><div class="empty-ttl">Arte aprobado</div><div class="empty-sub">No se detectaron diferencias.</div></div>';
+  } else {
+    diffs.forEach(function(d) {
+      var n=d.nivel||'menor', sc2=n==='critico'?'sc':n==='advertencia'?'sw':'si';
+      var lc=n==='critico'?'lv-c':n==='advertencia'?'lv-w':'lv-i';
+      var ll=n==='critico'?'Critico':n==='advertencia'?'Medio':'Menor';
+      var idTag=(d.idioma&&d.idioma!=='na')?'<span class="tag-sm" style="background:var(--nvy-bg);color:var(--nvy);border:1px solid var(--nvy-bd)">'+esc(d.idioma)+'</span>':'';
+      var impTag=d.impacto?'<span class="tag-sm" style="background:var(--ink04);color:var(--ink50);border:1px solid var(--ink08)">'+esc(d.impacto)+'</span>':'';
+      // Page number badge
+      var pgArt = d.pagina_art, pgPv = d.pagina_pv;
+      var pgTag = '';
+      if (pgArt) pgTag += '<span class="tag-sm" style="background:var(--nvy-bg);color:var(--nvy);border:1px solid var(--nvy-bd)">ART p.' + pgArt + '</span>';
+      if (pgPv) pgTag += '<span class="tag-sm" style="background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-bd)">PV p.' + pgPv + '</span>';
+
+      // Screenshots
+      var thumbO = '', thumbP = '';
+      if (ctx.canvasO && pgArt && ctx.pageOffsetsO && ctx.pageOffsetsO.length) {
+        var tO = getPageThumb(ctx.canvasO, ctx.pageOffsetsO, parseInt(pgArt));
+        if (tO) thumbO = '<img src="' + tO + '" style="width:100%;border-radius:4px;margin-top:8px;border:1px solid var(--ink08)" alt="ART p.' + pgArt + '">';
+      }
+      if (ctx.canvasP && pgPv && ctx.pageOffsetsP && ctx.pageOffsetsP.length) {
+        var tP = getPageThumb(ctx.canvasP, ctx.pageOffsetsP, parseInt(pgPv));
+        if (tP) thumbP = '<img src="' + tP + '" style="width:100%;border-radius:4px;margin-top:8px;border:1px solid var(--ink08)" alt="PV p.' + pgPv + '">';
+      }
+
+      var row=document.createElement('div'); row.className='drow';
+      row.innerHTML='<div class="drow-hd" onclick="toggleRow(this)">'
+        +'<div class="sev '+sc2+'"></div><div class="row-cat">'+esc(d.categoria||'-')+'</div>'
+        +'<div class="row-ttl">'+esc(d.titulo||'Diferencia')+idTag+impTag+pgTag+'</div>'
+        +'<div class="row-rhs"><span class="lv '+lc+'">'+ll+'</span><span class="chev">&#9662;</span></div></div>'
+        +'<div class="drow-bd"><div class="cmp">'
+        +'<div class="cmp-cell c-orig"><div class="cmp-lbl">ART &middot; Original</div>'+esc(d.original||'-')+thumbO+'</div>'
+        +'<div class="cmp-cell c-pv"><div class="cmp-lbl">PV &middot; Proveedor</div>'+esc(d.pv||'-')+thumbP+'</div>'
+        +'</div><div class="action"><span class="act-lbl">Correcci&oacute;n</span><span class="act-txt">'+esc(d.accion||'')+'</span></div></div>';
+      if (n==='critico') row.querySelector('.drow-bd').style.display='block';
+      rows.appendChild(row);
+    });
+  }
+
+  var cb=document.getElementById('conc-box'); cb.innerHTML='';
+  if (r.conclusion) {
+    cb.className='conc-box';
+    cb.innerHTML='<div style="font-family:monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink50);white-space:nowrap;flex-shrink:0;padding-top:2px">Conclusi&oacute;n</div><div>'+esc(r.conclusion)+'</div>';
+  }
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function toggleRow(hd) {
+  var bd=hd.parentElement.querySelector('.drow-bd'), ch=hd.querySelector('.chev');
+  if (bd.style.display==='block'){bd.style.display='none';ch.style.transform='';}
+  else{bd.style.display='block';ch.style.transform='rotate(180deg)';}
+}
+
+function showErr(m){document.getElementById('err-txt').textContent=m;document.getElementById('err').classList.add('on');}
+function hideErr(){document.getElementById('err').classList.remove('on');}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function resetAll() {
+  fO=null;fP=null;b64O=null;b64P=null;
+  ['o','p'].forEach(function(key) {
+    var dz=document.getElementById('dz-'+key);
+    dz.innerHTML='<div class="dz-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>'
+      +'<div class="dz-p1">Arrastr&aacute; o <span class="dz-lnk">seleccion&aacute;</span></div>'
+      +'<div class="dz-p2">JPG &middot; PNG &middot; PDF &mdash; sin l&iacute;mite de peso</div>';
+    dz.style.padding=''; dz.style.cursor='';
+    var fi=document.getElementById('fi-'+key); if(fi) fi.value='';
+    bindDZ('dz-'+key,'fi-'+key,key);
+  });
+  document.getElementById('btn-go').style.display='flex';
+  document.getElementById('btn-go').disabled=true;
+  document.getElementById('results').classList.remove('on');
+  document.getElementById('conc-box').innerHTML='';
+  setProgress(0,'','','');
+  hideErr(); window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
