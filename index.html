@@ -381,12 +381,21 @@ var PROMPT_BASE = 'Sos un auditor ULTRA-ESTRICTO de QA de packaging multilenguaj
   + '- NUNCA reportes diferencia de layout/posicion entre ART y PV — son formatos distintos por diseno\n'
   + '- Solo reporta diferencias de CONTENIDO (texto distinto, valor distinto, elemento ausente)\n'
   + '- Para cada diferencia: original= valor LITERAL visto en ART, pv= valor LITERAL visto en PV (o "AUSENTE EN PV")\n'
+  + '- zona_art y zona_pv: coordenadas aproximadas del elemento en la imagen como fraccion 0.0-1.0 {x,y,w,h}\n'
+  + '  Ejemplo: elemento en cuarto inferior derecho = {"x":0.5,"y":0.7,"w":0.5,"h":0.3}\n'
+  + '  Si no podes estimar la zona, usa {"x":0.0,"y":0.0,"w":1.0,"h":1.0}\n'
   + '- Si no podes leer claramente un valor en alguna de las dos imagenes, no lo reportes\n'
   + '- Etiquetado bilingue intencional NO es error (ej: "POWER/POTENCIA" es correcto)\n\n'
   + '=== SCORING ===\n'
   + 'CRITICO=-25 | MEDIO=-10 | MENOR=-3 (base 100)\n'
   + 'APROBADO: 90-100 | APROBADO CON OBSERVACIONES: 70-89 | RECHAZADO CRITICO: 0-69\n'
   + 'REGLA: cualquier CRITICO = RECHAZADO CRITICO automatico\n\n'
+  + '=== CONCLUSION (OBLIGATORIO) ===\n'
+  + 'La conclusion DEBE ser coherente con el score y las diferencias encontradas:\n'
+  + '- Si hay CRITICOS: conclusion debe listar las correcciones obligatorias y decir RECHAZADO\n'
+  + '- Si hay ADVERTENCIAS: conclusion debe mencionar las observaciones y decir APROBADO CON OBSERVACIONES\n'
+  + '- Solo si score >= 90 Y diferencias = 0: conclusion puede decir APROBADO SIN OBSERVACIONES\n'
+  + 'NUNCA escribas "aprobado" o "autorizado para produccion" si existen errores criticos.\n\n'
   + 'Responde SOLO con JSON puro sin backticks:\n'
   + '{"score":0,"clasificacion":"APROBADO|APROBADO CON OBSERVACIONES|RECHAZADO CRITICO",'
   + '"resumen":"diagnostico con ART=[sat/brillo]/PV=[sat/brillo]/Diferencia color=[SI/NO]",'
@@ -394,6 +403,7 @@ var PROMPT_BASE = 'Sos un auditor ULTRA-ESTRICTO de QA de packaging multilenguaj
   + '"diferencias":[{"nivel":"critico|advertencia|menor","categoria":"COLOR|IMAGEN|TEXTO|IDIOMA|ESPECIFICACION|CONTENIDO|LAYOUT|LEGAL|QR|NAMING",'
   + '"idioma":"ES|EN|FR|DE|IT|PT|NL|BG|CZ|SK|RO|HU|todos|na","titulo":"titulo corto",'
   + '"pagina_art":"pagina en ART donde aparece (entero) o null","pagina_pv":"pagina en PV donde aparece (entero) o null",'
+  + '"zona_art":{"x":0.0,"y":0.0,"w":1.0,"h":1.0},"zona_pv":{"x":0.0,"y":0.0,"w":1.0,"h":1.0},'
   + '"original":"valor exacto en ART","pv":"valor exacto en PV o AUSENTE EN PV","accion":"correccion exacta","impacto":"tecnico|legal|visual|comercial"}],'
   + '"conclusion":"veredicto y correcciones obligatorias"}';
 
@@ -795,19 +805,63 @@ async function zoomImage(b64, zoom) {
   });
 }
 
-// ── THUMB desde canvas global ─────────────────────────────────
-function getPageThumb(canvas, offsets, pageNum) {
+// ── THUMB con crop de zona y marcador rojo ────────────────────
+function getPageThumb(canvas, offsets, pageNum, zona) {
   if (!canvas || !offsets || !offsets.length) return null;
   var idx = Math.max(0, Math.min((pageNum||1)-1, offsets.length-1));
   var off = offsets[idx]; if (!off) return null;
-  var thumbW = Math.min(canvas.width, 500), scale = thumbW / canvas.width;
-  var cv = document.createElement('canvas');
-  cv.width = thumbW; cv.height = Math.floor(off.h * scale);
-  if (cv.height < 1) return null;
-  var ctx = cv.getContext('2d');
-  ctx.fillStyle = '#fff'; ctx.fillRect(0,0,cv.width,cv.height);
-  ctx.drawImage(canvas, 0, off.y, canvas.width, off.h, 0, 0, cv.width, cv.height);
-  return cv.toDataURL('image/jpeg', 0.85);
+
+  // Coordenadas de la zona dentro de la página
+  var z = zona && zona.w < 0.99 ? zona : null;
+  var MAX_THUMB = 500;
+
+  if (z) {
+    // Crop ajustado: expandir un 15% alrededor para dar contexto
+    var pad = 0.08;
+    var zx = Math.max(0, z.x - pad), zy = Math.max(0, z.y - pad);
+    var zw = Math.min(1, z.w + pad*2), zh = Math.min(1, z.h + pad*2);
+    // Ajustar para no salir de la página
+    if (zx + zw > 1) zw = 1 - zx;
+    if (zy + zh > 1) zh = 1 - zy;
+
+    var srcX = Math.floor(canvas.width * zx);
+    var srcY = Math.floor(off.y + off.h * zy);
+    var srcW = Math.floor(canvas.width * zw);
+    var srcH = Math.floor(off.h * zh);
+    if (srcW < 10 || srcH < 10) return getPageThumb(canvas, offsets, pageNum, null);
+
+    var scale = Math.min(MAX_THUMB / srcW, MAX_THUMB / srcH, 1);
+    // Mínimo 200px de ancho para que se lea bien
+    if (srcW * scale < 200) scale = Math.min(200 / srcW, 3);
+
+    var cv = document.createElement('canvas');
+    cv.width = Math.floor(srcW * scale);
+    cv.height = Math.floor(srcH * scale);
+    var ctx = cv.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.drawImage(canvas, srcX, srcY, srcW, srcH, 0, 0, cv.width, cv.height);
+
+    // Marcador rojo: recuadro sobre la zona exacta del error
+    var marX = Math.floor((z.x - zx) / zw * cv.width);
+    var marY = Math.floor((z.y - zy) / zh * cv.height);
+    var marW = Math.floor(z.w / zw * cv.width);
+    var marH = Math.floor(z.h / zh * cv.height);
+    ctx.strokeStyle = '#b5271f';
+    ctx.lineWidth = Math.max(2, Math.floor(cv.width / 80));
+    ctx.strokeRect(marX, marY, marW, marH);
+
+    return cv.toDataURL('image/jpeg', 0.88);
+  }
+
+  // Sin zona: página completa escalada
+  var thumbW = Math.min(canvas.width, MAX_THUMB), scale2 = thumbW / canvas.width;
+  var cv2 = document.createElement('canvas');
+  cv2.width = thumbW; cv2.height = Math.floor(off.h * scale2);
+  if (cv2.height < 1) return null;
+  var ctx2 = cv2.getContext('2d');
+  ctx2.fillStyle = '#fff'; ctx2.fillRect(0,0,cv2.width,cv2.height);
+  ctx2.drawImage(canvas, 0, off.y, canvas.width, off.h, 0, 0, cv2.width, cv2.height);
+  return cv2.toDataURL('image/jpeg', 0.85);
 }
 
 // ── RENDER ────────────────────────────────────────────────────
@@ -842,9 +896,9 @@ function render(r) {
       if (pgPv)  pgTag += '<span class="tag-sm" style="background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-bd)">PV p.'+pgPv+'</span>';
       // Thumbs — usan canvasO/canvasP globales
       var thumbO='', thumbP='';
-      var tO = getPageThumb(canvasO, pageOffsetsO, parseInt(pgArt)||1);
+      var tO = getPageThumb(canvasO, pageOffsetsO, parseInt(pgArt)||1, d.zona_art);
       if (tO) thumbO = '<img src="'+tO+'" style="width:100%;border-radius:4px;margin-top:8px;border:1px solid var(--ink08)" alt="ART">';
-      var tP = getPageThumb(canvasP, pageOffsetsP, parseInt(pgPv)||1);
+      var tP = getPageThumb(canvasP, pageOffsetsP, parseInt(pgPv)||1, d.zona_pv);
       if (tP) thumbP = '<img src="'+tP+'" style="width:100%;border-radius:4px;margin-top:8px;border:1px solid var(--ink08)" alt="PV">';
       var row=document.createElement('div'); row.className='drow';
       row.innerHTML='<div class="drow-hd" onclick="toggleRow(this)">'
