@@ -74,6 +74,34 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink
 .pill:hover{border-color:var(--ink20);color:var(--ink)}
 .pill.on{background:var(--ink);border-color:var(--ink);color:var(--white)}
 .pill input{display:none}
+/* ── PROMPT EDITOR ── */
+.prompt-panel{background:var(--white);border:var(--rule);border-radius:var(--r8);margin-bottom:22px;box-shadow:var(--sh);overflow:hidden}
+.prompt-hd{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:var(--rule);cursor:pointer;user-select:none}
+.prompt-hd-left{display:flex;align-items:center;gap:10px}
+.prompt-hd-title{font-size:12px;font-weight:600}
+.prompt-hd-sub{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink50);letter-spacing:1px}
+.prompt-chev{font-size:10px;color:var(--ink20);transition:transform .18s;display:inline-block}
+.prompt-body{display:none;padding:16px 20px}
+.prompt-body.open{display:block}
+.prompt-toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.prompt-toggle-lbl{font-size:11px;color:var(--ink50)}
+.toggle-switch{position:relative;display:inline-block;width:36px;height:20px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--ink08);border-radius:20px;transition:.2s}
+.toggle-slider:before{position:absolute;content:"";height:14px;width:14px;left:3px;bottom:3px;background:var(--white);border-radius:50%;transition:.2s}
+.toggle-switch input:checked + .toggle-slider{background:var(--ink)}
+.toggle-switch input:checked + .toggle-slider:before{transform:translateX(16px)}
+.prompt-textarea{width:100%;height:420px;background:var(--ink04);border:var(--rule);border-radius:var(--r);color:var(--ink);padding:14px;font-family:'IBM Plex Mono',monospace;font-size:11px;resize:vertical;box-sizing:border-box;line-height:1.6;outline:none}
+.prompt-textarea:focus{border-color:var(--ink20)}
+.prompt-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;flex-wrap:wrap;gap:8px}
+.prompt-meta{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink20)}
+.prompt-btns{display:flex;gap:8px}
+.btn-sm{padding:6px 14px;border:var(--rule);border-radius:var(--r);font-family:'IBM Plex Sans',sans-serif;font-size:11px;cursor:pointer;background:var(--white);color:var(--ink50)}
+.btn-sm:hover{border-color:var(--ink20);color:var(--ink)}
+.btn-sm-save{background:var(--ink);color:var(--white);border-color:var(--ink)}
+.btn-sm-save:hover{background:var(--ink80);color:var(--white)}
+.prompt-saved{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--grn);display:none}
+/* ── resto igual ── */
 .err{display:none;align-items:flex-start;gap:10px;background:var(--red-bg);border:1px solid var(--red-bd);border-radius:var(--r8);padding:12px 16px;margin-bottom:18px;font-size:12px;color:var(--red);line-height:1.65}
 .err.on{display:flex}
 .btn-go{width:100%;padding:14px 24px;background:var(--ink);color:var(--white);border:none;border-radius:var(--r);font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:32px}
@@ -225,6 +253,38 @@ input[type=file]{display:none}
     </div>
   </div>
 
+  <!-- ── PROMPT EDITOR ── -->
+  <div class="step">02b &mdash; Prompt del sistema</div>
+  <div class="prompt-panel">
+    <div class="prompt-hd" onclick="togglePromptPanel()">
+      <div class="prompt-hd-left">
+        <span class="prompt-hd-title">Editor de Prompt</span>
+        <span class="prompt-hd-sub" id="prompt-mode-badge">MODO: DIN&Aacute;MICO</span>
+      </div>
+      <span class="prompt-chev" id="prompt-chev">&#9662;</span>
+    </div>
+    <div class="prompt-body" id="prompt-body">
+      <div class="prompt-toggle-row">
+        <label class="toggle-switch">
+          <input type="checkbox" id="prompt-custom-toggle" onchange="toggleCustomPrompt()">
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="prompt-toggle-lbl">Usar prompt personalizado (sobreescribe el din&aacute;mico basado en criterios)</span>
+      </div>
+      <textarea class="prompt-textarea" id="prompt-textarea" placeholder="El prompt se genera automáticamente según los criterios activos. Activá el toggle para editarlo manualmente." readonly></textarea>
+      <div class="prompt-footer">
+        <span class="prompt-meta" id="prompt-meta">Vista previa — generado din&aacute;micamente</span>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="prompt-saved" id="prompt-saved">&#10003; Guardado</span>
+          <div class="prompt-btns" id="prompt-btns" style="display:none">
+            <button class="btn-sm" onclick="resetPrompt()">Restaurar original</button>
+            <button class="btn-sm btn-sm-save" onclick="savePrompt()">Guardar cambios</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="err" id="err">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
     <span id="err-txt"></span>
@@ -279,6 +339,149 @@ input[type=file]{display:none}
 <script>
 var fO = null, fP = null, b64O = null, b64P = null;
 
+// ── PROMPT BASE (nuevo — orientado a contenido, no a layout) ──
+var PROMPT_BASE = 'Sos un auditor ULTRA-ESTRICTO de QA de packaging multilenguaje para la empresa ALKON.\n\n'
+  + 'IMAGEN 1 = ART (arte original aprobado)\n'
+  + 'IMAGEN 2 = PV (version del proveedor — desglose completo de la caja impresa)\n\n'
+  + '=== REGLA FUNDAMENTAL ===\n'
+  + 'ART y PV son representaciones DISTINTAS del mismo packaging:\n'
+  + '- ART puede mostrar vistas renderizadas o caras individuales\n'
+  + '- PV es el desglose plano (dieline) completo con todas las caras desplegadas\n'
+  + 'NO compares posicion ni layout entre ART y PV.\n'
+  + 'Compara CONTENIDO: todo texto, valor, imagen, idioma, especificacion y simbolo que existe en ART\n'
+  + 'debe existir en PV con el mismo contenido exacto, sin importar en que cara o posicion este.\n\n'
+  + '=== METODOLOGIA ===\n'
+  + 'PASO 1 — INVENTARIO ART: Lista todo el contenido visible en ART:\n'
+  + '  - Todos los textos en todos los idiomas\n'
+  + '  - Todas las especificaciones tecnicas (W, RPM, m/s, mm, etc.) digito a digito\n'
+  + '  - Imagenes del producto, logos, simbolos, certificaciones\n'
+  + '  - Codigos QR, EAN, barcodes\n'
+  + '  - Informacion legal, pais de origen\n\n'
+  + 'PASO 2 — BUSQUEDA EN PV: Para cada elemento del inventario, buscalo en CUALQUIER parte del PV.\n'
+  + '  - Si lo encontras con el mismo valor: OK\n'
+  + '  - Si lo encontras con valor diferente: DIFERENCIA (reportar)\n'
+  + '  - Si no lo encontras en ninguna parte del PV: AUSENTE (reportar con pv="AUSENTE EN PV")\n\n'
+  + 'PASO 3 — VERIFICACION INVERSA: Busca en PV contenido que NO existe en ART (posibles agregados no aprobados).\n\n'
+  + '=== ESPECIFICACIONES TECNICAS (CRITICO) ===\n'
+  + 'Transcribir y comparar DIGITO POR DIGITO en TODOS los idiomas:\n'
+  + '- EN: No load speed | DE: Leerlaufdrehzahl | ES: Velocidad en vacio\n'
+  + '- FR: Vitesse a vide | IT: Velocita a vuoto | PT: Velocidade em vazio\n'
+  + '- NL: Onbelast toerental | HU: Uresjárati fordulatszam\n'
+  + '- BG: Обороти на празен ход (CIRÍLICO — MAXIMA ATENCION)\n'
+  + '- CZ: Otacky naprazdno | SK: Otacky naprazdno | RO: Turatie in gol\n'
+  + '- Potencia W | Velocidad cadena m/s | Longitud espada | Paso cadena\n'
+  + 'Un digito diferente entre ART y PV = CRITICO automatico.\n'
+  + 'Si una especificacion existe en ART pero no aparece en PV = ADVERTENCIA.\n\n'
+  + '=== COLOR PRODUCTO (OBLIGATORIO) ===\n'
+  + 'Evaluar el producto fotografiado (no el fondo del packaging):\n'
+  + 'ART=[sat X/10, brillo Y/10] / PV=[sat X/10, brillo Y/10] / Diferencia=[SI/NO]\n'
+  + 'Diferencia >= 1 punto = CRITICO\n\n'
+  + '=== CRITERIOS ACTIVOS ===\n'
+  + '{CRITERIA_LIST}\n\n'
+  + '=== ANTI-ALUCINACION ===\n'
+  + '- NUNCA reportes diferencia de layout/posicion entre ART y PV — son formatos distintos por diseno\n'
+  + '- Solo reporta diferencias de CONTENIDO (texto distinto, valor distinto, elemento ausente)\n'
+  + '- Para cada diferencia: original= valor LITERAL visto en ART, pv= valor LITERAL visto en PV (o "AUSENTE EN PV")\n'
+  + '- Si no podes leer claramente un valor en alguna de las dos imagenes, no lo reportes\n'
+  + '- Etiquetado bilingue intencional NO es error (ej: "POWER/POTENCIA" es correcto)\n\n'
+  + '=== SCORING ===\n'
+  + 'CRITICO=-25 | MEDIO=-10 | MENOR=-3 (base 100)\n'
+  + 'APROBADO: 90-100 | APROBADO CON OBSERVACIONES: 70-89 | RECHAZADO CRITICO: 0-69\n'
+  + 'REGLA: cualquier CRITICO = RECHAZADO CRITICO automatico\n\n'
+  + 'Responde SOLO con JSON puro sin backticks:\n'
+  + '{"score":0,"clasificacion":"APROBADO|APROBADO CON OBSERVACIONES|RECHAZADO CRITICO",'
+  + '"resumen":"diagnostico con ART=[sat/brillo]/PV=[sat/brillo]/Diferencia color=[SI/NO]",'
+  + '"criticos":0,"advertencias":0,"menores":0,"ok":0,'
+  + '"diferencias":[{"nivel":"critico|advertencia|menor","categoria":"COLOR|IMAGEN|TEXTO|IDIOMA|ESPECIFICACION|CONTENIDO|LAYOUT|LEGAL|QR|NAMING",'
+  + '"idioma":"ES|EN|FR|DE|IT|PT|NL|BG|CZ|SK|RO|HU|todos|na","titulo":"titulo corto",'
+  + '"pagina_art":"pagina en ART donde aparece (entero) o null","pagina_pv":"pagina en PV donde aparece (entero) o null",'
+  + '"original":"valor exacto en ART","pv":"valor exacto en PV o AUSENTE EN PV","accion":"correccion exacta","impacto":"tecnico|legal|visual|comercial"}],'
+  + '"conclusion":"veredicto y correcciones obligatorias"}';
+
+var SPECS_PROMPT = 'Sos un auditor experto en packaging. Se te envian dos imagenes con zoom en el area de especificaciones tecnicas.\n'
+  + 'IMAGEN 1 = ART (original aprobado) | IMAGEN 2 = PV (version proveedor)\n\n'
+  + 'REGLA CLAVE: ART y PV son formatos distintos del mismo packaging. Busca los valores del ART en CUALQUIER parte del PV.\n\n'
+  + 'TAREA: Para cada especificacion visible en ART, buscala en PV y compara DIGITO POR DIGITO:\n'
+  + '- EN: No load speed | DE: Leerlaufdrehzahl | ES: Velocidad en vacio\n'
+  + '- FR: Vitesse a vide | IT: Velocita a vuoto | PT: Velocidade em vazio\n'
+  + '- NL: Onbelast toerental | HU: Uresjárati fordulatszam\n'
+  + '- BG: Обороти на празен ход (CIRÍLICO — MAXIMA ATENCION — ej: 5300 vs 4700)\n'
+  + '- CZ: Otacky naprazdno | SK: Otacky naprazdno | RO: Turatie in gol\n'
+  + '- Potencia W | Velocidad cadena m/s | Longitud espada | Paso cadena\n\n'
+  + 'Si el valor en PV es DIFERENTE al ART: reportar con original= y pv= valores literales.\n'
+  + 'Si el valor del ART NO APARECE en ninguna parte del PV: reportar con pv="AUSENTE EN PV".\n'
+  + 'Si no hay diferencias ni ausencias: {"diferencias":[]}\n\n'
+  + 'ANTI-ALUCINACION: solo reporta lo que podes leer literalmente. No inventes diferencias.\n'
+  + 'Responde SOLO con JSON sin backticks:\n'
+  + '{"diferencias":[{"nivel":"critico","categoria":"ESPECIFICACION","idioma":"BG","titulo":"RPM diferente BG","original":"5300 ob/min","pv":"4700 ob/min","accion":"Corregir a 5300","impacto":"tecnico"}]}';
+
+// ── PROMPT EDITOR STATE ───────────────────────────────────────
+var promptCustomMode = false;
+var promptCustomText = '';
+
+function getStoredPrompt() { return localStorage.getItem('pk_custom_prompt') || ''; }
+function getStoredPromptMode() { return localStorage.getItem('pk_prompt_mode') === '1'; }
+
+function togglePromptPanel() {
+  var body = document.getElementById('prompt-body');
+  var chev = document.getElementById('prompt-chev');
+  var isOpen = body.classList.contains('open');
+  if (isOpen) { body.classList.remove('open'); chev.style.transform = ''; }
+  else { body.classList.add('open'); chev.style.transform = 'rotate(180deg)'; refreshPromptPreview(); }
+}
+
+function toggleCustomPrompt() {
+  var tog = document.getElementById('prompt-custom-toggle');
+  promptCustomMode = tog.checked;
+  var ta = document.getElementById('prompt-textarea');
+  var btns = document.getElementById('prompt-btns');
+  var badge = document.getElementById('prompt-mode-badge');
+  var meta = document.getElementById('prompt-meta');
+  if (promptCustomMode) {
+    ta.readOnly = false;
+    ta.value = promptCustomText || buildMainPromptText(getActiveChecks());
+    btns.style.display = 'flex';
+    badge.textContent = 'MODO: PERSONALIZADO';
+    meta.textContent = ta.value.length + ' caracteres';
+    localStorage.setItem('pk_prompt_mode', '1');
+  } else {
+    ta.readOnly = true;
+    btns.style.display = 'none';
+    badge.textContent = 'MODO: DINÁMICO';
+    meta.textContent = 'Vista previa — generado dinámicamente';
+    refreshPromptPreview();
+    localStorage.setItem('pk_prompt_mode', '0');
+  }
+}
+
+function refreshPromptPreview() {
+  if (promptCustomMode) return;
+  var ta = document.getElementById('prompt-textarea');
+  ta.value = buildMainPromptText(getActiveChecks());
+}
+
+function savePrompt() {
+  var ta = document.getElementById('prompt-textarea');
+  promptCustomText = ta.value;
+  localStorage.setItem('pk_custom_prompt', promptCustomText);
+  var saved = document.getElementById('prompt-saved');
+  saved.style.display = 'inline';
+  setTimeout(function() { saved.style.display = 'none'; }, 2000);
+  document.getElementById('prompt-meta').textContent = promptCustomText.length + ' caracteres · guardado';
+}
+
+function resetPrompt() {
+  promptCustomText = '';
+  localStorage.removeItem('pk_custom_prompt');
+  var ta = document.getElementById('prompt-textarea');
+  ta.value = buildMainPromptText(getActiveChecks());
+  document.getElementById('prompt-meta').textContent = ta.value.length + ' caracteres · restaurado';
+}
+
+function getActiveChecks() {
+  return Array.from(document.querySelectorAll('.pill.on input')).map(function(i){return i.value;});
+}
+
 // ── PROGRESS ─────────────────────────────────────────────────
 function setProgress(pct, label, step, detail) {
   pct = Math.min(100, Math.max(0, pct));
@@ -304,6 +507,13 @@ window.addEventListener('load', function() {
   if (getKey()) document.getElementById('apikey-ok').style.display = 'inline';
   bindDZ('dz-o', 'fi-o', 'o');
   bindDZ('dz-p', 'fi-p', 'p');
+  // Restore prompt mode
+  promptCustomMode = getStoredPromptMode();
+  promptCustomText = getStoredPrompt();
+  if (promptCustomMode) {
+    document.getElementById('prompt-custom-toggle').checked = true;
+    toggleCustomPrompt();
+  }
 });
 
 // ── FILE UTILS ────────────────────────────────────────────────
@@ -376,7 +586,6 @@ async function loadPdfJs() {
   await new Promise(function(r) { setTimeout(r, 200); });
 }
 
-// Render PDF to JPEG with given scale, returns base64
 async function renderPDF(b64, scale, label, pStart, pEnd) {
   var raw = atob(b64), arr = new Uint8Array(raw.length);
   for (var i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
@@ -388,7 +597,6 @@ async function renderPDF(b64, scale, label, pStart, pEnd) {
   var numPages = pdf.numPages;
   var pages = [], totalH = 0, maxW = 0;
   var pPerPage = pEnd ? (pEnd - pStart - 4) / numPages : 0;
-
   for (var p = 1; p <= numPages; p++) {
     if (pStart) setProgress(pStart + (p-1)*pPerPage, 'Procesando ' + label + '...', 'Pagina ' + p + ' / ' + numPages + ' — escala ' + scale + 'x', '');
     var page = await pdf.getPage(p);
@@ -399,13 +607,10 @@ async function renderPDF(b64, scale, label, pStart, pEnd) {
     pages.push(cv); totalH += vp.height;
     if (vp.width > maxW) maxW = vp.width;
   }
-
-  // Cap at API limit
   var MAX_PX = 7800, sd = 1.0;
   if (maxW > MAX_PX) sd = Math.min(sd, MAX_PX / maxW);
   if (totalH > MAX_PX) sd = Math.min(sd, MAX_PX / totalH);
   var fw = Math.floor(maxW * sd), fh = Math.floor(totalH * sd);
-
   var st = document.createElement('canvas');
   st.width = fw; st.height = fh;
   var ctx = st.getContext('2d');
@@ -416,17 +621,13 @@ async function renderPDF(b64, scale, label, pStart, pEnd) {
     ctx.drawImage(cv, 0, 0, cv.width, cv.height, 0, y, fw, dh);
     y += dh;
   });
-
-  // Target max 4MB for safety
   var MAX_B64 = 4 * 1024 * 1024, q = 0.92;
   var result = st.toDataURL('image/jpeg', q).split(',')[1];
   while (result.length > MAX_B64 && q > 0.4) {
     q = Math.round((q - 0.06) * 100) / 100;
     result = st.toDataURL('image/jpeg', q).split(',')[1];
   }
-  // Store page offsets so we can screenshot individual pages later
-  var pageOffsets = [];
-  var yOff = 0;
+  var pageOffsets = [], yOff = 0;
   pages.forEach(function(cv) {
     var dh = Math.floor(cv.height * sd);
     pageOffsets.push({ y: yOff, h: dh });
@@ -436,34 +637,23 @@ async function renderPDF(b64, scale, label, pStart, pEnd) {
   return { b64: result, canvas: st, q: q, pageOffsets: pageOffsets, numPages: numPages };
 }
 
-// Crop a region from a rendered canvas and return base64
 function cropCanvas(canvas, x, y, w, h, zoom) {
-  var sw = Math.floor(canvas.width * w);
-  var sh = Math.floor(canvas.height * h);
-  var sx = Math.floor(canvas.width * x);
-  var sy = Math.floor(canvas.height * y);
-  // Zoom the crop
-  var dw = Math.min(sw * zoom, 7800);
-  var dh = Math.min(sh * zoom, 7800);
+  var sw = Math.floor(canvas.width * w), sh = Math.floor(canvas.height * h);
+  var sx = Math.floor(canvas.width * x), sy = Math.floor(canvas.height * y);
+  var dw = Math.min(sw * zoom, 7800), dh = Math.min(sh * zoom, 7800);
   var scale = Math.min(dw / sw, dh / sh);
   var cv = document.createElement('canvas');
-  cv.width = Math.floor(sw * scale);
-  cv.height = Math.floor(sh * scale);
+  cv.width = Math.floor(sw * scale); cv.height = Math.floor(sh * scale);
   var ctx = cv.getContext('2d');
   ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
   ctx.drawImage(canvas, sx, sy, sw, sh, 0, 0, cv.width, cv.height);
   var result = cv.toDataURL('image/jpeg', 0.95).split(',')[1];
-  // Keep under 4MB
   var q = 0.95;
-  while (result.length > 4*1024*1024 && q > 0.4) {
-    q -= 0.05;
-    result = cv.toDataURL('image/jpeg', q).split(',')[1];
-  }
+  while (result.length > 4*1024*1024 && q > 0.4) { q -= 0.05; result = cv.toDataURL('image/jpeg', q).split(',')[1]; }
   return result;
 }
 
-// ── DIRECT BROWSER API CALL ──────────────────────────────────
-// Calls Anthropic directly from browser — no proxy timeout issues
+// ── API CALL ──────────────────────────────────────────────────
 async function callProxy(content, maxTokens) {
   var resp = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -490,22 +680,22 @@ async function callProxy(content, maxTokens) {
 }
 
 // ── PROMPTS ───────────────────────────────────────────────────
-function buildMainPrompt(checks) {
+function buildMainPromptText(checks) {
   var labels = {
     textos:'Textos en todos los idiomas: ortografia, gramatica, contenido, idiomas faltantes',
     colores:'Colores: tonos, saturacion, brillo, fondos, degradados',
     logos:'Logos, marcas registradas, simbolos y certificaciones',
     fotos:'Fotografias: COLOR DEL PRODUCTO (tono sat 1-10, brillo 1-10), resolucion, elementos',
-    specs:'Especificaciones tecnicas: potencia W, RPM, velocidad, capacidad, dimensiones — numero por numero en cada idioma incluyendo cirílico BG',
+    specs:'Especificaciones tecnicas: potencia W, RPM, velocidad — digito por digito en cada idioma incluyendo cirílico BG',
     traducciones:'Multilenguaje: traducciones equivalentes, atencion especial BG, CZ, SK, RO, HU',
-    layout:'Layout: posicion, jerarquia, margenes, alineacion entre caras',
+    layout:'Layout: solo reportar si falta contenido en alguna cara, no diferencias de posicion entre ART y PV',
     datos_repetidos:'Datos repetidos: valores en distintas caras deben coincidir exactamente',
-    consistencia_caras:'Consistencia entre caras: frente, dorso y laterales',
+    consistencia_caras:'Consistencia entre caras: mismo contenido en frente, dorso y laterales',
     legal:'CRITICO - Legal: textos legales, pais de origen, certificaciones CE/RoHS',
     placeholders:'Placeholders: campos sin completar, EAN vacio, seriales pendientes',
     unidades:'Unidades: separadores decimales, W/rpm/m-s/ml/mm consistentes',
     tipografia:'CRITICO - Tipografia/encoding: caracteres corruptos en cirílico',
-    dieline:'Dieline: contenido en zonas de corte',
+    dieline:'Dieline: contenido en zonas de corte o sangrado',
     qr:'QR y EAN: presentes y legibles',
     comercial:'Coherencia comercial: claims = specs tecnicas',
     naming:'Naming: modelo identico en todo el packaging',
@@ -513,53 +703,13 @@ function buildMainPrompt(checks) {
     copy_paste:'Copy/paste: duplicaciones, texto cortado'
   };
   var lista = checks.map(function(id) { return '  - ' + (labels[id]||id); }).join('\n');
-  return 'Actua como auditor ULTRA-ESTRICTO de QA de packaging multilenguaje.\n\n'
-    + 'IMAGEN 1 = ART (Original correcta) | IMAGEN 2 = PV (a validar)\n\n'
-    + 'CRITERIOS:\n' + lista + '\n\n'
-    + '=== COLOR PRODUCTO (OBLIGATORIO) ===\n'
-    + 'PASO A: ART — color del producto fotografiado: saturacion 1-10, brillo 1-10, temperatura\n'
-    + 'PASO B: PV — mismos parametros\n'
-    + 'PASO C: diferencia >= 1 punto = CRITICO\n'
-    + 'Resumen SIEMPRE: ART=[sat X/10, brillo Y/10] / PV=[sat X/10, brillo Y/10] / Diferencia=[SI/NO]\n\n'
-    + '=== SPECS TECNICAS (OBLIGATORIO) ===\n'
-    + 'Transcribir y comparar digito por digito todos los valores en todos los idiomas.\n'
-    + 'ATENCION MAXIMA: BG Обороти на празен ход, CZ Otacky, SK Otacky, RO Turatie, HU Uresjárati\n'
-    + 'Un digito diferente = CRITICO\n\n'
-    + 'SCORING: CRITICO=-25 | MEDIO=-10 | MENOR=-3 (parte de 100)\n'
-    + 'CLASIFICACION: 90-100=APROBADO | 70-89=APROBADO CON OBSERVACIONES | 0-69=RECHAZADO CRITICO\n'
-    + 'REGLA: 1 critico = RECHAZADO CRITICO automaticamente\n'
-    + 'REGLAS ANTI-ALUCINACION (CRITICO):\n'
-    + '- NUNCA reportes una diferencia si no podes citar el texto EXACTO que viste en cada documento\n'
-    + '- Si el screenshot o imagen no muestra claramente la diferencia, NO la reportes\n'
-    + '- Para cada diferencia reportada, el campo original= debe contener el texto LITERAL del ART y pv= el texto LITERAL del PV\n'
-    + '- NO uses frases como "pagina muestra celdas vacias" o "deberia aparecer" — solo reporta lo que VES\n'
-    + '- NO inferis diferencias a partir de lo que falta — solo reporta diferencias entre texto presente en ambos\n'
-    + '- Verificacion doble obligatoria: antes de agregar una diferencia, confirma que podes ver el valor en ART Y el valor diferente en PV\n'
-    + '- pagina_art y pagina_pv deben ser la pagina exacta donde VISTE el texto, no una estimacion\n\n'
-    + 'Responde SOLO con JSON puro sin backticks:\n'
-    + '{"score":0,"clasificacion":"APROBADO|APROBADO CON OBSERVACIONES|RECHAZADO CRITICO",'
-    + '"resumen":"diagnostico incluyendo ART=[sat/brillo]/PV=[sat/brillo]/Diferencia color=[SI/NO]",'
-    + '"criticos":0,"advertencias":0,"menores":0,"ok":0,'
-    + '"diferencias":[{"nivel":"critico|advertencia|menor","categoria":"COLOR|IMAGEN|TEXTO|IDIOMA|ESPECIFICACION|CONTENIDO|LAYOUT|LEGAL|QR|NAMING",'
-    + '"idioma":"ES|EN|FR|DE|IT|PT|NL|BG|CZ|SK|RO|HU|todos|na","titulo":"titulo corto",'
-    + '"pagina_art":"pagina en ART donde aparece (numero entero) o null","pagina_pv":"pagina en PV donde aparece (numero entero) o null","original":"valor exacto en ART","pv":"valor exacto en PV","accion":"correccion exacta","impacto":"tecnico|legal|visual|comercial"}],'
-    + '"conclusion":"veredicto y correcciones obligatorias"}';
+  return PROMPT_BASE.replace('{CRITERIA_LIST}', lista);
 }
 
-var SPECS_PROMPT = 'Sos un auditor experto en packaging. Dos imagenes en ZOOM 3x del panel de especificaciones tecnicas.\n'
-  + 'IMAGEN 1 = ART | IMAGEN 2 = PV\n\n'
-  + 'TAREA: Leer y comparar TODOS los valores numericos. Especialmente:\n'
-  + '- EN: No load speed | DE: Leerlaufdrehzahl | ES: Velocidad en vacio\n'
-  + '- FR: Vitesse a vide | IT: Velocita a vuoto | PT: Velocidade em vazio\n'
-  + '- NL: Onbelast toerental | HU: Uresjárati fordulatszam\n'
-  + '- BG: Обороти на празен ход (CIRÍLICO — MAXIMA ATENCION — comparar 5300 vs 4700 etc)\n'
-  + '- CZ: Otacky naprazdno | SK: Otacky naprazdno | RO: Turatie in gol\n'
-  + '- Potencia W en todos | Velocidad cadena m/s en todos\n\n'
-  + 'Compara DIGITO POR DIGITO entre ART y PV.\n'
-  + 'Si no hay diferencias: {"diferencias":[]}\n'
-  + 'ANTI-ALUCINACION: solo reporta valores que puedas leer LITERALMENTE en ambas imagenes. Si no podes leer el valor claramente, no lo reportes.\n'
-  + 'Responde SOLO con JSON sin backticks:\n'
-  + '{"diferencias":[{"nivel":"critico","categoria":"ESPECIFICACION","idioma":"BG","titulo":"RPM diferente BG","original":"5300 ob/min","pv":"4700 ob/min","accion":"Corregir a 5300","impacto":"tecnico"}]}';
+function buildMainPrompt(checks) {
+  if (promptCustomMode && promptCustomText.trim()) return promptCustomText;
+  return buildMainPromptText(checks);
+}
 
 // ── MAIN RUN ──────────────────────────────────────────────────
 async function run() {
@@ -573,11 +723,9 @@ async function run() {
   setProgress(0, 'Iniciando...', '', '');
 
   try {
-    // ── STEP 1: Load PDF.js (0-3%)
     setProgress(2, 'Preparando...', 'Cargando motor de renderizado...', '');
     if (isPDF(fO) || isPDF(fP)) await loadPdfJs();
 
-    // ── STEP 2: Render ART at scale 1.8 (3-30%)
     var canvasO = null, imgO, pageOffsetsO = [], numPagesO = 1;
     if (isPDF(fO)) {
       var resO = await renderPDF(b64O, 1.8, 'ART', 3, 28);
@@ -588,7 +736,6 @@ async function run() {
       setProgress(28, 'ART cargado', (fO.size/1024/1024).toFixed(1)+' MB', '');
     }
 
-    // ── STEP 3: Render PV at scale 1.8 (30-57%)
     var canvasP = null, imgP, pageOffsetsP = [], numPagesP = 1;
     if (isPDF(fP)) {
       var resP = await renderPDF(b64P, 1.8, 'PV', 30, 55);
@@ -599,7 +746,6 @@ async function run() {
       setProgress(55, 'PV cargado', (fP.size/1024/1024).toFixed(1)+' MB', '');
     }
 
-    // ── STEP 4: First API call — full art comparison (57-80%)
     setProgress(57, 'Analisis completo...', 'Enviando vistas completas a Claude Vision...', ((imgO.length+imgP.length)*0.75/1024/1024).toFixed(1)+' MB total');
 
     var progTimer = setInterval(function() {
@@ -619,26 +765,14 @@ async function run() {
     if (si === -1 || ei <= si) throw new Error('Respuesta inesperada en analisis principal.');
     var result = JSON.parse(raw1.slice(si, ei+1));
 
-    // ── STEP 5: Second API call — zoom on specs panel (80-97%)
     setProgress(82, 'Verificacion de specs...', 'Zoom 3x en panel de especificaciones...', 'Atencion especial en cirílico BG');
 
     try {
       var specImgO, specImgP;
-
-      if (canvasO) {
-        // Crop specs panel: bottom-right area of the layout (where specs grid lives)
-        // For this packaging layout the specs panel is in the lower portion
-        specImgO = cropCanvas(canvasO, 0, 0.35, 1.0, 0.65, 3.0);
-      } else {
-        // For regular images, create zoomed version
-        specImgO = await zoomImage(imgO, 2.5);
-      }
-
-      if (canvasP) {
-        specImgP = cropCanvas(canvasP, 0, 0.35, 1.0, 0.65, 3.0);
-      } else {
-        specImgP = await zoomImage(imgP, 2.5);
-      }
+      if (canvasO) { specImgO = cropCanvas(canvasO, 0, 0.35, 1.0, 0.65, 3.0); }
+      else { specImgO = await zoomImage(imgO, 2.5); }
+      if (canvasP) { specImgP = cropCanvas(canvasP, 0, 0.35, 1.0, 0.65, 3.0); }
+      else { specImgP = await zoomImage(imgP, 2.5); }
 
       setProgress(86, 'Analizando specs en zoom...', 'Comparando valores numericos digito por digito...', '');
 
@@ -694,18 +828,15 @@ async function run() {
   }
 }
 
-// Zoom a base64 image
 async function zoomImage(b64, zoom) {
   return new Promise(function(resolve) {
     var img = new Image();
     img.onload = function() {
       var maxPx = 7800;
-      var w = Math.min(img.width * zoom, maxPx);
-      var h = Math.min(img.height * zoom, maxPx);
+      var w = Math.min(img.width * zoom, maxPx), h = Math.min(img.height * zoom, maxPx);
       var scale = Math.min(w / img.width, h / img.height);
       var cv = document.createElement('canvas');
-      cv.width = Math.floor(img.width * scale);
-      cv.height = Math.floor(img.height * scale);
+      cv.width = Math.floor(img.width * scale); cv.height = Math.floor(img.height * scale);
       var ctx = cv.getContext('2d');
       ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
       ctx.drawImage(img, 0, 0, cv.width, cv.height);
@@ -717,24 +848,17 @@ async function zoomImage(b64, zoom) {
   });
 }
 
-// ── SCREENSHOT HELPER ────────────────────────────────────────
-// Given a canvas and page offsets, crop the page and return thumbnail b64
 function getPageThumb(canvas, pageOffsets, pageNum) {
   if (!canvas || !pageOffsets || !pageOffsets.length) return null;
   var idx = (pageNum || 1) - 1;
   if (idx < 0 || idx >= pageOffsets.length) idx = 0;
-  var off = pageOffsets[idx];
-  if (!off) return null;
+  var off = pageOffsets[idx]; if (!off) return null;
   var cv = document.createElement('canvas');
-  // Thumbnail width max 400px
-  var thumbW = Math.min(canvas.width, 500);
-  var scale = thumbW / canvas.width;
-  cv.width = thumbW;
-  cv.height = Math.floor(off.h * scale);
+  var thumbW = Math.min(canvas.width, 500), scale = thumbW / canvas.width;
+  cv.width = thumbW; cv.height = Math.floor(off.h * scale);
   if (cv.height < 1) return null;
   var ctx2 = cv.getContext('2d');
-  ctx2.fillStyle = '#fff';
-  ctx2.fillRect(0, 0, cv.width, cv.height);
+  ctx2.fillStyle = '#fff'; ctx2.fillRect(0, 0, cv.width, cv.height);
   ctx2.drawImage(canvas, 0, off.y, canvas.width, off.h, 0, 0, cv.width, cv.height);
   return cv.toDataURL('image/jpeg', 0.85);
 }
@@ -760,8 +884,7 @@ function render(r, ctx) {
     +'<div class="kpi kpi-o"><div class="kpi-n">'+(r.ok||0)+'</div><div class="kpi-l">OK</div></div>';
 
   document.getElementById('sum-txt').textContent = r.resumen||'';
-  var rows = document.getElementById('rows');
-  rows.innerHTML = '';
+  var rows = document.getElementById('rows'); rows.innerHTML = '';
 
   if (diffs.length === 0) {
     document.getElementById('tbl').innerHTML = '<div class="empty"><div class="empty-ico">&#x2713;</div><div class="empty-ttl">Arte aprobado</div><div class="empty-sub">No se detectaron diferencias.</div></div>';
@@ -772,23 +895,18 @@ function render(r, ctx) {
       var ll=n==='critico'?'Critico':n==='advertencia'?'Medio':'Menor';
       var idTag=(d.idioma&&d.idioma!=='na')?'<span class="tag-sm" style="background:var(--nvy-bg);color:var(--nvy);border:1px solid var(--nvy-bd)">'+esc(d.idioma)+'</span>':'';
       var impTag=d.impacto?'<span class="tag-sm" style="background:var(--ink04);color:var(--ink50);border:1px solid var(--ink08)">'+esc(d.impacto)+'</span>':'';
-      // Page number badge
-      var pgArt = d.pagina_art, pgPv = d.pagina_pv;
-      var pgTag = '';
-      if (pgArt) pgTag += '<span class="tag-sm" style="background:var(--nvy-bg);color:var(--nvy);border:1px solid var(--nvy-bd)">ART p.' + pgArt + '</span>';
-      if (pgPv) pgTag += '<span class="tag-sm" style="background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-bd)">PV p.' + pgPv + '</span>';
-
-      // Screenshots
-      var thumbO = '', thumbP = '';
+      var pgArt=d.pagina_art, pgPv=d.pagina_pv, pgTag='';
+      if (pgArt) pgTag += '<span class="tag-sm" style="background:var(--nvy-bg);color:var(--nvy);border:1px solid var(--nvy-bd)">ART p.'+pgArt+'</span>';
+      if (pgPv)  pgTag += '<span class="tag-sm" style="background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-bd)">PV p.'+pgPv+'</span>';
+      var thumbO='', thumbP='';
       if (ctx.canvasO && pgArt && ctx.pageOffsetsO && ctx.pageOffsetsO.length) {
         var tO = getPageThumb(ctx.canvasO, ctx.pageOffsetsO, parseInt(pgArt));
-        if (tO) thumbO = '<img src="' + tO + '" style="width:100%;border-radius:4px;margin-top:8px;border:1px solid var(--ink08)" alt="ART p.' + pgArt + '">';
+        if (tO) thumbO = '<img src="'+tO+'" style="width:100%;border-radius:4px;margin-top:8px;border:1px solid var(--ink08)" alt="ART p.'+pgArt+'">';
       }
       if (ctx.canvasP && pgPv && ctx.pageOffsetsP && ctx.pageOffsetsP.length) {
         var tP = getPageThumb(ctx.canvasP, ctx.pageOffsetsP, parseInt(pgPv));
-        if (tP) thumbP = '<img src="' + tP + '" style="width:100%;border-radius:4px;margin-top:8px;border:1px solid var(--ink08)" alt="PV p.' + pgPv + '">';
+        if (tP) thumbP = '<img src="'+tP+'" style="width:100%;border-radius:4px;margin-top:8px;border:1px solid var(--ink08)" alt="PV p.'+pgPv+'">';
       }
-
       var row=document.createElement('div'); row.className='drow';
       row.innerHTML='<div class="drow-hd" onclick="toggleRow(this)">'
         +'<div class="sev '+sc2+'"></div><div class="row-cat">'+esc(d.categoria||'-')+'</div>'
