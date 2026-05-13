@@ -772,6 +772,13 @@ async function run() {
 
     setProgress(82, 'Verificacion de specs...', 'Zoom 3x en panel de especificaciones...', 'Atencion especial en cirílico BG');
     try {
+      // Solo hacer segunda pasada si AMBOS archivos son PDF
+      // Si uno es imagen, el zoom genera falsos positivos por baja resolución
+      var ambosSON_PDF = isPDF(fO) && isPDF(fP);
+      if (!ambosSON_PDF) {
+        console.log('Specs pass omitida: tipos de archivo distintos (PDF vs imagen)');
+        setProgress(95, 'Specs omitidas...', 'Archivos de distinto tipo — zoom no confiable', '');
+      } else {
       var specImgO = canvasO ? cropCanvas(canvasO, 0, 0.35, 1.0, 0.65, 3.0) : await zoomImage(imgO, 2.5);
       var specImgP = canvasP ? cropCanvas(canvasP, 0, 0.35, 1.0, 0.65, 3.0) : await zoomImage(imgP, 2.5);
       setProgress(86, 'Analizando specs en zoom...', 'Comparando valores numericos digito por digito...', '');
@@ -798,6 +805,8 @@ async function run() {
             }
           });
         }
+      }
+      }
       }
     } catch(specErr) { console.log('Specs pass error (non-fatal):', specErr.message); }
 
