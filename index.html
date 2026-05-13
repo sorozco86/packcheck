@@ -377,13 +377,18 @@ var PROMPT_BASE = 'Sos un auditor ULTRA-ESTRICTO de QA de packaging multilenguaj
   + 'Diferencia >= 1 punto = CRITICO\n\n'
   + '=== CRITERIOS ACTIVOS ===\n'
   + '{CRITERIA_LIST}\n\n'
-  + '=== ANTI-ALUCINACION ===\n'
-  + '- NUNCA reportes diferencia de layout/posicion entre ART y PV — son formatos distintos por diseno\n'
-  + '- Solo reporta diferencias de CONTENIDO (texto distinto, valor distinto, elemento ausente)\n'
+  + '=== ANTI-ALUCINACION Y ANTI-LAYOUT ===\n'
+  + 'ERRORES QUE NUNCA DEBES REPORTAR (son diferencias de formato, no de contenido):\n'
+  + '- Posicion o ubicacion de elementos (QR arriba vs abajo, logo izquierda vs derecha)\n'
+  + '- Orientacion de elementos (horizontal vs vertical)\n'
+  + '- Jerarquia visual, tamaño tipografico, peso de fuente\n'
+  + '- Orden de caras o paneles en el desglose\n'
+  + '- Diferencias de diagramacion, maquetado o composicion\n'
+  + '- Tratamiento fotografico (blur, sombras, angulo) salvo diferencia de COLOR >= 1 punto\n'
+  + 'SOLO reporta: texto diferente, valor numerico diferente, elemento completamente ausente.\n\n'
   + '- Para cada diferencia: original= valor LITERAL visto en ART, pv= valor LITERAL visto en PV (o "AUSENTE EN PV")\n'
-  + '- zona_art y zona_pv: coordenadas aproximadas del elemento en la imagen como fraccion 0.0-1.0 {x,y,w,h}\n'
-  + '  Ejemplo: elemento en cuarto inferior derecho = {"x":0.5,"y":0.7,"w":0.5,"h":0.3}\n'
-  + '  Si no podes estimar la zona, usa {"x":0.0,"y":0.0,"w":1.0,"h":1.0}\n'
+  + '- Si no podes leer claramente un valor en alguna de las dos imagenes, no lo reportes\n'
+  + '- Etiquetado bilingue intencional NO es error (ej: "POWER/POTENCIA" es correcto)\n'
   + '- Si no podes leer claramente un valor en alguna de las dos imagenes, no lo reportes\n'
   + '- Etiquetado bilingue intencional NO es error (ej: "POWER/POTENCIA" es correcto)\n\n'
   + '=== SCORING ===\n'
@@ -403,7 +408,6 @@ var PROMPT_BASE = 'Sos un auditor ULTRA-ESTRICTO de QA de packaging multilenguaj
   + '"diferencias":[{"nivel":"critico|advertencia|menor","categoria":"COLOR|IMAGEN|TEXTO|IDIOMA|ESPECIFICACION|CONTENIDO|LAYOUT|LEGAL|QR|NAMING",'
   + '"idioma":"ES|EN|FR|DE|IT|PT|NL|BG|CZ|SK|RO|HU|todos|na","titulo":"titulo corto",'
   + '"pagina_art":"pagina en ART donde aparece (entero) o null","pagina_pv":"pagina en PV donde aparece (entero) o null",'
-  + '"zona_art":{"x":0.0,"y":0.0,"w":1.0,"h":1.0},"zona_pv":{"x":0.0,"y":0.0,"w":1.0,"h":1.0},'
   + '"original":"valor exacto en ART","pv":"valor exacto en PV o AUSENTE EN PV","accion":"correccion exacta","impacto":"tecnico|legal|visual|comercial"}],'
   + '"conclusion":"veredicto y correcciones obligatorias"}';
 
@@ -805,63 +809,55 @@ async function zoomImage(b64, zoom) {
   });
 }
 
-// ── THUMB con crop de zona y marcador rojo ────────────────────
-function getPageThumb(canvas, offsets, pageNum, zona) {
+// ── THUMB con crop automático por categoría ───────────────────
+function getPageThumb(canvas, offsets, pageNum, categoria) {
   if (!canvas || !offsets || !offsets.length) return null;
   var idx = Math.max(0, Math.min((pageNum||1)-1, offsets.length-1));
   var off = offsets[idx]; if (!off) return null;
 
-  // Coordenadas de la zona dentro de la página
-  var z = zona && zona.w < 0.99 ? zona : null;
-  var MAX_THUMB = 500;
+  // Zona de crop según categoría del error
+  // Valores: {x, y, w, h} como fracción de la página (0.0–1.0)
+  var zonas = {
+    'ESPECIFICACION': { x:0.0, y:0.4, w:1.0, h:0.6 }, // tabla specs = mitad inferior
+    'COLOR':          { x:0.0, y:0.0, w:0.6, h:0.55 }, // foto producto = zona central izq
+    'IMAGEN':         { x:0.0, y:0.0, w:0.6, h:0.55 },
+    'TEXTO':          { x:0.0, y:0.0, w:1.0, h:0.5  }, // textos = mitad superior
+    'IDIOMA':         { x:0.0, y:0.3, w:1.0, h:0.7  },
+    'LEGAL':          { x:0.5, y:0.5, w:0.5, h:0.5  }, // legal = esquina inferior der
+    'QR':             { x:0.5, y:0.6, w:0.5, h:0.4  },
+    'CONTENIDO':      { x:0.0, y:0.0, w:1.0, h:0.6  },
+    'NAMING':         { x:0.0, y:0.0, w:0.7, h:0.4  }
+  };
 
-  if (z) {
-    // Crop ajustado: expandir un 15% alrededor para dar contexto
-    var pad = 0.08;
-    var zx = Math.max(0, z.x - pad), zy = Math.max(0, z.y - pad);
-    var zw = Math.min(1, z.w + pad*2), zh = Math.min(1, z.h + pad*2);
-    // Ajustar para no salir de la página
-    if (zx + zw > 1) zw = 1 - zx;
-    if (zy + zh > 1) zh = 1 - zy;
+  var z = zonas[categoria] || { x:0.0, y:0.0, w:1.0, h:1.0 };
+  var fullPage = (z.w >= 0.99 && z.h >= 0.99);
 
-    var srcX = Math.floor(canvas.width * zx);
-    var srcY = Math.floor(off.y + off.h * zy);
-    var srcW = Math.floor(canvas.width * zw);
-    var srcH = Math.floor(off.h * zh);
-    if (srcW < 10 || srcH < 10) return getPageThumb(canvas, offsets, pageNum, null);
+  var srcX = Math.floor(canvas.width * z.x);
+  var srcY = Math.floor(off.y + off.h * z.y);
+  var srcW = Math.floor(canvas.width * z.w);
+  var srcH = Math.floor(off.h * z.h);
+  if (srcW < 10 || srcH < 10) return null;
 
-    var scale = Math.min(MAX_THUMB / srcW, MAX_THUMB / srcH, 1);
-    // Mínimo 200px de ancho para que se lea bien
-    if (srcW * scale < 200) scale = Math.min(200 / srcW, 3);
+  var MAX_THUMB = 480;
+  var scale = Math.min(MAX_THUMB / srcW, MAX_THUMB / srcH);
+  if (!fullPage && srcW * scale < 220) scale = 220 / srcW;
 
-    var cv = document.createElement('canvas');
-    cv.width = Math.floor(srcW * scale);
-    cv.height = Math.floor(srcH * scale);
-    var ctx = cv.getContext('2d');
-    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
-    ctx.drawImage(canvas, srcX, srcY, srcW, srcH, 0, 0, cv.width, cv.height);
+  var cv = document.createElement('canvas');
+  cv.width  = Math.floor(srcW * scale);
+  cv.height = Math.floor(srcH * scale);
+  var ctx = cv.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.drawImage(canvas, srcX, srcY, srcW, srcH, 0, 0, cv.width, cv.height);
 
-    // Marcador rojo: recuadro sobre la zona exacta del error
-    var marX = Math.floor((z.x - zx) / zw * cv.width);
-    var marY = Math.floor((z.y - zy) / zh * cv.height);
-    var marW = Math.floor(z.w / zw * cv.width);
-    var marH = Math.floor(z.h / zh * cv.height);
+  // Borde rojo fino para diferencias no de página completa
+  if (!fullPage) {
     ctx.strokeStyle = '#b5271f';
-    ctx.lineWidth = Math.max(2, Math.floor(cv.width / 80));
-    ctx.strokeRect(marX, marY, marW, marH);
-
-    return cv.toDataURL('image/jpeg', 0.88);
+    ctx.lineWidth = Math.max(2, Math.floor(cv.width / 100));
+    ctx.strokeRect(1, 1, cv.width - 2, cv.height - 2);
   }
 
-  // Sin zona: página completa escalada
-  var thumbW = Math.min(canvas.width, MAX_THUMB), scale2 = thumbW / canvas.width;
-  var cv2 = document.createElement('canvas');
-  cv2.width = thumbW; cv2.height = Math.floor(off.h * scale2);
-  if (cv2.height < 1) return null;
-  var ctx2 = cv2.getContext('2d');
-  ctx2.fillStyle = '#fff'; ctx2.fillRect(0,0,cv2.width,cv2.height);
-  ctx2.drawImage(canvas, 0, off.y, canvas.width, off.h, 0, 0, cv2.width, cv2.height);
-  return cv2.toDataURL('image/jpeg', 0.85);
+  return cv.toDataURL('image/jpeg', 0.88);
 }
 
 // ── RENDER ────────────────────────────────────────────────────
@@ -896,9 +892,9 @@ function render(r) {
       if (pgPv)  pgTag += '<span class="tag-sm" style="background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-bd)">PV p.'+pgPv+'</span>';
       // Thumbs — usan canvasO/canvasP globales
       var thumbO='', thumbP='';
-      var tO = getPageThumb(canvasO, pageOffsetsO, parseInt(pgArt)||1, d.zona_art);
+      var tO = getPageThumb(canvasO, pageOffsetsO, parseInt(pgArt)||1, d.categoria);
       if (tO) thumbO = '<img src="'+tO+'" style="width:100%;border-radius:4px;margin-top:8px;border:1px solid var(--ink08)" alt="ART">';
-      var tP = getPageThumb(canvasP, pageOffsetsP, parseInt(pgPv)||1, d.zona_pv);
+      var tP = getPageThumb(canvasP, pageOffsetsP, parseInt(pgPv)||1, d.categoria);
       if (tP) thumbP = '<img src="'+tP+'" style="width:100%;border-radius:4px;margin-top:8px;border:1px solid var(--ink08)" alt="PV">';
       var row=document.createElement('div'); row.className='drow';
       row.innerHTML='<div class="drow-hd" onclick="toggleRow(this)">'
