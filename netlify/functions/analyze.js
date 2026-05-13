@@ -1,52 +1,65 @@
 const https = require('https');
 
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Max-Age': '86400'
+};
+
 exports.handler = async function(event) {
+
+  // ── Preflight CORS ──────────────────────────────────────────
   if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS'
-      },
-      body: ''
-    };
+    return { statusCode: 204, headers: CORS, body: '' };
   }
 
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return { statusCode: 405, headers: CORS, body: 'Method Not Allowed' };
   }
 
+  // ── API Key ─────────────────────────────────────────────────
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
   if (!ANTHROPIC_API_KEY) {
     return {
       statusCode: 500,
-      headers: { 'Access-Control-Allow-Origin': '*' },
+      headers: { ...CORS, 'Content-Type': 'application/json' },
       body: JSON.stringify({ error: { message: 'ANTHROPIC_API_KEY no configurada.' } })
     };
   }
 
+  // ── Parse body ──────────────────────────────────────────────
   let bodyStr;
   try {
     bodyStr = event.isBase64Encoded
       ? Buffer.from(event.body, 'base64').toString('utf8')
       : event.body;
   } catch(e) {
-    return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: { message: 'Body error: ' + e.message } }) };
+    return {
+      statusCode: 400,
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: { message: 'Body error: ' + e.message } })
+    };
   }
 
   let body;
   try {
     body = JSON.parse(bodyStr);
   } catch(e) {
-    return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: { message: 'JSON invalido' } }) };
+    return {
+      statusCode: 400,
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: { message: 'JSON inválido: ' + e.message } })
+    };
   }
 
   const sizeMB = (Buffer.byteLength(bodyStr, 'utf8') / 1024 / 1024).toFixed(2);
-  console.log('Request size:', sizeMB, 'MB');
+  console.log('Request size:', sizeMB, 'MB | model:', body.model || '?', '| max_tokens:', body.max_tokens || '?');
 
+  // ── Forward a Anthropic ─────────────────────────────────────
   return new Promise((resolve) => {
     const postData = JSON.stringify(body);
+
     const options = {
       hostname: 'api.anthropic.com',
       port: 443,
@@ -71,16 +84,17 @@ exports.handler = async function(event) {
         if (statusCode !== 200) console.log('Error body:', responseData.slice(0, 500));
         resolve({
           statusCode,
-          headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
+          headers: { ...CORS, 'Content-Type': 'application/json' },
           body: responseData
         });
       });
     });
 
     req.on('error', (e) => {
+      console.error('Request error:', e.message);
       resolve({
         statusCode: 500,
-        headers: { 'Access-Control-Allow-Origin': '*' },
+        headers: { ...CORS, 'Content-Type': 'application/json' },
         body: JSON.stringify({ error: { message: 'Proxy error: ' + e.message } })
       });
     });
@@ -89,8 +103,8 @@ exports.handler = async function(event) {
       req.destroy();
       resolve({
         statusCode: 504,
-        headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ error: { message: 'Timeout despues de 14 minutos.' } })
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: { message: 'Timeout después de 14 minutos.' } })
       });
     });
 
