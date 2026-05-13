@@ -74,7 +74,6 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink
 .pill:hover{border-color:var(--ink20);color:var(--ink)}
 .pill.on{background:var(--ink);border-color:var(--ink);color:var(--white)}
 .pill input{display:none}
-/* ── PROMPT EDITOR ── */
 .prompt-panel{background:var(--white);border:var(--rule);border-radius:var(--r8);margin-bottom:22px;box-shadow:var(--sh);overflow:hidden}
 .prompt-hd{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:var(--rule);cursor:pointer;user-select:none}
 .prompt-hd-left{display:flex;align-items:center;gap:10px}
@@ -101,7 +100,6 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink
 .btn-sm-save{background:var(--ink);color:var(--white);border-color:var(--ink)}
 .btn-sm-save:hover{background:var(--ink80);color:var(--white)}
 .prompt-saved{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--grn);display:none}
-/* ── resto igual ── */
 .err{display:none;align-items:flex-start;gap:10px;background:var(--red-bg);border:1px solid var(--red-bd);border-radius:var(--r8);padding:12px 16px;margin-bottom:18px;font-size:12px;color:var(--red);line-height:1.65}
 .err.on{display:flex}
 .btn-go{width:100%;padding:14px 24px;background:var(--ink);color:var(--white);border:none;border-radius:var(--r);font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:32px}
@@ -253,7 +251,6 @@ input[type=file]{display:none}
     </div>
   </div>
 
-  <!-- ── PROMPT EDITOR ── -->
   <div class="step">02b &mdash; Prompt del sistema</div>
   <div class="prompt-panel">
     <div class="prompt-hd" onclick="togglePromptPanel()">
@@ -338,8 +335,10 @@ input[type=file]{display:none}
 
 <script>
 var fO = null, fP = null, b64O = null, b64P = null;
+// ── canvas para thumbs (imágenes y PDFs) ──────────────────────
+var canvasO = null, canvasP = null;
+var pageOffsetsO = [], pageOffsetsP = [];
 
-// ── PROMPT BASE (nuevo — orientado a contenido, no a layout) ──
 var PROMPT_BASE = 'Sos un auditor ULTRA-ESTRICTO de QA de packaging multilenguaje para la empresa ALKON.\n\n'
   + 'IMAGEN 1 = ART (arte original aprobado)\n'
   + 'IMAGEN 2 = PV (version del proveedor — desglose completo de la caja impresa)\n\n'
@@ -415,51 +414,38 @@ var SPECS_PROMPT = 'Sos un auditor experto en packaging. Se te envian dos imagen
   + 'Responde SOLO con JSON sin backticks:\n'
   + '{"diferencias":[{"nivel":"critico","categoria":"ESPECIFICACION","idioma":"BG","titulo":"RPM diferente BG","original":"5300 ob/min","pv":"4700 ob/min","accion":"Corregir a 5300","impacto":"tecnico"}]}';
 
-// ── PROMPT EDITOR STATE ───────────────────────────────────────
-var promptCustomMode = false;
-var promptCustomText = '';
-
+// ── PROMPT EDITOR ─────────────────────────────────────────────
+var promptCustomMode = false, promptCustomText = '';
 function getStoredPrompt() { return localStorage.getItem('pk_custom_prompt') || ''; }
 function getStoredPromptMode() { return localStorage.getItem('pk_prompt_mode') === '1'; }
-
 function togglePromptPanel() {
-  var body = document.getElementById('prompt-body');
-  var chev = document.getElementById('prompt-chev');
+  var body = document.getElementById('prompt-body'), chev = document.getElementById('prompt-chev');
   var isOpen = body.classList.contains('open');
   if (isOpen) { body.classList.remove('open'); chev.style.transform = ''; }
   else { body.classList.add('open'); chev.style.transform = 'rotate(180deg)'; refreshPromptPreview(); }
 }
-
 function toggleCustomPrompt() {
   var tog = document.getElementById('prompt-custom-toggle');
   promptCustomMode = tog.checked;
-  var ta = document.getElementById('prompt-textarea');
-  var btns = document.getElementById('prompt-btns');
-  var badge = document.getElementById('prompt-mode-badge');
-  var meta = document.getElementById('prompt-meta');
+  var ta = document.getElementById('prompt-textarea'), btns = document.getElementById('prompt-btns');
+  var badge = document.getElementById('prompt-mode-badge'), meta = document.getElementById('prompt-meta');
   if (promptCustomMode) {
     ta.readOnly = false;
     ta.value = promptCustomText || buildMainPromptText(getActiveChecks());
-    btns.style.display = 'flex';
-    badge.textContent = 'MODO: PERSONALIZADO';
+    btns.style.display = 'flex'; badge.textContent = 'MODO: PERSONALIZADO';
     meta.textContent = ta.value.length + ' caracteres';
     localStorage.setItem('pk_prompt_mode', '1');
   } else {
-    ta.readOnly = true;
-    btns.style.display = 'none';
+    ta.readOnly = true; btns.style.display = 'none';
     badge.textContent = 'MODO: DINÁMICO';
     meta.textContent = 'Vista previa — generado dinámicamente';
-    refreshPromptPreview();
-    localStorage.setItem('pk_prompt_mode', '0');
+    refreshPromptPreview(); localStorage.setItem('pk_prompt_mode', '0');
   }
 }
-
 function refreshPromptPreview() {
   if (promptCustomMode) return;
-  var ta = document.getElementById('prompt-textarea');
-  ta.value = buildMainPromptText(getActiveChecks());
+  document.getElementById('prompt-textarea').value = buildMainPromptText(getActiveChecks());
 }
-
 function savePrompt() {
   var ta = document.getElementById('prompt-textarea');
   promptCustomText = ta.value;
@@ -469,15 +455,12 @@ function savePrompt() {
   setTimeout(function() { saved.style.display = 'none'; }, 2000);
   document.getElementById('prompt-meta').textContent = promptCustomText.length + ' caracteres · guardado';
 }
-
 function resetPrompt() {
-  promptCustomText = '';
-  localStorage.removeItem('pk_custom_prompt');
+  promptCustomText = ''; localStorage.removeItem('pk_custom_prompt');
   var ta = document.getElementById('prompt-textarea');
   ta.value = buildMainPromptText(getActiveChecks());
   document.getElementById('prompt-meta').textContent = ta.value.length + ' caracteres · restaurado';
 }
-
 function getActiveChecks() {
   return Array.from(document.querySelectorAll('.pill.on input')).map(function(i){return i.value;});
 }
@@ -507,13 +490,9 @@ window.addEventListener('load', function() {
   if (getKey()) document.getElementById('apikey-ok').style.display = 'inline';
   bindDZ('dz-o', 'fi-o', 'o');
   bindDZ('dz-p', 'fi-p', 'p');
-  // Restore prompt mode
   promptCustomMode = getStoredPromptMode();
   promptCustomText = getStoredPrompt();
-  if (promptCustomMode) {
-    document.getElementById('prompt-custom-toggle').checked = true;
-    toggleCustomPrompt();
-  }
+  if (promptCustomMode) { document.getElementById('prompt-custom-toggle').checked = true; toggleCustomPrompt(); }
 });
 
 // ── FILE UTILS ────────────────────────────────────────────────
@@ -527,10 +506,25 @@ function mimeOf(f) {
 function isPDF(f) { return mimeOf(f) === 'application/pdf'; }
 function chkReady() { document.getElementById('btn-go').disabled = !(fO && fP && getKey()); }
 
+// ── Convertir imagen a canvas (para thumbs) ───────────────────
+function imageToCanvas(b64, mime) {
+  return new Promise(function(resolve) {
+    var img = new Image();
+    img.onload = function() {
+      var cv = document.createElement('canvas');
+      cv.width = img.width; cv.height = img.height;
+      var ctx = cv.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.drawImage(img, 0, 0);
+      resolve({ canvas: cv, pageOffsets: [{ y: 0, h: img.height }] });
+    };
+    img.src = 'data:' + mime + ';base64,' + b64;
+  });
+}
+
 // ── DROP ZONES ────────────────────────────────────────────────
 function bindDZ(dzId, fiId, key) {
-  var dz = document.getElementById(dzId);
-  var fi = document.getElementById(fiId);
+  var dz = document.getElementById(dzId), fi = document.getElementById(fiId);
   dz.onclick = function(e) { if (!e.target.classList.contains('fchg')) fi.click(); };
   fi.onchange = function(e) { if (e.target.files && e.target.files[0]) handleFile(e.target.files[0], key); };
   dz.ondragover = function(e) { e.preventDefault(); dz.classList.add('drag'); };
@@ -553,10 +547,8 @@ function handleFile(file, key) {
 }
 
 function updatePreview(file, src, key) {
-  var dz = document.getElementById('dz-' + key);
-  var fiId = 'fi-' + key;
-  dz.style.padding = '0'; dz.style.cursor = 'default';
-  dz.classList.remove('drag');
+  var dz = document.getElementById('dz-' + key), fiId = 'fi-' + key;
+  dz.style.padding = '0'; dz.style.cursor = 'default'; dz.classList.remove('drag');
   if (isPDF(file)) {
     dz.innerHTML = '<div class="prev-pdf">'
       + '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#b5271f" stroke-width="1.3"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'
@@ -579,8 +571,7 @@ async function loadPdfJs() {
   await new Promise(function(res, rej) {
     var s = document.createElement('script');
     s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-    s.onload = res; s.onerror = rej;
-    document.head.appendChild(s);
+    s.onload = res; s.onerror = rej; document.head.appendChild(s);
   });
   window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   await new Promise(function(r) { setTimeout(r, 200); });
@@ -589,13 +580,8 @@ async function loadPdfJs() {
 async function renderPDF(b64, scale, label, pStart, pEnd) {
   var raw = atob(b64), arr = new Uint8Array(raw.length);
   for (var i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
-  var pdf = await window.pdfjsLib.getDocument({
-    data: arr,
-    cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
-    cMapPacked: true
-  }).promise;
-  var numPages = pdf.numPages;
-  var pages = [], totalH = 0, maxW = 0;
+  var pdf = await window.pdfjsLib.getDocument({ data: arr, cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/', cMapPacked: true }).promise;
+  var numPages = pdf.numPages, pages = [], totalH = 0, maxW = 0;
   var pPerPage = pEnd ? (pEnd - pStart - 4) / numPages : 0;
   for (var p = 1; p <= numPages; p++) {
     if (pStart) setProgress(pStart + (p-1)*pPerPage, 'Procesando ' + label + '...', 'Pagina ' + p + ' / ' + numPages + ' — escala ' + scale + 'x', '');
@@ -618,21 +604,13 @@ async function renderPDF(b64, scale, label, pStart, pEnd) {
   var y = 0;
   pages.forEach(function(cv) {
     var dh = Math.floor(cv.height * sd);
-    ctx.drawImage(cv, 0, 0, cv.width, cv.height, 0, y, fw, dh);
-    y += dh;
+    ctx.drawImage(cv, 0, 0, cv.width, cv.height, 0, y, fw, dh); y += dh;
   });
   var MAX_B64 = 4 * 1024 * 1024, q = 0.92;
   var result = st.toDataURL('image/jpeg', q).split(',')[1];
-  while (result.length > MAX_B64 && q > 0.4) {
-    q = Math.round((q - 0.06) * 100) / 100;
-    result = st.toDataURL('image/jpeg', q).split(',')[1];
-  }
+  while (result.length > MAX_B64 && q > 0.4) { q = Math.round((q-0.06)*100)/100; result = st.toDataURL('image/jpeg', q).split(',')[1]; }
   var pageOffsets = [], yOff = 0;
-  pages.forEach(function(cv) {
-    var dh = Math.floor(cv.height * sd);
-    pageOffsets.push({ y: yOff, h: dh });
-    yOff += dh;
-  });
+  pages.forEach(function(cv) { var dh = Math.floor(cv.height * sd); pageOffsets.push({ y: yOff, h: dh }); yOff += dh; });
   if (pEnd) setProgress(pEnd, label + ' listo', (result.length*0.75/1024/1024).toFixed(1) + ' MB, calidad ' + Math.round(q*100) + '%', '');
   return { b64: result, canvas: st, q: q, pageOffsets: pageOffsets, numPages: numPages };
 }
@@ -647,8 +625,7 @@ function cropCanvas(canvas, x, y, w, h, zoom) {
   var ctx = cv.getContext('2d');
   ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
   ctx.drawImage(canvas, sx, sy, sw, sh, 0, 0, cv.width, cv.height);
-  var result = cv.toDataURL('image/jpeg', 0.95).split(',')[1];
-  var q = 0.95;
+  var result = cv.toDataURL('image/jpeg', 0.95).split(',')[1], q = 0.95;
   while (result.length > 4*1024*1024 && q > 0.4) { q -= 0.05; result = cv.toDataURL('image/jpeg', q).split(',')[1]; }
   return result;
 }
@@ -657,23 +634,11 @@ function cropCanvas(canvas, x, y, w, h, zoom) {
 async function callProxy(content, maxTokens) {
   var resp = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': getKey(),
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-5',
-      max_tokens: maxTokens || 8000,
-      messages: [{ role: 'user', content: content }]
-    })
+    headers: { 'Content-Type': 'application/json', 'x-api-key': getKey(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: maxTokens || 8000, messages: [{ role: 'user', content: content }] })
   });
   var txt = await resp.text();
-  if (!resp.ok) {
-    var msg = txt; try { msg = JSON.parse(txt).error.message || txt; } catch(e) {}
-    throw new Error('API ' + resp.status + ': ' + msg.slice(0, 300));
-  }
+  if (!resp.ok) { var msg = txt; try { msg = JSON.parse(txt).error.message || txt; } catch(e) {} throw new Error('API ' + resp.status + ': ' + msg.slice(0, 300)); }
   var data = JSON.parse(txt);
   if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
   return (data.content || []).map(function(b) { return b.text || ''; }).join('');
@@ -705,7 +670,6 @@ function buildMainPromptText(checks) {
   var lista = checks.map(function(id) { return '  - ' + (labels[id]||id); }).join('\n');
   return PROMPT_BASE.replace('{CRITERIA_LIST}', lista);
 }
-
 function buildMainPrompt(checks) {
   if (promptCustomMode && promptCustomText.trim()) return promptCustomText;
   return buildMainPromptText(checks);
@@ -721,33 +685,37 @@ async function run() {
   document.getElementById('loading').classList.add('on');
   document.getElementById('results').classList.remove('on');
   setProgress(0, 'Iniciando...', '', '');
+  canvasO = null; canvasP = null; pageOffsetsO = []; pageOffsetsP = [];
 
   try {
     setProgress(2, 'Preparando...', 'Cargando motor de renderizado...', '');
     if (isPDF(fO) || isPDF(fP)) await loadPdfJs();
 
-    var canvasO = null, imgO, pageOffsetsO = [], numPagesO = 1;
+    var imgO;
     if (isPDF(fO)) {
       var resO = await renderPDF(b64O, 1.8, 'ART', 3, 28);
-      imgO = resO.b64; canvasO = resO.canvas;
-      pageOffsetsO = resO.pageOffsets || []; numPagesO = resO.numPages || 1;
+      imgO = resO.b64; canvasO = resO.canvas; pageOffsetsO = resO.pageOffsets || [];
     } else {
       imgO = b64O;
       setProgress(28, 'ART cargado', (fO.size/1024/1024).toFixed(1)+' MB', '');
+      // Convertir imagen a canvas para thumbs
+      var resImgO = await imageToCanvas(b64O, mimeOf(fO));
+      canvasO = resImgO.canvas; pageOffsetsO = resImgO.pageOffsets;
     }
 
-    var canvasP = null, imgP, pageOffsetsP = [], numPagesP = 1;
+    var imgP;
     if (isPDF(fP)) {
       var resP = await renderPDF(b64P, 1.8, 'PV', 30, 55);
-      imgP = resP.b64; canvasP = resP.canvas;
-      pageOffsetsP = resP.pageOffsets || []; numPagesP = resP.numPages || 1;
+      imgP = resP.b64; canvasP = resP.canvas; pageOffsetsP = resP.pageOffsets || [];
     } else {
       imgP = b64P;
       setProgress(55, 'PV cargado', (fP.size/1024/1024).toFixed(1)+' MB', '');
+      // Convertir imagen a canvas para thumbs
+      var resImgP = await imageToCanvas(b64P, mimeOf(fP));
+      canvasP = resImgP.canvas; pageOffsetsP = resImgP.pageOffsets;
     }
 
     setProgress(57, 'Analisis completo...', 'Enviando vistas completas a Claude Vision...', ((imgO.length+imgP.length)*0.75/1024/1024).toFixed(1)+' MB total');
-
     var progTimer = setInterval(function() {
       var cur = parseFloat(document.getElementById('prog-pct').textContent);
       if (cur < 78) setProgress(cur + 0.4, undefined, undefined, undefined);
@@ -766,60 +734,40 @@ async function run() {
     var result = JSON.parse(raw1.slice(si, ei+1));
 
     setProgress(82, 'Verificacion de specs...', 'Zoom 3x en panel de especificaciones...', 'Atencion especial en cirílico BG');
-
     try {
-      var specImgO, specImgP;
-      if (canvasO) { specImgO = cropCanvas(canvasO, 0, 0.35, 1.0, 0.65, 3.0); }
-      else { specImgO = await zoomImage(imgO, 2.5); }
-      if (canvasP) { specImgP = cropCanvas(canvasP, 0, 0.35, 1.0, 0.65, 3.0); }
-      else { specImgP = await zoomImage(imgP, 2.5); }
-
+      var specImgO = canvasO ? cropCanvas(canvasO, 0, 0.35, 1.0, 0.65, 3.0) : await zoomImage(imgO, 2.5);
+      var specImgP = canvasP ? cropCanvas(canvasP, 0, 0.35, 1.0, 0.65, 3.0) : await zoomImage(imgP, 2.5);
       setProgress(86, 'Analizando specs en zoom...', 'Comparando valores numericos digito por digito...', '');
-
       var progTimer2 = setInterval(function() {
         var cur2 = parseFloat(document.getElementById('prog-pct').textContent);
         if (cur2 < 95) setProgress(cur2 + 0.5, undefined, undefined, undefined);
       }, 800);
-
       var raw2 = await callProxy([
         { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: specImgO } },
         { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: specImgP } },
         { type: 'text', text: SPECS_PROMPT }
       ], 3000);
       clearInterval(progTimer2);
-
       var si2 = raw2.indexOf('{'), ei2 = raw2.lastIndexOf('}');
       if (si2 !== -1 && ei2 > si2) {
         var specs = JSON.parse(raw2.slice(si2, ei2+1));
         if (specs.diferencias && specs.diferencias.length > 0) {
           specs.diferencias.forEach(function(d) {
-            var dup = (result.diferencias||[]).some(function(x) {
-              return x.original === d.original && x.pv === d.pv;
-            });
+            var dup = (result.diferencias||[]).some(function(x) { return x.original === d.original && x.pv === d.pv; });
             if (!dup) {
               result.diferencias = result.diferencias || [];
               result.diferencias.push(d);
-              if (d.nivel === 'critico') {
-                result.criticos = (result.criticos||0) + 1;
-                result.score = Math.max(0, (result.score||100) - 25);
-                result.clasificacion = 'RECHAZADO CRITICO';
-              }
+              if (d.nivel === 'critico') { result.criticos = (result.criticos||0)+1; result.score = Math.max(0,(result.score||100)-25); result.clasificacion = 'RECHAZADO CRITICO'; }
             }
           });
         }
       }
-    } catch(specErr) {
-      console.log('Specs pass error (non-fatal):', specErr.message);
-    }
+    } catch(specErr) { console.log('Specs pass error (non-fatal):', specErr.message); }
 
     setProgress(100, 'Analisis completado', '', '');
     await new Promise(function(r){setTimeout(r,400);});
     document.getElementById('loading').classList.remove('on');
-    render(result, {
-      canvasO: canvasO, canvasP: canvasP,
-      pageOffsetsO: pageOffsetsO, pageOffsetsP: pageOffsetsP,
-      isPdfO: isPDF(fO), isPdfP: isPDF(fP)
-    });
+    render(result);
 
   } catch(err) {
     document.getElementById('loading').classList.remove('on');
@@ -832,60 +780,54 @@ async function zoomImage(b64, zoom) {
   return new Promise(function(resolve) {
     var img = new Image();
     img.onload = function() {
-      var maxPx = 7800;
-      var w = Math.min(img.width * zoom, maxPx), h = Math.min(img.height * zoom, maxPx);
-      var scale = Math.min(w / img.width, h / img.height);
+      var maxPx = 7800, w = Math.min(img.width*zoom,maxPx), h = Math.min(img.height*zoom,maxPx);
+      var scale = Math.min(w/img.width, h/img.height);
       var cv = document.createElement('canvas');
-      cv.width = Math.floor(img.width * scale); cv.height = Math.floor(img.height * scale);
+      cv.width = Math.floor(img.width*scale); cv.height = Math.floor(img.height*scale);
       var ctx = cv.getContext('2d');
-      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.fillStyle = '#fff'; ctx.fillRect(0,0,cv.width,cv.height);
       ctx.drawImage(img, 0, 0, cv.width, cv.height);
-      var q = 0.92, result = cv.toDataURL('image/jpeg', q).split(',')[1];
-      while (result.length > 4*1024*1024 && q > 0.4) { q -= 0.05; result = cv.toDataURL('image/jpeg', q).split(',')[1]; }
+      var q = 0.92, result = cv.toDataURL('image/jpeg',q).split(',')[1];
+      while (result.length > 4*1024*1024 && q > 0.4) { q -= 0.05; result = cv.toDataURL('image/jpeg',q).split(',')[1]; }
       resolve(result);
     };
     img.src = 'data:image/jpeg;base64,' + b64;
   });
 }
 
-function getPageThumb(canvas, pageOffsets, pageNum) {
-  if (!canvas || !pageOffsets || !pageOffsets.length) return null;
-  var idx = (pageNum || 1) - 1;
-  if (idx < 0 || idx >= pageOffsets.length) idx = 0;
-  var off = pageOffsets[idx]; if (!off) return null;
-  var cv = document.createElement('canvas');
+// ── THUMB desde canvas global ─────────────────────────────────
+function getPageThumb(canvas, offsets, pageNum) {
+  if (!canvas || !offsets || !offsets.length) return null;
+  var idx = Math.max(0, Math.min((pageNum||1)-1, offsets.length-1));
+  var off = offsets[idx]; if (!off) return null;
   var thumbW = Math.min(canvas.width, 500), scale = thumbW / canvas.width;
+  var cv = document.createElement('canvas');
   cv.width = thumbW; cv.height = Math.floor(off.h * scale);
   if (cv.height < 1) return null;
-  var ctx2 = cv.getContext('2d');
-  ctx2.fillStyle = '#fff'; ctx2.fillRect(0, 0, cv.width, cv.height);
-  ctx2.drawImage(canvas, 0, off.y, canvas.width, off.h, 0, 0, cv.width, cv.height);
+  var ctx = cv.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.drawImage(canvas, 0, off.y, canvas.width, off.h, 0, 0, cv.width, cv.height);
   return cv.toDataURL('image/jpeg', 0.85);
 }
 
 // ── RENDER ────────────────────────────────────────────────────
-function render(r, ctx) {
-  ctx = ctx || {};
+function render(r) {
   document.getElementById('results').classList.add('on');
   var diffs = r.diferencias||[], score = typeof r.score==='number'?Math.max(0,r.score):0, clas = r.clasificacion||'';
   var sc = score>=90?'var(--grn)':score>=70?'var(--amb)':'var(--red)';
   var sb = score>=90?'var(--grn-bg)':score>=70?'var(--amb-bg)':'var(--red-bg)';
   var sd2 = score>=90?'var(--grn-bd)':score>=70?'var(--amb-bd)':'var(--red-bd)';
   var ic = score>=90?'&#x2705;':score>=70?'&#x26A0;&#xFE0F;':'&#x274C;';
-
   document.getElementById('res-ttl').innerHTML =
     '<span style="font-family:monospace;font-size:14px;font-weight:600;padding:5px 14px;border-radius:4px;background:'+sb+';border:1px solid '+sd2+';color:'+sc+'">'+score+'/100</span>'
     +'&nbsp;&nbsp;'+ic+'&nbsp;<span style="font-size:17px;font-weight:600">'+esc(clas)+'</span>';
-
   document.getElementById('kpis').innerHTML =
     '<div class="kpi kpi-c"><div class="kpi-n">'+(r.criticos||0)+'</div><div class="kpi-l">Criticos</div></div>'
     +'<div class="kpi kpi-w"><div class="kpi-n">'+(r.advertencias||0)+'</div><div class="kpi-l">Medios</div></div>'
     +'<div class="kpi kpi-m"><div class="kpi-n">'+(r.menores||0)+'</div><div class="kpi-l">Menores</div></div>'
     +'<div class="kpi kpi-o"><div class="kpi-n">'+(r.ok||0)+'</div><div class="kpi-l">OK</div></div>';
-
   document.getElementById('sum-txt').textContent = r.resumen||'';
   var rows = document.getElementById('rows'); rows.innerHTML = '';
-
   if (diffs.length === 0) {
     document.getElementById('tbl').innerHTML = '<div class="empty"><div class="empty-ico">&#x2713;</div><div class="empty-ttl">Arte aprobado</div><div class="empty-sub">No se detectaron diferencias.</div></div>';
   } else {
@@ -898,15 +840,12 @@ function render(r, ctx) {
       var pgArt=d.pagina_art, pgPv=d.pagina_pv, pgTag='';
       if (pgArt) pgTag += '<span class="tag-sm" style="background:var(--nvy-bg);color:var(--nvy);border:1px solid var(--nvy-bd)">ART p.'+pgArt+'</span>';
       if (pgPv)  pgTag += '<span class="tag-sm" style="background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-bd)">PV p.'+pgPv+'</span>';
+      // Thumbs — usan canvasO/canvasP globales
       var thumbO='', thumbP='';
-      if (ctx.canvasO && pgArt && ctx.pageOffsetsO && ctx.pageOffsetsO.length) {
-        var tO = getPageThumb(ctx.canvasO, ctx.pageOffsetsO, parseInt(pgArt));
-        if (tO) thumbO = '<img src="'+tO+'" style="width:100%;border-radius:4px;margin-top:8px;border:1px solid var(--ink08)" alt="ART p.'+pgArt+'">';
-      }
-      if (ctx.canvasP && pgPv && ctx.pageOffsetsP && ctx.pageOffsetsP.length) {
-        var tP = getPageThumb(ctx.canvasP, ctx.pageOffsetsP, parseInt(pgPv));
-        if (tP) thumbP = '<img src="'+tP+'" style="width:100%;border-radius:4px;margin-top:8px;border:1px solid var(--ink08)" alt="PV p.'+pgPv+'">';
-      }
+      var tO = getPageThumb(canvasO, pageOffsetsO, parseInt(pgArt)||1);
+      if (tO) thumbO = '<img src="'+tO+'" style="width:100%;border-radius:4px;margin-top:8px;border:1px solid var(--ink08)" alt="ART">';
+      var tP = getPageThumb(canvasP, pageOffsetsP, parseInt(pgPv)||1);
+      if (tP) thumbP = '<img src="'+tP+'" style="width:100%;border-radius:4px;margin-top:8px;border:1px solid var(--ink08)" alt="PV">';
       var row=document.createElement('div'); row.className='drow';
       row.innerHTML='<div class="drow-hd" onclick="toggleRow(this)">'
         +'<div class="sev '+sc2+'"></div><div class="row-cat">'+esc(d.categoria||'-')+'</div>'
@@ -920,7 +859,6 @@ function render(r, ctx) {
       rows.appendChild(row);
     });
   }
-
   var cb=document.getElementById('conc-box'); cb.innerHTML='';
   if (r.conclusion) {
     cb.className='conc-box';
@@ -934,13 +872,12 @@ function toggleRow(hd) {
   if (bd.style.display==='block'){bd.style.display='none';ch.style.transform='';}
   else{bd.style.display='block';ch.style.transform='rotate(180deg)';}
 }
-
 function showErr(m){document.getElementById('err-txt').textContent=m;document.getElementById('err').classList.add('on');}
 function hideErr(){document.getElementById('err').classList.remove('on');}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 function resetAll() {
-  fO=null;fP=null;b64O=null;b64P=null;
+  fO=null;fP=null;b64O=null;b64P=null;canvasO=null;canvasP=null;pageOffsetsO=[];pageOffsetsP=[];
   ['o','p'].forEach(function(key) {
     var dz=document.getElementById('dz-'+key);
     dz.innerHTML='<div class="dz-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>'
