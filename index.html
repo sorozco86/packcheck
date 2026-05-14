@@ -41,6 +41,18 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink
 .apikey-ok{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--grn);display:none}
 .apikey-note{font-size:11px;color:var(--ink50);font-weight:300;margin-top:8px}
 .apikey-note a{color:var(--nvy)}
+/* ── MATERIAL SELECTOR ── */
+.material-panel{background:var(--white);border:var(--rule);border-radius:var(--r8);padding:16px 20px;margin-bottom:28px;box-shadow:var(--sh)}
+.material-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--ink50);margin-bottom:12px}
+.material-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px}
+.mat-btn{display:flex;flex-direction:column;align-items:flex-start;padding:12px 14px;border:var(--rule);border-radius:var(--r8);cursor:pointer;background:var(--white);transition:all .15s;text-align:left}
+.mat-btn:hover{border-color:var(--ink20);background:var(--ink04)}
+.mat-btn.active{border-color:var(--ink);background:var(--ink);color:var(--white)}
+.mat-ico{font-size:20px;margin-bottom:6px}
+.mat-name{font-size:12px;font-weight:600;margin-bottom:2px}
+.mat-desc{font-size:10px;opacity:.6;font-weight:300;line-height:1.4}
+.mat-btn.active .mat-desc{opacity:.7}
+/* ── upload ── */
 .upload-grid{display:grid;grid-template-columns:1fr 32px 1fr;margin-bottom:14px;align-items:start}
 .panel{background:var(--white);border:var(--rule);border-radius:var(--r8);overflow:hidden;box-shadow:var(--sh)}
 .panel-hd{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:var(--rule)}
@@ -88,8 +100,8 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink
 .toggle-switch input{opacity:0;width:0;height:0}
 .toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--ink08);border-radius:20px;transition:.2s}
 .toggle-slider:before{position:absolute;content:"";height:14px;width:14px;left:3px;bottom:3px;background:var(--white);border-radius:50%;transition:.2s}
-.toggle-switch input:checked + .toggle-slider{background:var(--ink)}
-.toggle-switch input:checked + .toggle-slider:before{transform:translateX(16px)}
+.toggle-switch input:checked+.toggle-slider{background:var(--ink)}
+.toggle-switch input:checked+.toggle-slider:before{transform:translateX(16px)}
 .prompt-textarea{width:100%;height:420px;background:var(--ink04);border:var(--rule);border-radius:var(--r);color:var(--ink);padding:14px;font-family:'IBM Plex Mono',monospace;font-size:11px;resize:vertical;box-sizing:border-box;line-height:1.6;outline:none}
 .prompt-textarea:focus{border-color:var(--ink20)}
 .prompt-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;flex-wrap:wrap;gap:8px}
@@ -114,8 +126,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink
 .prog-bar{height:100%;width:0%;background:var(--ink);border-radius:4px;transition:width 0.5s ease}
 .prog-step{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink50);margin-bottom:6px;min-height:16px}
 .prog-detail{font-size:11px;color:var(--ink20);min-height:16px}
-.results{display:none}
-.results.on{display:block}
+.results{display:none}.results.on{display:block}
 .res-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:14px}
 .res-ttl{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .kpis{display:flex;gap:8px}
@@ -134,9 +145,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink
 .tbl{background:var(--white);border:var(--rule);border-radius:var(--r8);overflow:hidden;box-shadow:var(--sh);margin-bottom:16px}
 .tbl-head{display:grid;grid-template-columns:4px 105px 1fr 120px;padding:9px 18px;border-bottom:var(--rule);background:var(--ink04)}
 .th{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink50);font-weight:500}
-.drow{border-bottom:var(--rule)}
-.drow:last-child{border-bottom:none}
-.drow:hover{background:var(--ink04)}
+.drow{border-bottom:var(--rule)}.drow:last-child{border-bottom:none}.drow:hover{background:var(--ink04)}
 .drow-hd{display:grid;grid-template-columns:4px 105px 1fr 120px;align-items:center;padding:13px 18px;cursor:pointer}
 .sev{width:3px;height:26px;border-radius:2px}
 .sc{background:var(--red)}.sw{background:var(--amb)}.si{background:var(--ink20)}
@@ -182,7 +191,7 @@ input[type=file]{display:none}
 <div class="page">
   <div class="hero">
     <h1 class="hero-h">Validaci&oacute;n de<br><em>Artes de Packaging</em></h1>
-    <p class="hero-p">Auditor&iacute;a exhaustiva ART vs PV. An&aacute;lisis en dos pasadas: vista completa + zoom en specs.</p>
+    <p class="hero-p">Auditor&iacute;a exhaustiva ART vs PV. Seleccion&aacute; el tipo de material para un an&aacute;lisis preciso.</p>
   </div>
 
   <div class="step">00 &mdash; Configuraci&oacute;n</div>
@@ -196,14 +205,41 @@ input[type=file]{display:none}
     <div class="apikey-note">Obten&eacute;la en <a href="https://console.anthropic.com/api-keys" target="_blank">console.anthropic.com</a> &rarr; API Keys.</div>
   </div>
 
-  <div class="step">01 &mdash; Cargar archivos</div>
+  <div class="step">01 &mdash; Tipo de material</div>
+  <div class="material-panel">
+    <div class="material-lbl">Seleccion&aacute; qu&eacute; est&aacute;s validando</div>
+    <div class="material-grid">
+      <button class="mat-btn active" data-type="packaging" onclick="setMaterial(this)">
+        <span class="mat-ico">📦</span>
+        <span class="mat-name">Packaging / Caja</span>
+        <span class="mat-desc">Arte de caja, blister, bolsa. Compara contenido, specs, textos e im&aacute;genes d&iacute;gito a d&iacute;gito.</span>
+      </button>
+      <button class="mat-btn" data-type="manual" onclick="setMaterial(this)">
+        <span class="mat-ico">📖</span>
+        <span class="mat-name">Manual / Instructivo</span>
+        <span class="mat-desc">Manual de usuario, gu&iacute;a r&aacute;pida. Verifica que todo el contenido textual y gr&aacute;fico est&eacute; presente.</span>
+      </button>
+      <button class="mat-btn" data-type="etiqueta" onclick="setMaterial(this)">
+        <span class="mat-ico">🏷️</span>
+        <span class="mat-name">Etiqueta / Label</span>
+        <span class="mat-desc">Etiqueta adhesiva, hangtag. Foco en textos legales, c&oacute;digos, especificaciones y colores.</span>
+      </button>
+      <button class="mat-btn" data-type="inserto" onclick="setMaterial(this)">
+        <span class="mat-ico">📄</span>
+        <span class="mat-name">Inserto / Flyer</span>
+        <span class="mat-desc">Inserto de caja, folleto, certificado de garant&iacute;a. Verifica textos, im&aacute;genes y datos legales.</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="step">02 &mdash; Cargar archivos</div>
   <div class="upload-grid">
     <div class="panel">
       <div class="panel-hd"><span class="panel-lbl">Arte Original</span><span class="badge b-master">ART</span></div>
       <div id="dz-o" class="dz">
         <div class="dz-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
         <div class="dz-p1">Arrastr&aacute; o <span class="dz-lnk">seleccion&aacute;</span></div>
-        <div class="dz-p2">JPG &middot; PNG &middot; PDF &mdash; sin l&iacute;mite de peso</div>
+        <div class="dz-p2">JPG &middot; PNG &middot; PDF</div>
       </div>
       <input type="file" id="fi-o" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf">
     </div>
@@ -213,7 +249,7 @@ input[type=file]{display:none}
       <div id="dz-p" class="dz">
         <div class="dz-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
         <div class="dz-p1">Arrastr&aacute; o <span class="dz-lnk">seleccion&aacute;</span></div>
-        <div class="dz-p2">JPG &middot; PNG &middot; PDF &mdash; sin l&iacute;mite de peso</div>
+        <div class="dz-p2">JPG &middot; PNG &middot; PDF</div>
       </div>
       <input type="file" id="fi-p" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf">
     </div>
@@ -221,10 +257,10 @@ input[type=file]{display:none}
 
   <div class="info-note">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    JPG &middot; PNG &middot; PDF. An&aacute;lisis en 2 pasadas cuando ambos archivos son PDF: vista completa + zoom en specs.
+    <span id="info-note-txt">Packaging: an&aacute;lisis estricto con 2 pasadas cuando ambos son PDF.</span>
   </div>
 
-  <div class="step">02 &mdash; Criterios de revisi&oacute;n</div>
+  <div class="step">03 &mdash; Criterios de revisi&oacute;n</div>
   <div class="checks">
     <span class="ck-lbl">Revisar</span>
     <div class="ck-sep"></div>
@@ -251,7 +287,7 @@ input[type=file]{display:none}
     </div>
   </div>
 
-  <div class="step">02b &mdash; Prompt del sistema</div>
+  <div class="step">03b &mdash; Prompt del sistema</div>
   <div class="prompt-panel">
     <div class="prompt-hd" onclick="togglePromptPanel()">
       <div class="prompt-hd-left">
@@ -266,9 +302,9 @@ input[type=file]{display:none}
           <input type="checkbox" id="prompt-custom-toggle" onchange="toggleCustomPrompt()">
           <span class="toggle-slider"></span>
         </label>
-        <span class="prompt-toggle-lbl">Usar prompt personalizado (sobreescribe el din&aacute;mico basado en criterios)</span>
+        <span class="prompt-toggle-lbl">Usar prompt personalizado (sobreescribe el din&aacute;mico)</span>
       </div>
-      <textarea class="prompt-textarea" id="prompt-textarea" placeholder="El prompt se genera automáticamente según los criterios activos. Activá el toggle para editarlo manualmente." readonly></textarea>
+      <textarea class="prompt-textarea" id="prompt-textarea" readonly></textarea>
       <div class="prompt-footer">
         <span class="prompt-meta" id="prompt-meta">Vista previa — generado din&aacute;micamente</span>
         <div style="display:flex;align-items:center;gap:10px">
@@ -287,7 +323,7 @@ input[type=file]{display:none}
     <span id="err-txt"></span>
   </div>
 
-  <div class="step">03 &mdash; Ejecutar an&aacute;lisis</div>
+  <div class="step">04 &mdash; Ejecutar an&aacute;lisis</div>
   <button class="btn-go" id="btn-go" disabled onclick="run()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     Analizar diferencias
@@ -336,121 +372,193 @@ input[type=file]{display:none}
 <script>
 var fO=null,fP=null,b64O=null,b64P=null;
 var canvasO=null,canvasP=null,pageOffsetsO=[],pageOffsetsP=[];
+var materialType='packaging';
 
-// ── PROMPTS ───────────────────────────────────────────────────
-var PROMPT_BASE = 'Sos un auditor ULTRA-ESTRICTO de QA de packaging multilenguaje para la empresa ALKON.\n\n'
-  +'IMAGEN 1 = ART (arte original aprobado)\n'
-  +'IMAGEN 2 = PV (version del proveedor)\n\n'
-  +'=== DETECCION DE TIPO DE ARCHIVO ===\n'
-  +'Antes de analizar, determina el tipo de cada archivo:\n'
-  +'- PDF vectorial: bordes nítidos, texto perfectamente legible, colores uniformes\n'
-  +'- Imagen/foto: puede tener ruido, compresión JPEG, variaciones de iluminación\n\n'
-  +'Si ART y PV son de TIPOS DISTINTOS (ej: PDF vs imagen, PDF vs foto de impresión):\n'
-  +'- IGNORAR completamente diferencias de color, saturación, brillo, contraste, resolución\n'
-  +'- IGNORAR diferencias tipográficas menores (kerning, rendering de fuentes)\n'
-  +'- IGNORAR diferencias de nitidez o calidad visual\n'
-  +'- Solo reportar COLOR si la diferencia es GROSERA Y OBVIA: naranja vs rojo oscuro, azul vs verde\n'
-  +'- En caso de duda sobre si una diferencia de color es del formato o real: NO reportar\n\n'
-  +'Si ART y PV son del MISMO TIPO (PDF vs PDF, imagen vs imagen):\n'
-  +'- Aplicar criterio normal de color: diferencia >= 1 punto en sat/brillo = CRITICO\n\n'
-  +'=== REGLA FUNDAMENTAL ===\n'
-  +'ART y PV son representaciones del MISMO documento o packaging pero en FORMATOS DISTINTOS:\n'
-  +'- ART puede ser un PDF multipágina, un manual, un arte de caja desplegado, o vistas individuales\n'
-  +'- PV puede ser una imagen panorámica, un desglose plano, una foto de impresión, o un PDF diferente\n'
-  +'NUNCA compares página por página ni por orden de páginas.\n'
-  +'NUNCA reportes diferencias de formato, diagramación, orden de secciones o posición de elementos.\n'
-  +'SOLO compara CONTENIDO GLOBAL: todo texto, valor, imagen, idioma y especificación que existe\n'
-  +'en el ART debe existir en ALGUNA PARTE del PV con el mismo contenido exacto.\n\n'
-  +'=== METODOLOGIA OBLIGATORIA ===\n'
-  +'PASO 1 — INVENTARIO COMPLETO DEL ART:\n'
-  +'  Recorre TODAS las páginas/secciones del ART y lista TODO el contenido:\n'
-  +'  - Todos los textos en todos los idiomas presentes\n'
-  +'  - Todas las especificaciones técnicas con sus valores exactos\n'
-  +'  - Logos, símbolos, certificaciones, íconos\n'
-  +'  - Códigos QR, EAN, barcodes\n'
-  +'  - Información legal, garantía, país de origen, contacto\n'
-  +'  - Imágenes del producto y accesorios\n\n'
-  +'PASO 2 — BUSQUEDA EN PV (recorre TODO el PV para cada elemento):\n'
-  +'  - Encontrado con mismo valor → OK (no reportar)\n'
-  +'  - Encontrado con valor DIFERENTE → reportar diferencia con valores literales\n'
-  +'  - NO encontrado en ninguna parte del PV → reportar con pv="AUSENTE EN PV"\n\n'
-  +'PASO 3 — VERIFICACION INVERSA:\n'
-  +'  Busca en PV contenido que no existe en ART (agregados no aprobados).\n\n'
-  +'IMPORTANTE: Si el ART tiene más páginas que el PV o viceversa, eso NO es un error.\n'
-  +'Lo que importa es que el CONTENIDO coincida, no la cantidad ni el orden de páginas.\n\n'
-  +'=== ESPECIFICACIONES TECNICAS (CRITICO) ===\n'
-  +'Transcribir y comparar DIGITO POR DIGITO en TODOS los idiomas:\n'
-  +'- EN: No load speed | DE: Leerlaufdrehzahl | ES: Velocidad en vacio / Presion / Flujo / Potencia\n'
-  +'- FR: Vitesse a vide | IT: Velocita a vuoto | PT: Velocidade em vazio\n'
-  +'- NL: Onbelast toerental | HU: Uresjárati fordulatszam\n'
+// ── REGLA DE COLOR (compartida por todos los tipos) ───────────
+var COLOR_RULE = 'REGLA DE COLOR (aplica siempre, sin excepcion):\n'
+  +'- NUNCA reportes diferencias de saturacion, brillo, contraste, nitidez o resolucion\n'
+  +'- SOLO reporta color si la diferencia es GROSERA Y OBVIA a simple vista:\n'
+  +'  ejemplo valido: producto NARANJA en ART vs producto ROJO OSCURO en PV\n'
+  +'  ejemplo valido: fondo AZUL en ART vs fondo VERDE en PV\n'
+  +'  ejemplo INVALIDO: naranja ligeramente mas saturado\n'
+  +'  ejemplo INVALIDO: diferencia de 1-2 puntos en sat/brillo\n'
+  +'- En caso de duda: NO reportar diferencia de color\n\n';
+
+// ── PROMPTS POR TIPO DE MATERIAL ──────────────────────────────
+var PROMPTS = {
+
+packaging:
+  'Sos un auditor ULTRA-ESTRICTO de QA de packaging para la empresa ALKON.\n\n'
+  +'IMAGEN 1 = ART (arte original aprobado) | IMAGEN 2 = PV (version del proveedor)\n\n'
+  +'=== CONTEXTO ===\n'
+  +'Estas validando PACKAGING (caja, blister, bolsa, tubo).\n'
+  +'ART y PV representan el MISMO packaging — pueden tener formatos distintos\n'
+  +'(PDF desplegado, imagen renderizada, foto de impresion) pero el CONTENIDO debe ser identico.\n\n'
+  +'=== METODOLOGIA ESTRICTA ===\n'
+  +'PASO 1 — Inventario completo del ART:\n'
+  +'  Lista TODOS los elementos: textos en cada idioma, especificaciones tecnicas\n'
+  +'  (digito a digito), logos, simbolos, QR, EAN, informacion legal, imagenes del producto.\n\n'
+  +'PASO 2 — Verificacion en PV:\n'
+  +'  Para cada elemento del ART, buscalo en CUALQUIER PARTE del PV.\n'
+  +'  - Mismo valor exacto → OK\n'
+  +'  - Valor diferente → CRITICO (reportar con valores literales de ambos)\n'
+  +'  - No encontrado en ningun lugar del PV → reportar con pv="AUSENTE EN PV"\n\n'
+  +'PASO 3 — Verificacion inversa:\n'
+  +'  Detecta contenido en PV que NO existe en ART (agregados no aprobados).\n\n'
+  +'=== ESPECIFICACIONES TECNICAS ===\n'
+  +'Comparar DIGITO POR DIGITO en TODOS los idiomas:\n'
+  +'- EN/DE/ES/FR/IT/PT/NL/HU/CZ/SK/RO: potencia W, RPM, velocidad, presion, flujo, capacidad\n'
   +'- BG: Обороти на празен ход (CIRÍLICO — MAXIMA ATENCION)\n'
-  +'- CZ: Otacky naprazdno | SK: Otacky naprazdno | RO: Turatie in gol\n'
-  +'- Cualquier valor numerico: W, V, A, Hz, PSI, bar, Mpa, L/min, m/s, mm, mAh, etc.\n'
-  +'Un digito diferente entre ART y PV = CRITICO automatico.\n'
-  +'Si una especificacion existe en ART pero no se puede leer claramente en PV = no reportar\n\n'
-  +'=== COLOR PRODUCTO (solo si mismo tipo de archivo) ===\n'
-  +'Si ART y PV son del mismo tipo de archivo:\n'
-  +'  Evaluar producto fotografiado: ART=[sat X/10, brillo Y/10] / PV=[sat X/10, brillo Y/10]\n'
-  +'  Diferencia >= 1 punto = CRITICO\n'
-  +'Si ART y PV son de tipos distintos (PDF vs imagen, etc.):\n'
-  +'  Solo reportar si el color es COMPLETAMENTE DIFERENTE (otro tono/color distinto)\n'
-  +'  Diferencias de saturación o brillo: IGNORAR completamente\n\n'
-  +'=== CRITERIOS ACTIVOS ===\n'
-  +'{CRITERIA_LIST}\n\n'
-  +'=== ERRORES QUE NUNCA DEBES REPORTAR ===\n'
-  +'- Posicion o ubicacion de elementos (QR arriba vs abajo, logo izquierda vs derecha)\n'
-  +'- Orientacion de elementos (horizontal vs vertical)\n'
-  +'- Jerarquia visual, tamaño tipografico, peso de fuente\n'
-  +'- Orden de caras, paneles o paginas\n'
-  +'- Diferencias de diagramacion, maquetado o composicion\n'
-  +'- Tratamiento fotografico (blur, sombras, angulo) salvo diferencia de COLOR GROSERA\n'
-  +'- Diferencias de resolucion o calidad de imagen\n'
-  +'- Diferencias que pueden explicarse por distintos formatos de archivo\n\n'
-  +'=== CONCLUSION (OBLIGATORIO) ===\n'
-  +'La conclusion DEBE ser coherente con el score y las diferencias encontradas:\n'
-  +'- Si hay CRITICOS: conclusion debe listar las correcciones obligatorias y decir RECHAZADO\n'
-  +'- Si hay ADVERTENCIAS: conclusion debe mencionar las observaciones\n'
-  +'- Solo si score >= 90 Y diferencias = 0: conclusion puede decir APROBADO SIN OBSERVACIONES\n'
-  +'NUNCA escribas "aprobado" o "autorizado para produccion" si existen errores criticos.\n\n'
-  +'=== ANTI-ALUCINACION ===\n'
-  +'- Para cada diferencia: original= valor LITERAL visto en ART, pv= valor LITERAL visto en PV\n'
-  +'- Si no podes leer claramente un valor en alguna de las dos imagenes, NO lo reportes\n'
-  +'- Etiquetado bilingue intencional NO es error (ej: "POWER/POTENCIA" es correcto)\n'
-  +'- Verificacion doble: confirma que el valor existe en ART Y que es diferente en PV\n\n'
+  +'- Cualquier valor numerico: W, V, A, Hz, PSI, bar, Mpa, L/min, m/s, mm, mAh, rpm\n'
+  +'Un digito diferente = CRITICO automatico.\n\n'
+  +COLOR_RULE
+  +'=== NUNCA REPORTAR ===\n'
+  +'- Diferencias de posicion, orientacion, tamaño tipografico o jerarquia visual\n'
+  +'- Diferencias de diagramacion entre formatos distintos (PDF vs imagen)\n'
+  +'- Etiquetado bilingue intencional (ej: POWER/POTENCIA es correcto)\n\n'
+  +'=== CONCLUSION ===\n'
+  +'Si hay errores criticos: decir RECHAZADO y listar correcciones obligatorias.\n'
+  +'Solo si score >= 90 y cero diferencias: decir APROBADO SIN OBSERVACIONES.\n\n'
   +'=== SCORING ===\n'
   +'CRITICO=-25 | MEDIO=-10 | MENOR=-3 (base 100)\n'
-  +'APROBADO: 90-100 | APROBADO CON OBSERVACIONES: 70-89 | RECHAZADO CRITICO: 0-69\n'
-  +'REGLA: cualquier CRITICO = RECHAZADO CRITICO automatico\n\n'
-  +'Responde SOLO con JSON puro sin backticks:\n'
-  +'{"score":0,"clasificacion":"APROBADO|APROBADO CON OBSERVACIONES|RECHAZADO CRITICO",'
-  +'"resumen":"diagnostico con tipos de archivo detectados y principales hallazgos",'
-  +'"criticos":0,"advertencias":0,"menores":0,"ok":0,'
-  +'"diferencias":[{"nivel":"critico|advertencia|menor","categoria":"COLOR|IMAGEN|TEXTO|IDIOMA|ESPECIFICACION|CONTENIDO|LAYOUT|LEGAL|QR|NAMING",'
-  +'"idioma":"ES|EN|FR|DE|IT|PT|NL|BG|CZ|SK|RO|HU|todos|na","titulo":"titulo corto",'
-  +'"pagina_art":"seccion o pagina del ART donde se vio o null","pagina_pv":"seccion o pagina del PV donde se vio o null",'
-  +'"original":"valor exacto en ART","pv":"valor exacto en PV o AUSENTE EN PV","accion":"correccion exacta","impacto":"tecnico|legal|visual|comercial"}],'
-  +'"conclusion":"veredicto y correcciones obligatorias"}';
+  +'90-100=APROBADO | 70-89=APROBADO CON OBSERVACIONES | 0-69=RECHAZADO CRITICO\n'
+  +'Cualquier CRITICO = RECHAZADO automatico.\n\n'
+  +'{CRITERIA_LIST}\n\n'
+  +'Responde SOLO JSON sin backticks:\n'
+  +'{"score":0,"clasificacion":"...","resumen":"...","criticos":0,"advertencias":0,"menores":0,"ok":0,'
+  +'"diferencias":[{"nivel":"critico|advertencia|menor","categoria":"COLOR|IMAGEN|TEXTO|IDIOMA|ESPECIFICACION|CONTENIDO|LEGAL|QR|NAMING",'
+  +'"idioma":"ES|EN|BG|CZ|SK|RO|HU|FR|DE|IT|PT|NL|todos|na","titulo":"titulo corto",'
+  +'"pagina_art":"seccion ART o null","pagina_pv":"seccion PV o null",'
+  +'"original":"valor literal en ART","pv":"valor literal en PV o AUSENTE EN PV",'
+  +'"accion":"correccion exacta","impacto":"tecnico|legal|visual|comercial"}],'
+  +'"conclusion":"veredicto y acciones obligatorias"}',
 
-var SPECS_PROMPT = 'Sos un auditor experto en documentos y packaging. Se te envian dos imagenes con zoom en el area de especificaciones tecnicas.\n'
-  +'IMAGEN 1 = ART (original aprobado) | IMAGEN 2 = PV (version proveedor)\n\n'
-  +'REGLA CLAVE: ART y PV son formatos distintos del mismo documento.\n'
-  +'Busca los valores del ART en CUALQUIER parte del PV, sin importar posicion ni orden de paginas.\n\n'
-  +'TAREA: Para cada especificacion visible en ART, buscala en PV y compara DIGITO POR DIGITO:\n'
-  +'- EN: No load speed | DE: Leerlaufdrehzahl | ES: Velocidad en vacio / Presion / Flujo / Potencia\n'
-  +'- FR: Vitesse a vide | IT: Velocita a vuoto | PT: Velocidade em vazio\n'
-  +'- NL: Onbelast toerental | HU: Uresjárati fordulatszam\n'
-  +'- BG: Обороти на празен ход (CIRÍLICO — MAXIMA ATENCION — ej: 5300 vs 4700)\n'
-  +'- CZ: Otacky naprazdno | SK: Otacky naprazdno | RO: Turatie in gol\n'
-  +'- Cualquier valor numerico: W, V, A, Hz, PSI, bar, Mpa, L/min, m/s, mm, mAh, etc.\n\n'
-  +'Si el valor en PV es DIFERENTE al ART: reportar con original= y pv= valores literales.\n'
-  +'Si el valor del ART NO APARECE en ninguna parte del PV: reportar con pv="AUSENTE EN PV".\n'
-  +'Si no hay diferencias ni ausencias: {"diferencias":[]}\n\n'
-  +'ANTI-ALUCINACION: solo reporta lo que podes leer literalmente. No inventes diferencias.\n'
-  +'Responde SOLO con JSON sin backticks:\n'
-  +'{"diferencias":[{"nivel":"critico","categoria":"ESPECIFICACION","idioma":"ES","titulo":"Presion diferente","original":"80 PSI","pv":"100 PSI","accion":"Corregir a 80 PSI","impacto":"tecnico"}]}';
+manual:
+  'Sos un auditor de QA de documentacion tecnica para la empresa ALKON.\n\n'
+  +'IMAGEN 1 = ART (documento original aprobado) | IMAGEN 2 = PV (version del proveedor)\n\n'
+  +'=== CONTEXTO ===\n'
+  +'Estas validando un MANUAL o INSTRUCTIVO.\n'
+  +'ART y PV pueden tener formatos completamente distintos (PDF multipagina vs imagen panoramica,\n'
+  +'impresion fotografiada, etc). El orden de secciones PUEDE ser diferente — eso NO es error.\n'
+  +'Lo que importa: que todo el CONTENIDO del ART este presente en el PV.\n\n'
+  +'=== METODOLOGIA ===\n'
+  +'PASO 1 — Inventario del ART (recorre TODAS las paginas):\n'
+  +'  Secciones presentes, textos clave, especificaciones, advertencias de seguridad,\n'
+  +'  imagenes de instrucciones, datos de fabricante, garantia, contacto.\n\n'
+  +'PASO 2 — Verificacion en PV (busca en CUALQUIER PARTE):\n'
+  +'  - Seccion/contenido presente con mismo texto → OK\n'
+  +'  - Texto con diferencia significativa → reportar\n'
+  +'  - Seccion completamente ausente → reportar con pv="AUSENTE EN PV"\n\n'
+  +'=== ESPECIFICACIONES TECNICAS ===\n'
+  +'Si el manual tiene especificaciones tecnicas, comparar DIGITO POR DIGITO:\n'
+  +'Potencia W, voltaje V, presion PSI/bar, flujo L/min, capacidad mAh, etc.\n'
+  +'Un digito diferente = CRITICO.\n\n'
+  +COLOR_RULE
+  +'=== NUNCA REPORTAR ===\n'
+  +'- Diferencias de orden de secciones o paginas\n'
+  +'- Diferencias de diagramacion, columnas, tipografia\n'
+  +'- Diferencias de calidad de imagen entre PDF e impresion fotografiada\n\n'
+  +'=== SCORING ===\n'
+  +'CRITICO=-25 | MEDIO=-10 | MENOR=-3 (base 100)\n'
+  +'90-100=APROBADO | 70-89=APROBADO CON OBSERVACIONES | 0-69=RECHAZADO CRITICO\n\n'
+  +'{CRITERIA_LIST}\n\n'
+  +'Responde SOLO JSON sin backticks:\n'
+  +'{"score":0,"clasificacion":"...","resumen":"...","criticos":0,"advertencias":0,"menores":0,"ok":0,'
+  +'"diferencias":[{"nivel":"critico|advertencia|menor","categoria":"TEXTO|ESPECIFICACION|CONTENIDO|LEGAL|IMAGEN|QR|NAMING",'
+  +'"idioma":"ES|EN|todos|na","titulo":"titulo corto",'
+  +'"pagina_art":"seccion ART o null","pagina_pv":"seccion PV o null",'
+  +'"original":"valor literal en ART","pv":"valor literal en PV o AUSENTE EN PV",'
+  +'"accion":"correccion exacta","impacto":"tecnico|legal|visual|comercial"}],'
+  +'"conclusion":"veredicto y acciones obligatorias"}',
+
+etiqueta:
+  'Sos un auditor ULTRA-ESTRICTO de QA de etiquetas para la empresa ALKON.\n\n'
+  +'IMAGEN 1 = ART (etiqueta original aprobada) | IMAGEN 2 = PV (version del proveedor)\n\n'
+  +'=== CONTEXTO ===\n'
+  +'Estas validando una ETIQUETA ADHESIVA, HANGTAG o LABEL.\n'
+  +'Foco especial en: textos legales, codigos de barras, especificaciones tecnicas,\n'
+  +'informacion de contacto, pais de origen, certificaciones, colores de marca.\n\n'
+  +'=== METODOLOGIA ESTRICTA ===\n'
+  +'Compara TODOS los elementos del ART contra el PV caracter por caracter:\n'
+  +'- Textos legales y advertencias\n'
+  +'- Especificaciones tecnicas: digito por digito\n'
+  +'- EAN/codigo de barras: digito por digito\n'
+  +'- Logos y certificaciones presentes\n'
+  +'- Pais de origen, fabricante, importador\n'
+  +'Un digito diferente en specs o EAN = CRITICO automatico.\n\n'
+  +COLOR_RULE
+  +'=== SCORING ===\n'
+  +'CRITICO=-25 | MEDIO=-10 | MENOR=-3 (base 100)\n'
+  +'90-100=APROBADO | 70-89=APROBADO CON OBSERVACIONES | 0-69=RECHAZADO CRITICO\n\n'
+  +'{CRITERIA_LIST}\n\n'
+  +'Responde SOLO JSON sin backticks:\n'
+  +'{"score":0,"clasificacion":"...","resumen":"...","criticos":0,"advertencias":0,"menores":0,"ok":0,'
+  +'"diferencias":[{"nivel":"critico|advertencia|menor","categoria":"COLOR|TEXTO|ESPECIFICACION|LEGAL|QR|NAMING|CONTENIDO",'
+  +'"idioma":"ES|EN|todos|na","titulo":"titulo corto",'
+  +'"pagina_art":"null","pagina_pv":"null",'
+  +'"original":"valor literal en ART","pv":"valor literal en PV o AUSENTE EN PV",'
+  +'"accion":"correccion exacta","impacto":"tecnico|legal|visual|comercial"}],'
+  +'"conclusion":"veredicto y acciones obligatorias"}',
+
+inserto:
+  'Sos un auditor de QA de materiales impresos para la empresa ALKON.\n\n'
+  +'IMAGEN 1 = ART (inserto original aprobado) | IMAGEN 2 = PV (version del proveedor)\n\n'
+  +'=== CONTEXTO ===\n'
+  +'Estas validando un INSERTO, FLYER o CERTIFICADO DE GARANTIA.\n'
+  +'Foco en: textos legales, datos de garantia, informacion de contacto,\n'
+  +'imagenes del producto, logos, especificaciones si las hay.\n\n'
+  +'=== METODOLOGIA ===\n'
+  +'Compara TODO el contenido del ART contra el PV:\n'
+  +'- Todos los textos presentes y correctos\n'
+  +'- Datos de garantia (plazo, condiciones, exclusiones)\n'
+  +'- Informacion de contacto (telefono, email, web, direccion)\n'
+  +'- Logos y marcas\n'
+  +'- Especificaciones tecnicas si existen: digito por digito\n\n'
+  +COLOR_RULE
+  +'=== SCORING ===\n'
+  +'CRITICO=-25 | MEDIO=-10 | MENOR=-3 (base 100)\n'
+  +'90-100=APROBADO | 70-89=APROBADO CON OBSERVACIONES | 0-69=RECHAZADO CRITICO\n\n'
+  +'{CRITERIA_LIST}\n\n'
+  +'Responde SOLO JSON sin backticks:\n'
+  +'{"score":0,"clasificacion":"...","resumen":"...","criticos":0,"advertencias":0,"menores":0,"ok":0,'
+  +'"diferencias":[{"nivel":"critico|advertencia|menor","categoria":"COLOR|TEXTO|ESPECIFICACION|LEGAL|QR|NAMING|CONTENIDO",'
+  +'"idioma":"ES|EN|todos|na","titulo":"titulo corto",'
+  +'"pagina_art":"seccion ART o null","pagina_pv":"seccion PV o null",'
+  +'"original":"valor literal en ART","pv":"valor literal en PV o AUSENTE EN PV",'
+  +'"accion":"correccion exacta","impacto":"tecnico|legal|visual|comercial"}],'
+  +'"conclusion":"veredicto y acciones obligatorias"}'
+};
+
+var SPECS_PROMPT = 'Sos un auditor experto. Dos imagenes con zoom en el area de especificaciones tecnicas.\n'
+  +'IMAGEN 1 = ART | IMAGEN 2 = PV\n\n'
+  +'Busca los valores del ART en CUALQUIER parte del PV. Compara DIGITO POR DIGITO:\n'
+  +'- Potencia W, RPM, velocidad, presion PSI/bar/Mpa, flujo L/min, voltaje V, capacidad mAh\n'
+  +'- BG: Обороти на празен ход (CIRÍLICO — MAXIMA ATENCION)\n'
+  +'- Todos los idiomas: EN/DE/ES/FR/IT/PT/NL/HU/BG/CZ/SK/RO\n\n'
+  +'Si valor en PV es DIFERENTE: reportar con literales de ambos.\n'
+  +'Si valor del ART NO APARECE en PV: pv="AUSENTE EN PV".\n'
+  +'Sin diferencias: {"diferencias":[]}\n'
+  +'Solo reporta lo que podes leer literalmente.\n'
+  +'Responde SOLO JSON:\n'
+  +'{"diferencias":[{"nivel":"critico","categoria":"ESPECIFICACION","idioma":"BG","titulo":"RPM BG diferente","original":"5300 ob/min","pv":"4700 ob/min","accion":"Corregir a 5300","impacto":"tecnico"}]}';
+
+// ── SELECTOR DE MATERIAL ──────────────────────────────────────
+var MATERIAL_NOTES = {
+  packaging: 'Packaging: an&aacute;lisis estricto. 2 pasadas cuando ambos son PDF.',
+  manual:    'Manual: verifica contenido completo ignorando orden de p&aacute;ginas.',
+  etiqueta:  'Etiqueta: foco en textos legales, EAN y especificaciones.',
+  inserto:   'Inserto: verifica textos, garant&iacute;a, contacto e im&aacute;genes.'
+};
+function setMaterial(btn){
+  document.querySelectorAll('.mat-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  materialType=btn.dataset.type;
+  document.getElementById('info-note-txt').innerHTML=MATERIAL_NOTES[materialType];
+  refreshPromptPreview();
+}
 
 // ── PROMPT EDITOR ─────────────────────────────────────────────
-var promptCustomMode=false, promptCustomText='';
+var promptCustomMode=false,promptCustomText='';
 function getStoredPrompt(){return localStorage.getItem('pk_custom_prompt')||'';}
 function getStoredPromptMode(){return localStorage.getItem('pk_prompt_mode')==='1';}
 function togglePromptPanel(){
@@ -466,7 +574,7 @@ function toggleCustomPrompt(){
   var badge=document.getElementById('prompt-mode-badge'),meta=document.getElementById('prompt-meta');
   if(promptCustomMode){
     ta.readOnly=false;
-    ta.value=promptCustomText||buildMainPromptText(getActiveChecks());
+    ta.value=promptCustomText||buildPromptText(getActiveChecks());
     btns.style.display='flex';badge.textContent='MODO: PERSONALIZADO';
     meta.textContent=ta.value.length+' caracteres';
     localStorage.setItem('pk_prompt_mode','1');
@@ -479,7 +587,8 @@ function toggleCustomPrompt(){
 }
 function refreshPromptPreview(){
   if(promptCustomMode)return;
-  document.getElementById('prompt-textarea').value=buildMainPromptText(getActiveChecks());
+  var ta=document.getElementById('prompt-textarea');
+  if(ta)ta.value=buildPromptText(getActiveChecks());
 }
 function savePrompt(){
   var ta=document.getElementById('prompt-textarea');
@@ -493,7 +602,7 @@ function savePrompt(){
 function resetPrompt(){
   promptCustomText='';localStorage.removeItem('pk_custom_prompt');
   var ta=document.getElementById('prompt-textarea');
-  ta.value=buildMainPromptText(getActiveChecks());
+  ta.value=buildPromptText(getActiveChecks());
   document.getElementById('prompt-meta').textContent=ta.value.length+' caracteres · restaurado';
 }
 function getActiveChecks(){
@@ -607,7 +716,6 @@ async function loadPdfJs(){
   window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   await new Promise(function(r){setTimeout(r,200);});
 }
-
 async function renderPDF(b64,scale,label,pStart,pEnd){
   var raw=atob(b64),arr=new Uint8Array(raw.length);
   for(var i=0;i<raw.length;i++)arr[i]=raw.charCodeAt(i);
@@ -615,46 +723,37 @@ async function renderPDF(b64,scale,label,pStart,pEnd){
   var numPages=pdf.numPages,pages=[],totalH=0,maxW=0;
   var pPerPage=pEnd?(pEnd-pStart-4)/numPages:0;
   for(var p=1;p<=numPages;p++){
-    if(pStart)setProgress(pStart+(p-1)*pPerPage,'Procesando '+label+'...','Pagina '+p+' / '+numPages+' — escala '+scale+'x','');
+    if(pStart)setProgress(pStart+(p-1)*pPerPage,'Procesando '+label+'...','Pagina '+p+' / '+numPages,'');
     var page=await pdf.getPage(p);
     var vp=page.getViewport({scale:scale});
     var cv=document.createElement('canvas');
     cv.width=vp.width;cv.height=vp.height;
     await page.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
-    pages.push(cv);totalH+=vp.height;
-    if(vp.width>maxW)maxW=vp.width;
+    pages.push(cv);totalH+=vp.height;if(vp.width>maxW)maxW=vp.width;
   }
   var MAX_PX=7800,sd=1.0;
   if(maxW>MAX_PX)sd=Math.min(sd,MAX_PX/maxW);
   if(totalH>MAX_PX)sd=Math.min(sd,MAX_PX/totalH);
   var fw=Math.floor(maxW*sd),fh=Math.floor(totalH*sd);
-  var st=document.createElement('canvas');
-  st.width=fw;st.height=fh;
-  var ctx=st.getContext('2d');
-  ctx.fillStyle='#fff';ctx.fillRect(0,0,fw,fh);
+  var st=document.createElement('canvas');st.width=fw;st.height=fh;
+  var ctx=st.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,fw,fh);
   var y=0;
-  pages.forEach(function(cv){
-    var dh=Math.floor(cv.height*sd);
-    ctx.drawImage(cv,0,0,cv.width,cv.height,0,y,fw,dh);y+=dh;
-  });
+  pages.forEach(function(cv){var dh=Math.floor(cv.height*sd);ctx.drawImage(cv,0,0,cv.width,cv.height,0,y,fw,dh);y+=dh;});
   var MAX_B64=4*1024*1024,q=0.92;
   var result=st.toDataURL('image/jpeg',q).split(',')[1];
   while(result.length>MAX_B64&&q>0.4){q=Math.round((q-0.06)*100)/100;result=st.toDataURL('image/jpeg',q).split(',')[1];}
   var pageOffsets=[],yOff=0;
   pages.forEach(function(cv){var dh=Math.floor(cv.height*sd);pageOffsets.push({y:yOff,h:dh});yOff+=dh;});
-  if(pEnd)setProgress(pEnd,label+' listo',(result.length*0.75/1024/1024).toFixed(1)+' MB, calidad '+Math.round(q*100)+'%','');
+  if(pEnd)setProgress(pEnd,label+' listo',(result.length*0.75/1024/1024).toFixed(1)+' MB','');
   return{b64:result,canvas:st,q:q,pageOffsets:pageOffsets,numPages:numPages};
 }
-
 function cropCanvas(canvas,x,y,w,h,zoom){
   var sw=Math.floor(canvas.width*w),sh=Math.floor(canvas.height*h);
   var sx=Math.floor(canvas.width*x),sy=Math.floor(canvas.height*y);
   var dw=Math.min(sw*zoom,7800),dh=Math.min(sh*zoom,7800);
   var scale=Math.min(dw/sw,dh/sh);
-  var cv=document.createElement('canvas');
-  cv.width=Math.floor(sw*scale);cv.height=Math.floor(sh*scale);
-  var ctx=cv.getContext('2d');
-  ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);
+  var cv=document.createElement('canvas');cv.width=Math.floor(sw*scale);cv.height=Math.floor(sh*scale);
+  var ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);
   ctx.drawImage(canvas,sx,sy,sw,sh,0,0,cv.width,cv.height);
   var result=cv.toDataURL('image/jpeg',0.95).split(',')[1],q=0.95;
   while(result.length>4*1024*1024&&q>0.4){q-=0.05;result=cv.toDataURL('image/jpeg',q).split(',')[1];}
@@ -676,34 +775,34 @@ async function callProxy(content,maxTokens){
 }
 
 // ── BUILD PROMPT ──────────────────────────────────────────────
-function buildMainPromptText(checks){
+function buildPromptText(checks){
   var labels={
     textos:'Textos en todos los idiomas: ortografia, gramatica, contenido, idiomas faltantes',
-    colores:'Colores: tonos, saturacion, brillo, fondos, degradados',
+    colores:'Colores: SOLO diferencias groseras y obvias de tono (no saturacion ni brillo)',
     logos:'Logos, marcas registradas, simbolos y certificaciones',
-    fotos:'Fotografias: COLOR DEL PRODUCTO (tono sat 1-10, brillo 1-10), resolucion, elementos',
-    specs:'Especificaciones tecnicas: potencia W, RPM, velocidad — digito por digito en cada idioma incluyendo cirílico BG',
-    traducciones:'Multilenguaje: traducciones equivalentes, atencion especial BG, CZ, SK, RO, HU',
-    layout:'Layout: solo reportar si falta contenido, no diferencias de posicion entre ART y PV',
-    datos_repetidos:'Datos repetidos: valores en distintas caras deben coincidir exactamente',
-    consistencia_caras:'Consistencia entre caras: mismo contenido en frente, dorso y laterales',
+    fotos:'Fotografias: producto presente y correcto',
+    specs:'Especificaciones tecnicas: digito por digito en cada idioma incluyendo cirílico BG',
+    traducciones:'Multilenguaje: traducciones equivalentes BG, CZ, SK, RO, HU, etc.',
+    layout:'Layout: solo si falta contenido, NO diferencias de posicion',
+    datos_repetidos:'Datos repetidos: valores en distintas secciones deben coincidir',
+    consistencia_caras:'Consistencia: mismo contenido en todas las caras/secciones',
     legal:'CRITICO - Legal: textos legales, pais de origen, certificaciones CE/RoHS',
-    placeholders:'Placeholders: campos sin completar, EAN vacio, seriales pendientes',
-    unidades:'Unidades: separadores decimales, W/rpm/m-s/ml/mm consistentes',
-    tipografia:'CRITICO - Tipografia/encoding: caracteres corruptos en cirílico',
-    dieline:'Dieline: contenido en zonas de corte o sangrado',
+    placeholders:'Placeholders: campos sin completar, EAN vacio',
+    unidades:'Unidades: W/rpm/m-s/ml/mm/PSI consistentes',
+    tipografia:'CRITICO - Tipografia: caracteres corruptos en cirílico',
+    dieline:'Dieline: contenido en zonas de corte',
     qr:'QR y EAN: presentes y legibles',
     comercial:'Coherencia comercial: claims = specs tecnicas',
-    naming:'Naming: modelo identico en todo el packaging',
-    jerarquia:'Jerarquia visual: contraste y visibilidad',
-    copy_paste:'Copy/paste: duplicaciones, texto cortado'
+    naming:'Naming: modelo identico en todo el material',
+    jerarquia:'Jerarquia visual: elementos criticos visibles',
+    copy_paste:'Copy/paste: duplicaciones o texto cortado'
   };
-  var lista=checks.map(function(id){return '  - '+(labels[id]||id);}).join('\n');
-  return PROMPT_BASE.replace('{CRITERIA_LIST}',lista);
+  var lista='CRITERIOS ACTIVOS:\n'+checks.map(function(id){return '  - '+(labels[id]||id);}).join('\n');
+  return(PROMPTS[materialType]||PROMPTS.packaging).replace('{CRITERIA_LIST}',lista);
 }
 function buildMainPrompt(checks){
   if(promptCustomMode&&promptCustomText.trim())return promptCustomText;
-  return buildMainPromptText(checks);
+  return buildPromptText(checks);
 }
 
 // ── MAIN RUN ──────────────────────────────────────────────────
@@ -729,8 +828,7 @@ async function run(){
     }else{
       imgO=b64O;
       setProgress(28,'ART cargado',(fO.size/1024/1024).toFixed(1)+' MB','');
-      var resImgO=await imageToCanvas(b64O,mimeOf(fO));
-      canvasO=resImgO.canvas;pageOffsetsO=resImgO.pageOffsets;
+      var ri=await imageToCanvas(b64O,mimeOf(fO));canvasO=ri.canvas;pageOffsetsO=ri.pageOffsets;
     }
 
     var imgP;
@@ -740,8 +838,7 @@ async function run(){
     }else{
       imgP=b64P;
       setProgress(55,'PV cargado',(fP.size/1024/1024).toFixed(1)+' MB','');
-      var resImgP=await imageToCanvas(b64P,mimeOf(fP));
-      canvasP=resImgP.canvas;pageOffsetsP=resImgP.pageOffsets;
+      var rp=await imageToCanvas(b64P,mimeOf(fP));canvasP=rp.canvas;pageOffsetsP=rp.pageOffsets;
     }
 
     setProgress(57,'Analisis completo...','Enviando archivos a Claude Vision...','');
@@ -762,39 +859,36 @@ async function run(){
     if(si===-1||ei<=si)throw new Error('Respuesta inesperada en analisis principal.');
     var result=JSON.parse(raw1.slice(si,ei+1));
 
-    // Segunda pasada de specs: SOLO si ambos son PDF
+    // Segunda pasada specs: solo si ambos PDF y tipo packaging/etiqueta
     var ambosPDF=isPDF(fO)&&isPDF(fP);
-    setProgress(82,'Verificacion de specs...',ambosPDF?'Zoom 3x en panel de especificaciones...':'Omitida — tipos de archivo distintos',ambosPDF?'Atencion especial en cirílico BG':'');
-    if(ambosPDF){
+    var hacerSpecs=ambosPDF&&(materialType==='packaging'||materialType==='etiqueta');
+    setProgress(82,'Verificacion de specs...',hacerSpecs?'Zoom 3x en especificaciones...':'Omitida','');
+    if(hacerSpecs){
       try{
-        var specImgO=canvasO?cropCanvas(canvasO,0,0.35,1.0,0.65,3.0):await zoomImage(imgO,2.5);
-        var specImgP=canvasP?cropCanvas(canvasP,0,0.35,1.0,0.65,3.0):await zoomImage(imgP,2.5);
-        setProgress(86,'Analizando specs en zoom...','Comparando valores numericos digito por digito...','');
-        var progTimer2=setInterval(function(){
-          var cur2=parseFloat(document.getElementById('prog-pct').textContent);
-          if(cur2<95)setProgress(cur2+0.5,undefined,undefined,undefined);
-        },800);
+        var specO=canvasO?cropCanvas(canvasO,0,0.35,1.0,0.65,3.0):await zoomImage(imgO,2.5);
+        var specP=canvasP?cropCanvas(canvasP,0,0.35,1.0,0.65,3.0):await zoomImage(imgP,2.5);
+        setProgress(86,'Analizando specs...','Comparando digito por digito...','');
+        var pt2=setInterval(function(){var c=parseFloat(document.getElementById('prog-pct').textContent);if(c<95)setProgress(c+0.5,undefined,undefined,undefined);},800);
         var raw2=await callProxy([
-          {type:'image',source:{type:'base64',media_type:'image/jpeg',data:specImgO}},
-          {type:'image',source:{type:'base64',media_type:'image/jpeg',data:specImgP}},
+          {type:'image',source:{type:'base64',media_type:'image/jpeg',data:specO}},
+          {type:'image',source:{type:'base64',media_type:'image/jpeg',data:specP}},
           {type:'text',text:SPECS_PROMPT}
         ],3000);
-        clearInterval(progTimer2);
-        var si2=raw2.indexOf('{'),ei2=raw2.lastIndexOf('}');
-        if(si2!==-1&&ei2>si2){
-          var specs=JSON.parse(raw2.slice(si2,ei2+1));
+        clearInterval(pt2);
+        var s2=raw2.indexOf('{'),e2=raw2.lastIndexOf('}');
+        if(s2!==-1&&e2>s2){
+          var specs=JSON.parse(raw2.slice(s2,e2+1));
           if(specs.diferencias&&specs.diferencias.length>0){
             specs.diferencias.forEach(function(d){
               var dup=(result.diferencias||[]).some(function(x){return x.original===d.original&&x.pv===d.pv;});
               if(!dup){
-                result.diferencias=result.diferencias||[];
-                result.diferencias.push(d);
+                result.diferencias=result.diferencias||[];result.diferencias.push(d);
                 if(d.nivel==='critico'){result.criticos=(result.criticos||0)+1;result.score=Math.max(0,(result.score||100)-25);result.clasificacion='RECHAZADO CRITICO';}
               }
             });
           }
         }
-      }catch(specErr){console.log('Specs pass error (non-fatal):',specErr.message);}
+      }catch(e){console.log('Specs pass error:',e.message);}
     }
 
     setProgress(100,'Analisis completado','','');
@@ -815,55 +909,32 @@ async function zoomImage(b64,zoom){
     img.onload=function(){
       var maxPx=7800,w=Math.min(img.width*zoom,maxPx),h=Math.min(img.height*zoom,maxPx);
       var scale=Math.min(w/img.width,h/img.height);
-      var cv=document.createElement('canvas');
-      cv.width=Math.floor(img.width*scale);cv.height=Math.floor(img.height*scale);
-      var ctx=cv.getContext('2d');
-      ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);
-      ctx.drawImage(img,0,0,cv.width,cv.height);
-      var q=0.92,result=cv.toDataURL('image/jpeg',q).split(',')[1];
-      while(result.length>4*1024*1024&&q>0.4){q-=0.05;result=cv.toDataURL('image/jpeg',q).split(',')[1];}
-      resolve(result);
+      var cv=document.createElement('canvas');cv.width=Math.floor(img.width*scale);cv.height=Math.floor(img.height*scale);
+      var ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);ctx.drawImage(img,0,0,cv.width,cv.height);
+      var q=0.92,res=cv.toDataURL('image/jpeg',q).split(',')[1];
+      while(res.length>4*1024*1024&&q>0.4){q-=0.05;res=cv.toDataURL('image/jpeg',q).split(',')[1];}
+      resolve(res);
     };
     img.src='data:image/jpeg;base64,'+b64;
   });
 }
 
-// ── THUMB con crop automatico por categoria ───────────────────
 function getPageThumb(canvas,offsets,pageNum,categoria){
   if(!canvas||!offsets||!offsets.length)return null;
   var idx=Math.max(0,Math.min((pageNum||1)-1,offsets.length-1));
   var off=offsets[idx];if(!off)return null;
-  var zonas={
-    'ESPECIFICACION':{x:0.0,y:0.4,w:1.0,h:0.6},
-    'COLOR':{x:0.0,y:0.0,w:0.6,h:0.55},
-    'IMAGEN':{x:0.0,y:0.0,w:0.6,h:0.55},
-    'TEXTO':{x:0.0,y:0.0,w:1.0,h:0.5},
-    'IDIOMA':{x:0.0,y:0.3,w:1.0,h:0.7},
-    'LEGAL':{x:0.5,y:0.5,w:0.5,h:0.5},
-    'QR':{x:0.5,y:0.6,w:0.5,h:0.4},
-    'CONTENIDO':{x:0.0,y:0.0,w:1.0,h:0.6},
-    'NAMING':{x:0.0,y:0.0,w:0.7,h:0.4}
-  };
-  var z=zonas[categoria]||{x:0.0,y:0.0,w:1.0,h:1.0};
-  var fullPage=(z.w>=0.99&&z.h>=0.99);
-  var srcX=Math.floor(canvas.width*z.x);
-  var srcY=Math.floor(off.y+off.h*z.y);
-  var srcW=Math.floor(canvas.width*z.w);
-  var srcH=Math.floor(off.h*z.h);
+  var zonas={'ESPECIFICACION':{x:0,y:0.4,w:1,h:0.6},'COLOR':{x:0,y:0,w:0.6,h:0.55},'IMAGEN':{x:0,y:0,w:0.6,h:0.55},'TEXTO':{x:0,y:0,w:1,h:0.5},'IDIOMA':{x:0,y:0.3,w:1,h:0.7},'LEGAL':{x:0.5,y:0.5,w:0.5,h:0.5},'QR':{x:0.5,y:0.6,w:0.5,h:0.4},'CONTENIDO':{x:0,y:0,w:1,h:0.6},'NAMING':{x:0,y:0,w:0.7,h:0.4}};
+  var z=zonas[categoria]||{x:0,y:0,w:1,h:1};
+  var full=(z.w>=0.99&&z.h>=0.99);
+  var srcX=Math.floor(canvas.width*z.x),srcY=Math.floor(off.y+off.h*z.y);
+  var srcW=Math.floor(canvas.width*z.w),srcH=Math.floor(off.h*z.h);
   if(srcW<10||srcH<10)return null;
-  var MAX_THUMB=480;
-  var scale=Math.min(MAX_THUMB/srcW,MAX_THUMB/srcH);
-  if(!fullPage&&srcW*scale<220)scale=220/srcW;
-  var cv=document.createElement('canvas');
-  cv.width=Math.floor(srcW*scale);cv.height=Math.floor(srcH*scale);
-  var ctx=cv.getContext('2d');
-  ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);
+  var MAX=480,scale=Math.min(MAX/srcW,MAX/srcH);
+  if(!full&&srcW*scale<220)scale=220/srcW;
+  var cv=document.createElement('canvas');cv.width=Math.floor(srcW*scale);cv.height=Math.floor(srcH*scale);
+  var ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);
   ctx.drawImage(canvas,srcX,srcY,srcW,srcH,0,0,cv.width,cv.height);
-  if(!fullPage){
-    ctx.strokeStyle='#b5271f';
-    ctx.lineWidth=Math.max(2,Math.floor(cv.width/100));
-    ctx.strokeRect(1,1,cv.width-2,cv.height-2);
-  }
+  if(!full){ctx.strokeStyle='#b5271f';ctx.lineWidth=Math.max(2,Math.floor(cv.width/100));ctx.strokeRect(1,1,cv.width-2,cv.height-2);}
   return cv.toDataURL('image/jpeg',0.88);
 }
 
@@ -895,13 +966,12 @@ function render(r){
       var idTag=(d.idioma&&d.idioma!=='na')?'<span class="tag-sm" style="background:var(--nvy-bg);color:var(--nvy);border:1px solid var(--nvy-bd)">'+esc(d.idioma)+'</span>':'';
       var impTag=d.impacto?'<span class="tag-sm" style="background:var(--ink04);color:var(--ink50);border:1px solid var(--ink08)">'+esc(d.impacto)+'</span>':'';
       var pgArt=d.pagina_art,pgPv=d.pagina_pv,pgTag='';
-      if(pgArt)pgTag+='<span class="tag-sm" style="background:var(--nvy-bg);color:var(--nvy);border:1px solid var(--nvy-bd)">ART: '+esc(pgArt)+'</span>';
-      if(pgPv)pgTag+='<span class="tag-sm" style="background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-bd)">PV: '+esc(pgPv)+'</span>';
+      if(pgArt)pgTag+='<span class="tag-sm" style="background:var(--nvy-bg);color:var(--nvy);border:1px solid var(--nvy-bd)">ART: '+esc(String(pgArt))+'</span>';
+      if(pgPv)pgTag+='<span class="tag-sm" style="background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-bd)">PV: '+esc(String(pgPv))+'</span>';
       var thumbO='',thumbP='';
-      var pgArtNum=parseInt(pgArt)||1,pgPvNum=parseInt(pgPv)||1;
-      var tO=getPageThumb(canvasO,pageOffsetsO,pgArtNum,d.categoria);
+      var tO=getPageThumb(canvasO,pageOffsetsO,parseInt(pgArt)||1,d.categoria);
       if(tO)thumbO='<img src="'+tO+'" style="width:100%;border-radius:4px;margin-top:8px;border:1px solid var(--ink08)" alt="ART">';
-      var tP=getPageThumb(canvasP,pageOffsetsP,pgPvNum,d.categoria);
+      var tP=getPageThumb(canvasP,pageOffsetsP,parseInt(pgPv)||1,d.categoria);
       if(tP)thumbP='<img src="'+tP+'" style="width:100%;border-radius:4px;margin-top:8px;border:1px solid var(--ink08)" alt="PV">';
       var row=document.createElement('div');row.className='drow';
       row.innerHTML='<div class="drow-hd" onclick="toggleRow(this)">'
@@ -939,7 +1009,7 @@ function resetAll(){
     var dz=document.getElementById('dz-'+key);
     dz.innerHTML='<div class="dz-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>'
       +'<div class="dz-p1">Arrastr&aacute; o <span class="dz-lnk">seleccion&aacute;</span></div>'
-      +'<div class="dz-p2">JPG &middot; PNG &middot; PDF &mdash; sin l&iacute;mite de peso</div>';
+      +'<div class="dz-p2">JPG &middot; PNG &middot; PDF</div>';
     dz.style.padding='';dz.style.cursor='';
     var fi=document.getElementById('fi-'+key);if(fi)fi.value='';
     bindDZ('dz-'+key,'fi-'+key,key);
