@@ -405,12 +405,21 @@ packaging:
   +'  - No encontrado en ningun lugar del PV → reportar con pv="AUSENTE EN PV"\n\n'
   +'PASO 3 — Verificacion inversa:\n'
   +'  Detecta contenido en PV que NO existe en ART (agregados no aprobados).\n\n'
-  +'=== ESPECIFICACIONES TECNICAS ===\n'
-  +'Comparar DIGITO POR DIGITO en TODOS los idiomas:\n'
-  +'- EN/DE/ES/FR/IT/PT/NL/HU/CZ/SK/RO: potencia W, RPM, velocidad, presion, flujo, capacidad\n'
-  +'- BG: Обороти на празен ход (CIRÍLICO — MAXIMA ATENCION)\n'
-  +'- Cualquier valor numerico: W, V, A, Hz, PSI, bar, Mpa, L/min, m/s, mm, mAh, rpm\n'
-  +'Un digito diferente = CRITICO automatico.\n\n'
+  +'=== ESPECIFICACIONES TECNICAS — OBLIGATORIO ===\n'
+  +'Transcribir y comparar DIGITO POR DIGITO en TODOS los idiomas visibles:\n'
+  +'- EN: No load speed | DE: Leerlaufdrehzahl | ES: Velocidad en vacío\n'
+  +'- FR: Vitesse à vide | IT: Velocità a vuoto | PT: Velocidade em vazio\n'
+  +'- NL: Onbelast toerental | HU: Üresjárati fordulatszám\n'
+  +'- BG: Обороти на празен ход ← MAXIMA ATENCION CIRÍLICO (ej: 5300 vs 4700 ob/min)\n'
+  +'- CZ: Otáčky naprázdno | SK: Otáčky naprázdno | RO: Turație în gol\n'
+  +'- Potencia W | Velocidad cadena/corte m/s | Longitud espada/barra | Paso cadena\n'
+  +'- Cualquier valor numerico: W, V, A, Hz, PSI, bar, Mpa, L/min, rpm, mm, mAh\n'
+  +'PROCESO OBLIGATORIO:\n'
+  +'  1. Leer el valor en ART para CADA especificacion en CADA idioma\n'
+  +'  2. Buscar ese mismo valor en PV en CUALQUIER parte\n'
+  +'  3. Si el valor difiere UN SOLO DIGITO → CRITICO\n'
+  +'  4. Si no aparece en PV → AUSENTE EN PV\n'
+  +'Un digito diferente = RECHAZADO CRITICO automatico.\n\n'
   +COLOR_RULE
   +'=== NUNCA REPORTAR ===\n'
   +'- Diferencias de posicion, orientacion, tamaño tipografico o jerarquia visual\n'
@@ -865,15 +874,17 @@ async function run(){
     setProgress(82,'Verificacion de specs...',hacerSpecs?'Zoom 3x en especificaciones...':'Omitida','');
     if(hacerSpecs){
       try{
-        var specO=canvasO?cropCanvas(canvasO,0,0.35,1.0,0.65,3.0):await zoomImage(imgO,2.5);
-        var specP=canvasP?cropCanvas(canvasP,0,0.35,1.0,0.65,3.0):await zoomImage(imgP,2.5);
-        setProgress(86,'Analizando specs...','Comparando digito por digito...','');
+        var specO=cropCanvas(canvasO,0,0.3,1.0,0.7,3.0);
+        var specP=cropCanvas(canvasP,0,0.3,1.0,0.7,3.0);
+        setProgress(86,'Analizando specs...','Comparando digito por digito en todos los idiomas...','');
+        // Esperamos explicitamente antes de la llamada para evitar cierre de canal
+        await new Promise(function(r){setTimeout(r,300);});
         var pt2=setInterval(function(){var c=parseFloat(document.getElementById('prog-pct').textContent);if(c<95)setProgress(c+0.5,undefined,undefined,undefined);},800);
         var raw2=await callProxy([
           {type:'image',source:{type:'base64',media_type:'image/jpeg',data:specO}},
           {type:'image',source:{type:'base64',media_type:'image/jpeg',data:specP}},
           {type:'text',text:SPECS_PROMPT}
-        ],3000);
+        ],4000);
         clearInterval(pt2);
         var s2=raw2.indexOf('{'),e2=raw2.lastIndexOf('}');
         if(s2!==-1&&e2>s2){
