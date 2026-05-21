@@ -26,6 +26,15 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink
 .brand-sep{width:1px;height:14px;background:var(--ink20)}
 .brand-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ink50)}
 .hdr-pill{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 11px;border:var(--rule);border-radius:2px;color:var(--ink50)}
+/* ── NAV TABS ── */
+.sec-nav{background:var(--white);border-bottom:var(--rule);position:sticky;top:56px;z-index:99}
+.sec-nav-in{max-width:1100px;margin:0 auto;padding:0 32px;height:44px;display:flex;align-items:center;gap:0}
+.sec-tab{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ink50);cursor:pointer;padding:0 20px;height:44px;display:flex;align-items:center;border-bottom:2px solid transparent;transition:all .15s;user-select:none}
+.sec-tab:hover{color:var(--ink)}
+.sec-tab.active{color:var(--ink);border-bottom-color:var(--ink)}
+.sec-wrap{display:none}
+.sec-wrap.active{display:block}
+/* ── PACKCHECK ── */
 .page{max-width:1100px;margin:0 auto;padding:36px 32px 80px}
 .hero{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:26px;border-bottom:var(--rule);margin-bottom:32px}
 .hero-h{font-family:'Playfair Display',serif;font-size:clamp(26px,3vw,40px);font-weight:400;letter-spacing:-.6px;line-height:1.08}
@@ -52,7 +61,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink
 .mat-name{font-size:12px;font-weight:600;margin-bottom:2px}
 .mat-desc{font-size:10px;opacity:.6;font-weight:300;line-height:1.4}
 .mat-btn.active .mat-desc{opacity:.7}
-/* ── upload ── */
+/* ── UPLOAD ── */
 .upload-grid{display:grid;grid-template-columns:1fr 32px 1fr;margin-bottom:14px;align-items:start}
 .panel{background:var(--white);border:var(--rule);border-radius:var(--r8);overflow:hidden;box-shadow:var(--sh)}
 .panel-hd{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:var(--rule)}
@@ -86,6 +95,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink
 .pill:hover{border-color:var(--ink20);color:var(--ink)}
 .pill.on{background:var(--ink);border-color:var(--ink);color:var(--white)}
 .pill input{display:none}
+/* ── PROMPT EDITOR ── */
 .prompt-panel{background:var(--white);border:var(--rule);border-radius:var(--r8);margin-bottom:22px;box-shadow:var(--sh);overflow:hidden}
 .prompt-hd{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:var(--rule);cursor:pointer;user-select:none}
 .prompt-hd-left{display:flex;align-items:center;gap:10px}
@@ -112,6 +122,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink
 .btn-sm-save{background:var(--ink);color:var(--white);border-color:var(--ink)}
 .btn-sm-save:hover{background:var(--ink80);color:var(--white)}
 .prompt-saved{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--grn);display:none}
+/* ── STATES ── */
 .err{display:none;align-items:flex-start;gap:10px;background:var(--red-bg);border:1px solid var(--red-bd);border-radius:var(--r8);padding:12px 16px;margin-bottom:18px;font-size:12px;color:var(--red);line-height:1.65}
 .err.on{display:flex}
 .btn-go{width:100%;padding:14px 24px;background:var(--ink);color:var(--white);border:none;border-radius:var(--r);font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:32px}
@@ -172,11 +183,43 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink
 .empty-ico{font-size:32px;margin-bottom:12px}
 .empty-ttl{font-family:'Playfair Display',serif;font-size:18px;font-weight:400;margin-bottom:6px;color:var(--grn)}
 .empty-sub{font-size:12px;color:var(--ink50);font-weight:300}
+/* ── INSPECCIONES ── */
+.insp-panel{background:var(--white);border:var(--rule);border-radius:var(--r8);padding:20px;margin-bottom:20px;box-shadow:var(--sh)}
+.insp-dz{border:2px dashed var(--ink20);border-radius:var(--r8);padding:40px 24px;text-align:center;cursor:pointer;transition:all .15s;min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.insp-dz:hover{border-color:var(--ink);background:var(--ink04)}
+.insp-dz.has-file{border-color:var(--nvy);background:var(--nvy-bg)}
+.insp-dz-ico{font-size:32px}
+.insp-dz-txt{font-size:13px;font-weight:500;color:var(--ink)}
+.insp-dz-sub{font-size:11px;color:var(--ink50)}
+.insp-btn{width:100%;padding:13px 20px;background:var(--ink);color:var(--white);border:none;border-radius:var(--r);font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px}
+.insp-btn:hover:not(:disabled){background:var(--ink80);transform:translateY(-1px);box-shadow:var(--shm)}
+.insp-btn:disabled{opacity:.3;cursor:not-allowed;transform:none}
+.insp-loading{display:none;background:var(--white);border:var(--rule);border-radius:var(--r8);padding:40px 32px;box-shadow:var(--sh);margin-bottom:24px;text-align:center}
+.insp-loading.on{display:block}
+.insp-spinner{width:28px;height:28px;border:2px solid var(--ink08);border-top-color:var(--ink);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.insp-load-label{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:6px}
+.insp-log{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink50);min-height:16px}
+.insp-results{display:none}.insp-results.on{display:block}
+.insp-sheet-note{display:none;align-items:center;gap:8px;padding:10px 14px;background:var(--nvy-bg);border:1px solid var(--nvy-bd);border-radius:var(--r8);font-size:11px;color:var(--nvy);margin-bottom:16px}
+.insp-sheet-note.on{display:flex}
+.result-table{width:100%;border-collapse:collapse;font-size:12px}
+.result-table th{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink50);padding:8px 12px;text-align:left;border-bottom:2px solid var(--ink08);background:var(--ink04)}
+.result-table td{padding:11px 12px;border-bottom:var(--rule);vertical-align:top;line-height:1.6}
+.result-table tr:last-child td{border-bottom:none}
+.result-table tr:hover td{background:var(--ink04)}
+.badge-ap{display:inline-block;padding:3px 10px;border-radius:2px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;font-weight:600;background:var(--grn-bg);color:var(--grn);border:1px solid var(--grn-bd)}
+.badge-no{display:inline-block;padding:3px 10px;border-radius:2px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;font-weight:600;background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)}
+.badge-obs{display:inline-block;padding:3px 10px;border-radius:2px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;font-weight:600;background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-bd)}
+.insp-detail{background:var(--ink04);border:var(--rule);border-radius:var(--r);padding:14px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.7;white-space:pre-wrap;margin-top:14px;max-height:380px;overflow-y:auto;color:var(--ink80)}
+.export-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:transparent;border:var(--rule);border-radius:var(--r);font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:var(--ink50);cursor:pointer;margin-top:12px}
+.export-btn:hover{border-color:var(--ink20);color:var(--ink)}
 footer{text-align:center;padding:24px 32px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--ink20);text-transform:uppercase;border-top:var(--rule);background:var(--white);margin-top:40px}
 input[type=file]{display:none}
 </style>
 </head>
 <body>
+
 <header class="hdr">
   <div class="hdr-in">
     <div class="brand">
@@ -188,6 +231,18 @@ input[type=file]{display:none}
   </div>
 </header>
 
+<!-- Navegación entre secciones -->
+<div class="sec-nav">
+  <div class="sec-nav-in">
+    <span class="sec-tab active" onclick="switchSec('packcheck')">📦 PackCheck</span>
+    <span class="sec-tab" onclick="switchSec('inspeccion')">⚡ Inspecciones</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECCIÓN: PACKCHECK
+     ══════════════════════════════════════════════════════ -->
+<div class="sec-wrap active" id="sec-packcheck">
 <div class="page">
   <div class="hero">
     <h1 class="hero-h">Validaci&oacute;n de<br><em>Artes de Packaging</em></h1>
@@ -212,22 +267,22 @@ input[type=file]{display:none}
       <button class="mat-btn active" data-type="packaging" onclick="setMaterial(this)">
         <span class="mat-ico">📦</span>
         <span class="mat-name">Packaging / Caja</span>
-        <span class="mat-desc">Arte de caja, blister, bolsa. Compara contenido, specs, textos e im&aacute;genes d&iacute;gito a d&iacute;gito.</span>
+        <span class="mat-desc">Arte de caja, blister, bolsa. Compara contenido, specs y textos d&iacute;gito a d&iacute;gito.</span>
       </button>
       <button class="mat-btn" data-type="manual" onclick="setMaterial(this)">
         <span class="mat-ico">📖</span>
         <span class="mat-name">Manual / Instructivo</span>
-        <span class="mat-desc">Manual de usuario, gu&iacute;a r&aacute;pida. Verifica que todo el contenido textual y gr&aacute;fico est&eacute; presente.</span>
+        <span class="mat-desc">Manual de usuario, gu&iacute;a r&aacute;pida. Verifica contenido completo sin importar orden.</span>
       </button>
       <button class="mat-btn" data-type="etiqueta" onclick="setMaterial(this)">
         <span class="mat-ico">🏷️</span>
         <span class="mat-name">Etiqueta / Label</span>
-        <span class="mat-desc">Etiqueta adhesiva, hangtag. Foco en textos legales, c&oacute;digos, especificaciones y colores.</span>
+        <span class="mat-desc">Etiqueta adhesiva, hangtag. Foco en textos legales, c&oacute;digos y especificaciones.</span>
       </button>
       <button class="mat-btn" data-type="inserto" onclick="setMaterial(this)">
         <span class="mat-ico">📄</span>
         <span class="mat-name">Inserto / Flyer</span>
-        <span class="mat-desc">Inserto de caja, folleto, certificado de garant&iacute;a. Verifica textos, im&aacute;genes y datos legales.</span>
+        <span class="mat-desc">Inserto de caja, folleto, certificado de garant&iacute;a. Textos, im&aacute;genes y datos legales.</span>
       </button>
     </div>
   </div>
@@ -257,7 +312,7 @@ input[type=file]{display:none}
 
   <div class="info-note">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    <span id="info-note-txt">Packaging: an&aacute;lisis estricto con 2 pasadas cuando ambos son PDF.</span>
+    <span id="info-note-txt">Packaging: an&aacute;lisis estricto. 2 pasadas cuando ambos son PDF.</span>
   </div>
 
   <div class="step">03 &mdash; Criterios de revisi&oacute;n</div>
@@ -365,211 +420,206 @@ input[type=file]{display:none}
     </div>
     <div id="conc-box"></div>
   </div>
+</div><!-- end .page -->
+</div><!-- end #sec-packcheck -->
+
+<!-- ══════════════════════════════════════════════════════
+     SECCIÓN: INSPECCIONES / SEGURIDAD ELÉCTRICA
+     ══════════════════════════════════════════════════════ -->
+<div class="sec-wrap" id="sec-inspeccion">
+<div class="page">
+  <div class="hero">
+    <h1 class="hero-h">Inspecciones de<br><em>Seguridad El&eacute;ctrica</em></h1>
+    <p class="hero-p">An&aacute;lisis autom&aacute;tico de reportes de laboratorio contra el checklist Argentina ALKON.</p>
+  </div>
+
+  <div class="step">01 &mdash; Reporte de laboratorio</div>
+  <div class="insp-panel">
+    <div class="insp-dz" id="insp-dz"
+      onclick="document.getElementById('insp-file').click()"
+      ondragover="event.preventDefault();this.style.borderColor='var(--ink)'"
+      ondragleave="this.style.borderColor=''"
+      ondrop="event.preventDefault();this.style.borderColor='';handleInspFile({files:event.dataTransfer.files})">
+      <div class="insp-dz-ico">📋</div>
+      <div class="insp-dz-txt" id="insp-dz-txt">Arrastr&aacute; o seleccion&aacute; el reporte PDF</div>
+      <div class="insp-dz-sub">Reporte de laboratorio de inspecci&oacute;n el&eacute;ctrica</div>
+    </div>
+    <input type="file" id="insp-file" accept="application/pdf" onchange="handleInspFile(this)">
+  </div>
+
+  <div class="step">02 &mdash; Analizar</div>
+  <button class="insp-btn" id="insp-btn" disabled onclick="runInspeccion()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+    Analizar reporte
+  </button>
+
+  <div class="insp-loading" id="insp-loading">
+    <div class="insp-spinner"></div>
+    <div class="insp-load-label" id="insp-load-label">Procesando...</div>
+    <div class="insp-log" id="insp-log"></div>
+  </div>
+
+  <div class="insp-results" id="insp-results">
+    <div class="step">Resultado</div>
+    <div class="insp-sheet-note" id="insp-sheet-note"></div>
+    <div class="insp-panel">
+      <div id="insp-table-wrap"></div>
+      <button class="export-btn" onclick="exportInspCSV()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="12" height="12"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportar CSV
+      </button>
+    </div>
+    <button class="insp-btn" style="background:transparent;border:var(--rule);color:var(--ink50)" onclick="resetInspeccion()">
+      Nuevo an&aacute;lisis
+    </button>
+  </div>
 </div>
+</div><!-- end #sec-inspeccion -->
 
 <footer>DM AI Ops</footer>
 
 <script>
+// ══════════════════════════════════════════════════════════════
+// NAVEGACIÓN
+// ══════════════════════════════════════════════════════════════
+function switchSec(name) {
+  document.querySelectorAll('.sec-wrap').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.sec-tab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('sec-'+name).classList.add('active');
+  var tabs = document.querySelectorAll('.sec-tab');
+  tabs.forEach(function(t){
+    if((name==='packcheck'&&t.textContent.includes('Pack'))||(name==='inspeccion'&&t.textContent.includes('Insp')))
+      t.classList.add('active');
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ══════════════════════════════════════════════════════════════
+// PACKCHECK — STATE
+// ══════════════════════════════════════════════════════════════
 var fO=null,fP=null,b64O=null,b64P=null;
 var canvasO=null,canvasP=null,pageOffsetsO=[],pageOffsetsP=[];
 var materialType='packaging';
 
-// ── REGLA DE COLOR (compartida por todos los tipos) ───────────
-var COLOR_RULE = 'REGLA DE COLOR (aplica siempre, sin excepcion):\n'
+var COLOR_RULE='REGLA DE COLOR (aplica siempre):\n'
   +'- NUNCA reportes diferencias de saturacion, brillo, contraste, nitidez o resolucion\n'
-  +'- SOLO reporta color si la diferencia es GROSERA Y OBVIA a simple vista:\n'
-  +'  ejemplo valido: producto NARANJA en ART vs producto ROJO OSCURO en PV\n'
-  +'  ejemplo valido: fondo AZUL en ART vs fondo VERDE en PV\n'
-  +'  ejemplo INVALIDO: naranja ligeramente mas saturado\n'
-  +'  ejemplo INVALIDO: diferencia de 1-2 puntos en sat/brillo\n'
-  +'- En caso de duda: NO reportar diferencia de color\n\n';
+  +'- SOLO reporta color si la diferencia es GROSERA Y OBVIA a simple vista\n'
+  +'- En caso de duda: NO reportar\n\n';
 
-// ── PROMPTS POR TIPO DE MATERIAL ──────────────────────────────
-var PROMPTS = {
-
+var PROMPTS={
 packaging:
   'Sos un auditor ULTRA-ESTRICTO de QA de packaging para la empresa ALKON.\n\n'
   +'IMAGEN 1 = ART (arte original aprobado) | IMAGEN 2 = PV (version del proveedor)\n\n'
   +'=== CONTEXTO ===\n'
-  +'Estas validando PACKAGING (caja, blister, bolsa, tubo).\n'
-  +'ART y PV representan el MISMO packaging — pueden tener formatos distintos\n'
-  +'(PDF desplegado, imagen renderizada, foto de impresion) pero el CONTENIDO debe ser identico.\n\n'
+  +'Packaging (caja, blister, bolsa). ART y PV pueden tener formatos distintos\n'
+  +'(PDF desplegado, imagen renderizada) pero el CONTENIDO debe ser identico.\n\n'
   +'=== METODOLOGIA ESTRICTA ===\n'
-  +'PASO 1 — Inventario completo del ART:\n'
-  +'  Lista TODOS los elementos: textos en cada idioma, especificaciones tecnicas\n'
-  +'  (digito a digito), logos, simbolos, QR, EAN, informacion legal, imagenes del producto.\n\n'
-  +'PASO 2 — Verificacion en PV:\n'
-  +'  Para cada elemento del ART, buscalo en CUALQUIER PARTE del PV.\n'
-  +'  - Mismo valor exacto → OK\n'
-  +'  - Valor diferente → CRITICO (reportar con valores literales de ambos)\n'
-  +'  - No encontrado en ningun lugar del PV → reportar con pv="AUSENTE EN PV"\n\n'
-  +'PASO 3 — Verificacion inversa:\n'
-  +'  Detecta contenido en PV que NO existe en ART (agregados no aprobados).\n\n'
+  +'PASO 1 — Inventario ART: lista TODOS los elementos.\n'
+  +'PASO 2 — Verificacion PV: busca cada elemento en CUALQUIER parte del PV.\n'
+  +'  - Mismo valor → OK\n'
+  +'  - Valor diferente → CRITICO con literales de ambos\n'
+  +'  - No encontrado → pv="AUSENTE EN PV"\n'
+  +'PASO 3 — Verificacion inversa: contenido en PV que no existe en ART.\n\n'
   +'=== ESPECIFICACIONES TECNICAS — OBLIGATORIO ===\n'
-  +'Transcribir y comparar DIGITO POR DIGITO en TODOS los idiomas visibles:\n'
-  +'- EN: No load speed | DE: Leerlaufdrehzahl | ES: Velocidad en vacío\n'
-  +'- FR: Vitesse à vide | IT: Velocità a vuoto | PT: Velocidade em vazio\n'
-  +'- NL: Onbelast toerental | HU: Üresjárati fordulatszám\n'
-  +'- BG: Обороти на празен ход ← MAXIMA ATENCION CIRÍLICO (ej: 5300 vs 4700 ob/min)\n'
-  +'- CZ: Otáčky naprázdno | SK: Otáčky naprázdno | RO: Turație în gol\n'
-  +'- Potencia W | Velocidad cadena/corte m/s | Longitud espada/barra | Paso cadena\n'
-  +'- Cualquier valor numerico: W, V, A, Hz, PSI, bar, Mpa, L/min, rpm, mm, mAh\n'
-  +'PROCESO OBLIGATORIO:\n'
-  +'  1. Leer el valor en ART para CADA especificacion en CADA idioma\n'
-  +'  2. Buscar ese mismo valor en PV en CUALQUIER parte\n'
-  +'  3. Si el valor difiere UN SOLO DIGITO → CRITICO\n'
-  +'  4. Si no aparece en PV → AUSENTE EN PV\n'
+  +'Transcribir y comparar DIGITO POR DIGITO en TODOS los idiomas:\n'
+  +'- EN: No load speed | DE: Leerlaufdrehzahl | ES: Velocidad en vacio\n'
+  +'- FR: Vitesse a vide | IT: Velocita a vuoto | PT: Velocidade em vazio\n'
+  +'- NL: Onbelast toerental | HU: Uresjárati fordulatszam\n'
+  +'- BG: Обороти на празен ход ← MAXIMA ATENCION CIRÍLICO (ej: 5300 vs 4700)\n'
+  +'- CZ: Otacky naprazdno | SK: Otacky naprazdno | RO: Turatie in gol\n'
+  +'- W, V, Hz, PSI, bar, Mpa, L/min, m/s, mm, mAh, rpm\n'
   +'Un digito diferente = RECHAZADO CRITICO automatico.\n\n'
   +COLOR_RULE
-  +'=== REGLA CRITICA ANTI-FALSOS-POSITIVOS ===\n'
-  +'Antes de reportar cualquier diferencia, aplicá este filtro obligatorio:\n\n'
-  +'PREGUNTA 1: ¿El contenido que falta en PV podría estar presente pero en baja resolución\n'
-  +'o en formato reducido por ser un desglose de caja vs un arte desplegado?\n'
-  +'→ Si la respuesta es SI o POSIBLEMENTE: NO reportar, clasificar como OK\n\n'
-  +'PREGUNTA 2: ¿Es una diferencia de cantidad de texto (más texto en ART que en PV)\n'
-  +'pero el PV tiene ALGO de ese contenido aunque sea resumido?\n'
-  +'→ Si la respuesta es SI: reportar solo como MENOR, nunca como CRITICO\n\n'
-  +'PREGUNTA 3: ¿Es una diferencia de idioma faltante en la tabla de especificaciones?\n'
-  +'→ SOLO reportar si podés leer el idioma en ART Y confirmar que NO existe en ninguna\n'
-  +'   parte del PV. Si el PV tiene texto pequeño que no podés leer claramente: NO reportar\n\n'
-  +'REGLA DE ORO: En caso de duda sobre si algo está o no está en el PV → NO reportar.\n'
-  +'Es mejor aprobar con observaciones que rechazar por falsos positivos.\n\n'
-  +'LO QUE SÍ ES CRITICO (sin dudas):\n'
-  +'- Un valor numérico DIFERENTE que podés leer claramente en ambos (ej: 5300 vs 4700)\n'
-  +'- Un texto COMPLETAMENTE DISTINTO que podés leer en ambos\n'
-  +'- Un elemento que NO EXISTE en ninguna parte del PV (no solo en distinta posición)\n\n'
+  +'=== REGLA ANTI-FALSOS-POSITIVOS ===\n'
+  +'Antes de reportar, respondete:\n'
+  +'¿El contenido podria estar en PV pero en baja resolucion o formato reducido?\n'
+  +'→ Si es posible: NO reportar\n'
+  +'¿Es diferencia de cantidad de texto pero el PV tiene algo de ese contenido?\n'
+  +'→ Reportar solo como MENOR\n'
+  +'¿Es un idioma en tabla de specs que no podes leer claramente en PV?\n'
+  +'→ Solo reportar si confirmas que NO existe en ninguna parte del PV\n'
+  +'REGLA DE ORO: En caso de duda → NO reportar.\n\n'
+  +'LO QUE SI ES CRITICO:\n'
+  +'- Valor numerico DIFERENTE que podes leer claramente en ambos\n'
+  +'- Texto COMPLETAMENTE DISTINTO que podes leer en ambos\n'
+  +'- Elemento que NO EXISTE en ninguna parte del PV\n\n'
+  +'=== NUNCA REPORTAR ===\n'
+  +'- Diferencias de posicion, orientacion, jerarquia visual\n'
+  +'- Diferencias de diagramacion entre formatos distintos\n'
+  +'- Etiquetado bilingue intencional (POWER/POTENCIA = correcto)\n\n'
   +'=== CONCLUSION ===\n'
-  +'Si hay errores criticos: decir RECHAZADO y listar correcciones obligatorias.\n'
-  +'Solo si score >= 90 y cero diferencias: decir APROBADO SIN OBSERVACIONES.\n\n'
-  +'=== SCORING ===\n'
-  +'CRITICO=-25 | MEDIO=-10 | MENOR=-3 (base 100)\n'
-  +'90-100=APROBADO | 70-89=APROBADO CON OBSERVACIONES | 0-69=RECHAZADO CRITICO\n'
-  +'Cualquier CRITICO = RECHAZADO automatico.\n\n'
+  +'Si hay criticos: decir RECHAZADO y listar correcciones.\n'
+  +'Solo si score>=90 y cero diferencias: APROBADO SIN OBSERVACIONES.\n\n'
+  +'SCORING: CRITICO=-25|MEDIO=-10|MENOR=-3 (base 100)\n'
+  +'90-100=APROBADO|70-89=APROBADO CON OBSERVACIONES|0-69=RECHAZADO CRITICO\n\n'
   +'{CRITERIA_LIST}\n\n'
   +'Responde SOLO JSON sin backticks:\n'
   +'{"score":0,"clasificacion":"...","resumen":"...","criticos":0,"advertencias":0,"menores":0,"ok":0,'
   +'"diferencias":[{"nivel":"critico|advertencia|menor","categoria":"COLOR|IMAGEN|TEXTO|IDIOMA|ESPECIFICACION|CONTENIDO|LEGAL|QR|NAMING",'
   +'"idioma":"ES|EN|BG|CZ|SK|RO|HU|FR|DE|IT|PT|NL|todos|na","titulo":"titulo corto",'
   +'"pagina_art":"seccion ART o null","pagina_pv":"seccion PV o null",'
-  +'"original":"valor literal en ART","pv":"valor literal en PV o AUSENTE EN PV",'
+  +'"original":"valor literal ART","pv":"valor literal PV o AUSENTE EN PV",'
   +'"accion":"correccion exacta","impacto":"tecnico|legal|visual|comercial"}],'
-  +'"conclusion":"veredicto y acciones obligatorias"}',
+  +'"conclusion":"veredicto y acciones"}',
 
 manual:
-  'Sos un auditor de QA de documentacion tecnica para la empresa ALKON.\n\n'
-  +'IMAGEN 1 = ART (documento original aprobado) | IMAGEN 2 = PV (version del proveedor)\n\n'
-  +'=== CONTEXTO ===\n'
-  +'Estas validando un MANUAL o INSTRUCTIVO.\n'
-  +'ART y PV pueden tener formatos completamente distintos (PDF multipagina vs imagen panoramica,\n'
-  +'impresion fotografiada, etc). El orden de secciones PUEDE ser diferente — eso NO es error.\n'
-  +'Lo que importa: que todo el CONTENIDO del ART este presente en el PV.\n\n'
-  +'=== METODOLOGIA ===\n'
-  +'PASO 1 — Inventario del ART (recorre TODAS las paginas):\n'
-  +'  Secciones presentes, textos clave, especificaciones, advertencias de seguridad,\n'
-  +'  imagenes de instrucciones, datos de fabricante, garantia, contacto.\n\n'
-  +'PASO 2 — Verificacion en PV (busca en CUALQUIER PARTE):\n'
-  +'  - Seccion/contenido presente con mismo texto → OK\n'
-  +'  - Texto con diferencia significativa → reportar\n'
-  +'  - Seccion completamente ausente → reportar con pv="AUSENTE EN PV"\n\n'
-  +'=== ESPECIFICACIONES TECNICAS ===\n'
-  +'Si el manual tiene especificaciones tecnicas, comparar DIGITO POR DIGITO:\n'
-  +'Potencia W, voltaje V, presion PSI/bar, flujo L/min, capacidad mAh, etc.\n'
-  +'Un digito diferente = CRITICO.\n\n'
+  'Sos un auditor de QA de documentacion tecnica para ALKON.\n\n'
+  +'IMAGEN 1 = ART | IMAGEN 2 = PV\n\n'
+  +'Manual/instructivo. El orden de secciones PUEDE ser diferente — no es error.\n'
+  +'Verificar que TODO el CONTENIDO del ART este en el PV.\n\n'
+  +'Inventario ART → buscar en cualquier parte del PV.\n'
+  +'Specs tecnicas: comparar digito por digito si existen.\n'
   +COLOR_RULE
-  +'=== NUNCA REPORTAR ===\n'
-  +'- Diferencias de orden de secciones o paginas\n'
-  +'- Diferencias de diagramacion, columnas, tipografia\n'
-  +'- Diferencias de calidad de imagen entre PDF e impresion fotografiada\n\n'
-  +'=== SCORING ===\n'
-  +'CRITICO=-25 | MEDIO=-10 | MENOR=-3 (base 100)\n'
-  +'90-100=APROBADO | 70-89=APROBADO CON OBSERVACIONES | 0-69=RECHAZADO CRITICO\n\n'
+  +'NUNCA reportar: orden de secciones, diagramacion, calidad de imagen.\n\n'
+  +'SCORING: CRITICO=-25|MEDIO=-10|MENOR=-3\n'
+  +'90-100=APROBADO|70-89=OBSERVACIONES|0-69=RECHAZADO\n\n'
   +'{CRITERIA_LIST}\n\n'
-  +'Responde SOLO JSON sin backticks:\n'
+  +'Responde SOLO JSON:\n'
   +'{"score":0,"clasificacion":"...","resumen":"...","criticos":0,"advertencias":0,"menores":0,"ok":0,'
-  +'"diferencias":[{"nivel":"critico|advertencia|menor","categoria":"TEXTO|ESPECIFICACION|CONTENIDO|LEGAL|IMAGEN|QR|NAMING",'
-  +'"idioma":"ES|EN|todos|na","titulo":"titulo corto",'
-  +'"pagina_art":"seccion ART o null","pagina_pv":"seccion PV o null",'
-  +'"original":"valor literal en ART","pv":"valor literal en PV o AUSENTE EN PV",'
-  +'"accion":"correccion exacta","impacto":"tecnico|legal|visual|comercial"}],'
-  +'"conclusion":"veredicto y acciones obligatorias"}',
+  +'"diferencias":[{"nivel":"...","categoria":"...","idioma":"...","titulo":"...","pagina_art":null,"pagina_pv":null,"original":"...","pv":"...","accion":"...","impacto":"..."}],"conclusion":"..."}',
 
 etiqueta:
-  'Sos un auditor ULTRA-ESTRICTO de QA de etiquetas para la empresa ALKON.\n\n'
-  +'IMAGEN 1 = ART (etiqueta original aprobada) | IMAGEN 2 = PV (version del proveedor)\n\n'
-  +'=== CONTEXTO ===\n'
-  +'Estas validando una ETIQUETA ADHESIVA, HANGTAG o LABEL.\n'
-  +'Foco especial en: textos legales, codigos de barras, especificaciones tecnicas,\n'
-  +'informacion de contacto, pais de origen, certificaciones, colores de marca.\n\n'
-  +'=== METODOLOGIA ESTRICTA ===\n'
-  +'Compara TODOS los elementos del ART contra el PV caracter por caracter:\n'
-  +'- Textos legales y advertencias\n'
-  +'- Especificaciones tecnicas: digito por digito\n'
-  +'- EAN/codigo de barras: digito por digito\n'
-  +'- Logos y certificaciones presentes\n'
-  +'- Pais de origen, fabricante, importador\n'
-  +'Un digito diferente en specs o EAN = CRITICO automatico.\n\n'
+  'Sos un auditor ULTRA-ESTRICTO de QA de etiquetas para ALKON.\n\n'
+  +'IMAGEN 1 = ART | IMAGEN 2 = PV\n\n'
+  +'Etiqueta adhesiva, hangtag o label.\n'
+  +'Comparar TODOS los elementos caracter por caracter:\n'
+  +'textos legales, specs tecnicas (digito a digito), EAN, logos, pais de origen.\n'
   +COLOR_RULE
-  +'=== SCORING ===\n'
-  +'CRITICO=-25 | MEDIO=-10 | MENOR=-3 (base 100)\n'
-  +'90-100=APROBADO | 70-89=APROBADO CON OBSERVACIONES | 0-69=RECHAZADO CRITICO\n\n'
+  +'SCORING: CRITICO=-25|MEDIO=-10|MENOR=-3\n\n'
   +'{CRITERIA_LIST}\n\n'
-  +'Responde SOLO JSON sin backticks:\n'
+  +'Responde SOLO JSON:\n'
   +'{"score":0,"clasificacion":"...","resumen":"...","criticos":0,"advertencias":0,"menores":0,"ok":0,'
-  +'"diferencias":[{"nivel":"critico|advertencia|menor","categoria":"COLOR|TEXTO|ESPECIFICACION|LEGAL|QR|NAMING|CONTENIDO",'
-  +'"idioma":"ES|EN|todos|na","titulo":"titulo corto",'
-  +'"pagina_art":"null","pagina_pv":"null",'
-  +'"original":"valor literal en ART","pv":"valor literal en PV o AUSENTE EN PV",'
-  +'"accion":"correccion exacta","impacto":"tecnico|legal|visual|comercial"}],'
-  +'"conclusion":"veredicto y acciones obligatorias"}',
+  +'"diferencias":[{"nivel":"...","categoria":"...","idioma":"...","titulo":"...","pagina_art":null,"pagina_pv":null,"original":"...","pv":"...","accion":"...","impacto":"..."}],"conclusion":"..."}',
 
 inserto:
-  'Sos un auditor de QA de materiales impresos para la empresa ALKON.\n\n'
-  +'IMAGEN 1 = ART (inserto original aprobado) | IMAGEN 2 = PV (version del proveedor)\n\n'
-  +'=== CONTEXTO ===\n'
-  +'Estas validando un INSERTO, FLYER o CERTIFICADO DE GARANTIA.\n'
-  +'Foco en: textos legales, datos de garantia, informacion de contacto,\n'
-  +'imagenes del producto, logos, especificaciones si las hay.\n\n'
-  +'=== METODOLOGIA ===\n'
-  +'Compara TODO el contenido del ART contra el PV:\n'
-  +'- Todos los textos presentes y correctos\n'
-  +'- Datos de garantia (plazo, condiciones, exclusiones)\n'
-  +'- Informacion de contacto (telefono, email, web, direccion)\n'
-  +'- Logos y marcas\n'
-  +'- Especificaciones tecnicas si existen: digito por digito\n\n'
+  'Sos un auditor de QA de materiales impresos para ALKON.\n\n'
+  +'IMAGEN 1 = ART | IMAGEN 2 = PV\n\n'
+  +'Inserto, flyer o certificado de garantia.\n'
+  +'Verificar: textos, garantia, contacto, logos, specs si existen.\n'
   +COLOR_RULE
-  +'=== SCORING ===\n'
-  +'CRITICO=-25 | MEDIO=-10 | MENOR=-3 (base 100)\n'
-  +'90-100=APROBADO | 70-89=APROBADO CON OBSERVACIONES | 0-69=RECHAZADO CRITICO\n\n'
+  +'SCORING: CRITICO=-25|MEDIO=-10|MENOR=-3\n\n'
   +'{CRITERIA_LIST}\n\n'
-  +'Responde SOLO JSON sin backticks:\n'
+  +'Responde SOLO JSON:\n'
   +'{"score":0,"clasificacion":"...","resumen":"...","criticos":0,"advertencias":0,"menores":0,"ok":0,'
-  +'"diferencias":[{"nivel":"critico|advertencia|menor","categoria":"COLOR|TEXTO|ESPECIFICACION|LEGAL|QR|NAMING|CONTENIDO",'
-  +'"idioma":"ES|EN|todos|na","titulo":"titulo corto",'
-  +'"pagina_art":"seccion ART o null","pagina_pv":"seccion PV o null",'
-  +'"original":"valor literal en ART","pv":"valor literal en PV o AUSENTE EN PV",'
-  +'"accion":"correccion exacta","impacto":"tecnico|legal|visual|comercial"}],'
-  +'"conclusion":"veredicto y acciones obligatorias"}'
+  +'"diferencias":[{"nivel":"...","categoria":"...","idioma":"...","titulo":"...","pagina_art":null,"pagina_pv":null,"original":"...","pv":"...","accion":"...","impacto":"..."}],"conclusion":"..."}'
 };
 
-var SPECS_PROMPT = 'Sos un auditor experto. Dos imagenes con zoom en el area de especificaciones tecnicas.\n'
-  +'IMAGEN 1 = ART | IMAGEN 2 = PV\n\n'
-  +'Busca los valores del ART en CUALQUIER parte del PV. Compara DIGITO POR DIGITO:\n'
-  +'- Potencia W, RPM, velocidad, presion PSI/bar/Mpa, flujo L/min, voltaje V, capacidad mAh\n'
-  +'- BG: Обороти на празен ход (CIRÍLICO — MAXIMA ATENCION)\n'
-  +'- Todos los idiomas: EN/DE/ES/FR/IT/PT/NL/HU/BG/CZ/SK/RO\n\n'
-  +'Si valor en PV es DIFERENTE: reportar con literales de ambos.\n'
-  +'Si valor del ART NO APARECE en PV: pv="AUSENTE EN PV".\n'
-  +'Sin diferencias: {"diferencias":[]}\n'
-  +'Solo reporta lo que podes leer literalmente.\n'
+var SPECS_PROMPT='Sos un auditor experto. Dos imagenes con zoom en specs tecnicas.\n'
+  +'IMAGEN 1=ART | IMAGEN 2=PV\n'
+  +'Busca valores del ART en CUALQUIER parte del PV. Compara DIGITO POR DIGITO:\n'
+  +'- W, RPM, m/s, PSI, bar, Mpa, L/min, V, Hz, mAh\n'
+  +'- BG: Обороти на празен ход (CIRÍLICO — 5300 vs 4700)\n'
+  +'- EN/DE/ES/FR/IT/PT/NL/HU/BG/CZ/SK/RO\n'
+  +'Valor diferente: reportar. No aparece: pv="AUSENTE EN PV". Sin difs: {"diferencias":[]}\n'
   +'Responde SOLO JSON:\n'
-  +'{"diferencias":[{"nivel":"critico","categoria":"ESPECIFICACION","idioma":"BG","titulo":"RPM BG diferente","original":"5300 ob/min","pv":"4700 ob/min","accion":"Corregir a 5300","impacto":"tecnico"}]}';
+  +'{"diferencias":[{"nivel":"critico","categoria":"ESPECIFICACION","idioma":"BG","titulo":"RPM BG","original":"5300 ob/min","pv":"4700 ob/min","accion":"Corregir a 5300","impacto":"tecnico"}]}';
 
-// ── SELECTOR DE MATERIAL ──────────────────────────────────────
-var MATERIAL_NOTES = {
-  packaging: 'Packaging: an&aacute;lisis estricto. 2 pasadas cuando ambos son PDF.',
-  manual:    'Manual: verifica contenido completo ignorando orden de p&aacute;ginas.',
-  etiqueta:  'Etiqueta: foco en textos legales, EAN y especificaciones.',
-  inserto:   'Inserto: verifica textos, garant&iacute;a, contacto e im&aacute;genes.'
+// ── MATERIAL SELECTOR ─────────────────────────────────────────
+var MATERIAL_NOTES={
+  packaging:'Packaging: an&aacute;lisis estricto. 2 pasadas cuando ambos son PDF.',
+  manual:'Manual: verifica contenido completo ignorando orden de p&aacute;ginas.',
+  etiqueta:'Etiqueta: foco en textos legales, EAN y especificaciones.',
+  inserto:'Inserto: verifica textos, garant&iacute;a, contacto e im&aacute;genes.'
 };
 function setMaterial(btn){
   document.querySelectorAll('.mat-btn').forEach(function(b){b.classList.remove('active');});
@@ -595,14 +645,11 @@ function toggleCustomPrompt(){
   var ta=document.getElementById('prompt-textarea'),btns=document.getElementById('prompt-btns');
   var badge=document.getElementById('prompt-mode-badge'),meta=document.getElementById('prompt-meta');
   if(promptCustomMode){
-    ta.readOnly=false;
-    ta.value=promptCustomText||buildPromptText(getActiveChecks());
+    ta.readOnly=false;ta.value=promptCustomText||buildPromptText(getActiveChecks());
     btns.style.display='flex';badge.textContent='MODO: PERSONALIZADO';
-    meta.textContent=ta.value.length+' caracteres';
-    localStorage.setItem('pk_prompt_mode','1');
+    meta.textContent=ta.value.length+' caracteres';localStorage.setItem('pk_prompt_mode','1');
   }else{
-    ta.readOnly=true;btns.style.display='none';
-    badge.textContent='MODO: DINÁMICO';
+    ta.readOnly=true;btns.style.display='none';badge.textContent='MODO: DINÁMICO';
     meta.textContent='Vista previa — generado dinámicamente';
     refreshPromptPreview();localStorage.setItem('pk_prompt_mode','0');
   }
@@ -614,11 +661,9 @@ function refreshPromptPreview(){
 }
 function savePrompt(){
   var ta=document.getElementById('prompt-textarea');
-  promptCustomText=ta.value;
-  localStorage.setItem('pk_custom_prompt',promptCustomText);
-  var saved=document.getElementById('prompt-saved');
-  saved.style.display='inline';
-  setTimeout(function(){saved.style.display='none';},2000);
+  promptCustomText=ta.value;localStorage.setItem('pk_custom_prompt',promptCustomText);
+  var s=document.getElementById('prompt-saved');s.style.display='inline';
+  setTimeout(function(){s.style.display='none';},2000);
   document.getElementById('prompt-meta').textContent=promptCustomText.length+' caracteres · guardado';
 }
 function resetPrompt(){
@@ -654,10 +699,8 @@ function getKey(){return localStorage.getItem('pk_key')||'';}
 
 window.addEventListener('load',function(){
   if(getKey())document.getElementById('apikey-ok').style.display='inline';
-  bindDZ('dz-o','fi-o','o');
-  bindDZ('dz-p','fi-p','p');
-  promptCustomMode=getStoredPromptMode();
-  promptCustomText=getStoredPrompt();
+  bindDZ('dz-o','fi-o','o');bindDZ('dz-p','fi-p','p');
+  promptCustomMode=getStoredPromptMode();promptCustomText=getStoredPrompt();
   if(promptCustomMode){document.getElementById('prompt-custom-toggle').checked=true;toggleCustomPrompt();}
 });
 
@@ -671,16 +714,12 @@ function mimeOf(f){
 }
 function isPDF(f){return mimeOf(f)==='application/pdf';}
 function chkReady(){document.getElementById('btn-go').disabled=!(fO&&fP&&getKey());}
-
 function imageToCanvas(b64,mime){
   return new Promise(function(resolve){
     var img=new Image();
     img.onload=function(){
-      var cv=document.createElement('canvas');
-      cv.width=img.width;cv.height=img.height;
-      var ctx=cv.getContext('2d');
-      ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);
-      ctx.drawImage(img,0,0);
+      var cv=document.createElement('canvas');cv.width=img.width;cv.height=img.height;
+      var ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);ctx.drawImage(img,0,0);
       resolve({canvas:cv,pageOffsets:[{y:0,h:img.height}]});
     };
     img.src='data:'+mime+';base64,'+b64;
@@ -694,18 +733,14 @@ function bindDZ(dzId,fiId,key){
   fi.onchange=function(e){if(e.target.files&&e.target.files[0])handleFile(e.target.files[0],key);};
   dz.ondragover=function(e){e.preventDefault();dz.classList.add('drag');};
   dz.ondragleave=function(){dz.classList.remove('drag');};
-  dz.ondrop=function(e){
-    e.preventDefault();dz.classList.remove('drag');
-    if(e.dataTransfer.files&&e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0],key);
-  };
+  dz.ondrop=function(e){e.preventDefault();dz.classList.remove('drag');if(e.dataTransfer.files&&e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0],key);};
 }
 function handleFile(file,key){
   var reader=new FileReader();
   reader.onload=function(e){
     var b64=e.target.result.split(',')[1];
     if(key==='o'){fO=file;b64O=b64;}else{fP=file;b64P=b64;}
-    updatePreview(file,e.target.result,key);
-    chkReady();
+    updatePreview(file,e.target.result,key);chkReady();
   };
   reader.readAsDataURL(file);
 }
@@ -713,16 +748,13 @@ function updatePreview(file,src,key){
   var dz=document.getElementById('dz-'+key),fiId='fi-'+key;
   dz.style.padding='0';dz.style.cursor='default';dz.classList.remove('drag');
   if(isPDF(file)){
-    dz.innerHTML='<div class="prev-pdf">'
-      +'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#b5271f" stroke-width="1.3"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'
+    dz.innerHTML='<div class="prev-pdf"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#b5271f" stroke-width="1.3"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'
       +'<span class="prev-pdf-name">'+esc(file.name)+'</span>'
       +'<span class="prev-pdf-size">'+(file.size/1024/1024).toFixed(1)+' MB</span></div>'
-      +'<div class="fbar"><span class="fnm">'+esc(file.name)+'</span>'
-      +'<span class="fchg" onclick="document.getElementById(\''+fiId+'\').click()">Cambiar</span></div>';
+      +'<div class="fbar"><span class="fnm">'+esc(file.name)+'</span><span class="fchg" onclick="document.getElementById(\''+fiId+'\').click()">Cambiar</span></div>';
   }else{
     dz.innerHTML='<img class="prev-img" src="'+src+'" alt="">'
-      +'<div class="fbar"><span class="fnm">'+esc(file.name)+'</span>'
-      +'<span class="fchg" onclick="document.getElementById(\''+fiId+'\').click()">Cambiar</span></div>';
+      +'<div class="fbar"><span class="fnm">'+esc(file.name)+'</span><span class="fchg" onclick="document.getElementById(\''+fiId+'\').click()">Cambiar</span></div>';
   }
 }
 document.querySelectorAll('.pill').forEach(function(p){p.addEventListener('click',function(){p.classList.toggle('on');});});
@@ -730,11 +762,7 @@ document.querySelectorAll('.pill').forEach(function(p){p.addEventListener('click
 // ── PDF.JS ────────────────────────────────────────────────────
 async function loadPdfJs(){
   if(window.pdfjsLib)return;
-  await new Promise(function(res,rej){
-    var s=document.createElement('script');
-    s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-    s.onload=res;s.onerror=rej;document.head.appendChild(s);
-  });
+  await new Promise(function(res,rej){var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
   window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   await new Promise(function(r){setTimeout(r,200);});
 }
@@ -746,21 +774,17 @@ async function renderPDF(b64,scale,label,pStart,pEnd){
   var pPerPage=pEnd?(pEnd-pStart-4)/numPages:0;
   for(var p=1;p<=numPages;p++){
     if(pStart)setProgress(pStart+(p-1)*pPerPage,'Procesando '+label+'...','Pagina '+p+' / '+numPages,'');
-    var page=await pdf.getPage(p);
-    var vp=page.getViewport({scale:scale});
-    var cv=document.createElement('canvas');
-    cv.width=vp.width;cv.height=vp.height;
+    var page=await pdf.getPage(p);var vp=page.getViewport({scale:scale});
+    var cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;
     await page.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
     pages.push(cv);totalH+=vp.height;if(vp.width>maxW)maxW=vp.width;
   }
   var MAX_PX=7800,sd=1.0;
-  if(maxW>MAX_PX)sd=Math.min(sd,MAX_PX/maxW);
-  if(totalH>MAX_PX)sd=Math.min(sd,MAX_PX/totalH);
+  if(maxW>MAX_PX)sd=Math.min(sd,MAX_PX/maxW);if(totalH>MAX_PX)sd=Math.min(sd,MAX_PX/totalH);
   var fw=Math.floor(maxW*sd),fh=Math.floor(totalH*sd);
   var st=document.createElement('canvas');st.width=fw;st.height=fh;
   var ctx=st.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,fw,fh);
-  var y=0;
-  pages.forEach(function(cv){var dh=Math.floor(cv.height*sd);ctx.drawImage(cv,0,0,cv.width,cv.height,0,y,fw,dh);y+=dh;});
+  var y=0;pages.forEach(function(cv){var dh=Math.floor(cv.height*sd);ctx.drawImage(cv,0,0,cv.width,cv.height,0,y,fw,dh);y+=dh;});
   var MAX_B64=4*1024*1024,q=0.92;
   var result=st.toDataURL('image/jpeg',q).split(',')[1];
   while(result.length>MAX_B64&&q>0.4){q=Math.round((q-0.06)*100)/100;result=st.toDataURL('image/jpeg',q).split(',')[1];}
@@ -799,22 +823,22 @@ async function callProxy(content,maxTokens){
 // ── BUILD PROMPT ──────────────────────────────────────────────
 function buildPromptText(checks){
   var labels={
-    textos:'Textos en todos los idiomas: ortografia, gramatica, contenido, idiomas faltantes',
-    colores:'Colores: SOLO diferencias groseras y obvias de tono (no saturacion ni brillo)',
-    logos:'Logos, marcas registradas, simbolos y certificaciones',
+    textos:'Textos en todos los idiomas: ortografia, gramatica, contenido',
+    colores:'Colores: SOLO diferencias groseras de tono (no saturacion ni brillo)',
+    logos:'Logos, marcas, simbolos y certificaciones',
     fotos:'Fotografias: producto presente y correcto',
-    specs:'Especificaciones tecnicas: digito por digito en cada idioma incluyendo cirílico BG',
-    traducciones:'Multilenguaje: traducciones equivalentes BG, CZ, SK, RO, HU, etc.',
+    specs:'Especificaciones tecnicas: digito por digito en cada idioma incluyendo BG cirílico',
+    traducciones:'Multilenguaje: BG, CZ, SK, RO, HU, etc.',
     layout:'Layout: solo si falta contenido, NO diferencias de posicion',
     datos_repetidos:'Datos repetidos: valores en distintas secciones deben coincidir',
-    consistencia_caras:'Consistencia: mismo contenido en todas las caras/secciones',
-    legal:'CRITICO - Legal: textos legales, pais de origen, certificaciones CE/RoHS',
+    consistencia_caras:'Consistencia: mismo contenido en todas las caras',
+    legal:'CRITICO - Legal: textos, pais de origen, CE/RoHS',
     placeholders:'Placeholders: campos sin completar, EAN vacio',
-    unidades:'Unidades: W/rpm/m-s/ml/mm/PSI consistentes',
+    unidades:'Unidades: W/rpm/PSI/ml/mm consistentes',
     tipografia:'CRITICO - Tipografia: caracteres corruptos en cirílico',
     dieline:'Dieline: contenido en zonas de corte',
     qr:'QR y EAN: presentes y legibles',
-    comercial:'Coherencia comercial: claims = specs tecnicas',
+    comercial:'Coherencia comercial: claims = specs',
     naming:'Naming: modelo identico en todo el material',
     jerarquia:'Jerarquia visual: elementos criticos visibles',
     copy_paste:'Copy/paste: duplicaciones o texto cortado'
@@ -838,59 +862,36 @@ async function run(){
   document.getElementById('results').classList.remove('on');
   setProgress(0,'Iniciando...','','');
   canvasO=null;canvasP=null;pageOffsetsO=[];pageOffsetsP=[];
-
   try{
     setProgress(2,'Preparando...','Cargando motor de renderizado...','');
     if(isPDF(fO)||isPDF(fP))await loadPdfJs();
-
     var imgO;
-    if(isPDF(fO)){
-      var resO=await renderPDF(b64O,1.8,'ART',3,28);
-      imgO=resO.b64;canvasO=resO.canvas;pageOffsetsO=resO.pageOffsets||[];
-    }else{
-      imgO=b64O;
-      setProgress(28,'ART cargado',(fO.size/1024/1024).toFixed(1)+' MB','');
-      var ri=await imageToCanvas(b64O,mimeOf(fO));canvasO=ri.canvas;pageOffsetsO=ri.pageOffsets;
-    }
-
+    if(isPDF(fO)){var resO=await renderPDF(b64O,1.8,'ART',3,28);imgO=resO.b64;canvasO=resO.canvas;pageOffsetsO=resO.pageOffsets||[];}
+    else{imgO=b64O;setProgress(28,'ART cargado','','');var ri=await imageToCanvas(b64O,mimeOf(fO));canvasO=ri.canvas;pageOffsetsO=ri.pageOffsets;}
     var imgP;
-    if(isPDF(fP)){
-      var resP=await renderPDF(b64P,1.8,'PV',30,55);
-      imgP=resP.b64;canvasP=resP.canvas;pageOffsetsP=resP.pageOffsets||[];
-    }else{
-      imgP=b64P;
-      setProgress(55,'PV cargado',(fP.size/1024/1024).toFixed(1)+' MB','');
-      var rp=await imageToCanvas(b64P,mimeOf(fP));canvasP=rp.canvas;pageOffsetsP=rp.pageOffsets;
-    }
-
+    if(isPDF(fP)){var resP=await renderPDF(b64P,1.8,'PV',30,55);imgP=resP.b64;canvasP=resP.canvas;pageOffsetsP=resP.pageOffsets||[];}
+    else{imgP=b64P;setProgress(55,'PV cargado','','');var rp=await imageToCanvas(b64P,mimeOf(fP));canvasP=rp.canvas;pageOffsetsP=rp.pageOffsets;}
     setProgress(57,'Analisis completo...','Enviando archivos a Claude Vision...','');
-    var progTimer=setInterval(function(){
-      var cur=parseFloat(document.getElementById('prog-pct').textContent);
-      if(cur<78)setProgress(cur+0.4,undefined,undefined,undefined);
-    },800);
-
+    var progTimer=setInterval(function(){var cur=parseFloat(document.getElementById('prog-pct').textContent);if(cur<78)setProgress(cur+0.4,undefined,undefined,undefined);},800);
     var raw1=await callProxy([
       {type:'image',source:{type:'base64',media_type:'image/jpeg',data:imgO}},
       {type:'image',source:{type:'base64',media_type:'image/jpeg',data:imgP}},
       {type:'text',text:buildMainPrompt(checks)}
     ],8000);
     clearInterval(progTimer);
-
     setProgress(80,'Parseando resultado...','','');
     var si=raw1.indexOf('{'),ei=raw1.lastIndexOf('}');
-    if(si===-1||ei<=si)throw new Error('Respuesta inesperada en analisis principal.');
+    if(si===-1||ei<=si)throw new Error('Respuesta inesperada.');
     var result=JSON.parse(raw1.slice(si,ei+1));
-
-    // Segunda pasada specs: solo si ambos PDF y tipo packaging/etiqueta
+    // Segunda pasada specs solo si ambos PDF y packaging/etiqueta
     var ambosPDF=isPDF(fO)&&isPDF(fP);
     var hacerSpecs=ambosPDF&&(materialType==='packaging'||materialType==='etiqueta');
-    setProgress(82,'Verificacion de specs...',hacerSpecs?'Zoom 3x en especificaciones...':'Omitida','');
+    setProgress(82,'Verificacion de specs...',hacerSpecs?'Zoom 3x...':'Omitida','');
     if(hacerSpecs){
       try{
         var specO=cropCanvas(canvasO,0,0.3,1.0,0.7,3.0);
         var specP=cropCanvas(canvasP,0,0.3,1.0,0.7,3.0);
-        setProgress(86,'Analizando specs...','Comparando digito por digito en todos los idiomas...','');
-        // Esperamos explicitamente antes de la llamada para evitar cierre de canal
+        setProgress(86,'Analizando specs...','Comparando digito por digito...','');
         await new Promise(function(r){setTimeout(r,300);});
         var pt2=setInterval(function(){var c=parseFloat(document.getElementById('prog-pct').textContent);if(c<95)setProgress(c+0.5,undefined,undefined,undefined);},800);
         var raw2=await callProxy([
@@ -905,21 +906,17 @@ async function run(){
           if(specs.diferencias&&specs.diferencias.length>0){
             specs.diferencias.forEach(function(d){
               var dup=(result.diferencias||[]).some(function(x){return x.original===d.original&&x.pv===d.pv;});
-              if(!dup){
-                result.diferencias=result.diferencias||[];result.diferencias.push(d);
-                if(d.nivel==='critico'){result.criticos=(result.criticos||0)+1;result.score=Math.max(0,(result.score||100)-25);result.clasificacion='RECHAZADO CRITICO';}
-              }
+              if(!dup){result.diferencias=result.diferencias||[];result.diferencias.push(d);
+                if(d.nivel==='critico'){result.criticos=(result.criticos||0)+1;result.score=Math.max(0,(result.score||100)-25);result.clasificacion='RECHAZADO CRITICO';}}
             });
           }
         }
       }catch(e){console.log('Specs pass error:',e.message);}
     }
-
     setProgress(100,'Analisis completado','','');
     await new Promise(function(r){setTimeout(r,400);});
     document.getElementById('loading').classList.remove('on');
     render(result);
-
   }catch(err){
     document.getElementById('loading').classList.remove('on');
     document.getElementById('btn-go').style.display='flex';
@@ -962,7 +959,7 @@ function getPageThumb(canvas,offsets,pageNum,categoria){
   return cv.toDataURL('image/jpeg',0.88);
 }
 
-// ── RENDER ────────────────────────────────────────────────────
+// ── RENDER PACKCHECK ──────────────────────────────────────────
 function render(r){
   document.getElementById('results').classList.add('on');
   var diffs=r.diferencias||[],score=typeof r.score==='number'?Math.max(0,r.score):0,clas=r.clasificacion||'';
@@ -1026,24 +1023,194 @@ function toggleRow(hd){
 function showErr(m){document.getElementById('err-txt').textContent=m;document.getElementById('err').classList.add('on');}
 function hideErr(){document.getElementById('err').classList.remove('on');}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
 function resetAll(){
   fO=null;fP=null;b64O=null;b64P=null;canvasO=null;canvasP=null;pageOffsetsO=[];pageOffsetsP=[];
   ['o','p'].forEach(function(key){
     var dz=document.getElementById('dz-'+key);
     dz.innerHTML='<div class="dz-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>'
-      +'<div class="dz-p1">Arrastr&aacute; o <span class="dz-lnk">seleccion&aacute;</span></div>'
-      +'<div class="dz-p2">JPG &middot; PNG &middot; PDF</div>';
+      +'<div class="dz-p1">Arrastr&aacute; o <span class="dz-lnk">seleccion&aacute;</span></div><div class="dz-p2">JPG &middot; PNG &middot; PDF</div>';
     dz.style.padding='';dz.style.cursor='';
-    var fi=document.getElementById('fi-'+key);if(fi)fi.value='';
-    bindDZ('dz-'+key,'fi-'+key,key);
+    var fi=document.getElementById('fi-'+key);if(fi)fi.value='';bindDZ('dz-'+key,'fi-'+key,key);
   });
-  document.getElementById('btn-go').style.display='flex';
-  document.getElementById('btn-go').disabled=true;
-  document.getElementById('results').classList.remove('on');
-  document.getElementById('conc-box').innerHTML='';
-  setProgress(0,'','','');
-  hideErr();window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('btn-go').style.display='flex';document.getElementById('btn-go').disabled=true;
+  document.getElementById('results').classList.remove('on');document.getElementById('conc-box').innerHTML='';
+  setProgress(0,'','','');hideErr();window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ══════════════════════════════════════════════════════════════
+// INSPECCIONES — STATE & LOGIC
+// ══════════════════════════════════════════════════════════════
+var inspFile=null,inspB64=null,inspResultData=null;
+
+function handleInspFile(input){
+  var file=input.files[0];if(!file)return;
+  inspFile=file;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    inspB64=e.target.result.split(',')[1];
+    var dz=document.getElementById('insp-dz');dz.classList.add('has-file');
+    document.getElementById('insp-dz-txt').textContent=file.name;
+    document.getElementById('insp-btn').disabled=false;
+  };
+  reader.readAsDataURL(file);
+}
+
+function setInspLog(msg){document.getElementById('insp-log').textContent=msg;}
+function setInspLabel(msg){document.getElementById('insp-load-label').textContent=msg;}
+
+async function runInspeccion(){
+  if(!inspB64)return;
+  document.getElementById('insp-btn').style.display='none';
+  document.getElementById('insp-loading').classList.add('on');
+  document.getElementById('insp-results').classList.remove('on');
+
+  try{
+    // PASO 1: Extraer datos del reporte con Claude
+    setInspLabel('Leyendo reporte...');
+    setInspLog('Extrayendo información del encabezado...');
+
+    var extractPrompt='Analiza este reporte de inspección eléctrica de laboratorio.\n\n'
+      +'Extraer:\n'
+      +'- model_no: número de modelo del producto (del encabezado)\n'
+      +'- order_no: número de orden\n'
+      +'- quantity: cantidad\n'
+      +'- brand: marca (DAEWOO, PEKTRA u otra)\n'
+      +'- description_of_problems: todas las observaciones, problemas o hallazgos\n'
+      +'- label_carton: importador indicado en etiqueta del cartón\n'
+      +'- label_machine: info en etiqueta de la máquina (voltaje, potencia, frecuencia, clase)\n'
+      +'- qr_label: si tiene QR label con logo AR / doble check azul (si/no/no visible)\n'
+      +'- enchufe: tipo de enchufe (2 patas, 3 patas, clase I, clase II)\n'
+      +'- tiene_cargador: true/false\n'
+      +'- modelo_cargador: modelo del cargador si existe\n'
+      +'- notas_adicionales: cualquier otra información relevante\n\n'
+      +'Responde SOLO JSON sin backticks:\n'
+      +'{"model_no":"","order_no":"","quantity":"","brand":"","description_of_problems":"","label_carton":"","label_machine":"","qr_label":"","enchufe":"","tiene_cargador":false,"modelo_cargador":"","notas_adicionales":""}';
+
+    var extractResp=await callProxy([
+      {type:'document',source:{type:'base64',media_type:'application/pdf',data:inspB64}},
+      {type:'text',text:extractPrompt}
+    ],2000);
+
+    var si=extractResp.indexOf('{'),ei=extractResp.lastIndexOf('}');
+    if(si===-1)throw new Error('No se pudo extraer información del reporte.');
+    var extracted=JSON.parse(extractResp.slice(si,ei+1));
+    var modelNo=(extracted.model_no||'').trim();
+
+    setInspLog('Modelo detectado: '+(modelNo||'(no encontrado)'));
+
+    // PASO 2: Consultar Google Sheets via Netlify proxy
+    setInspLabel('Consultando checklist Argentina...');
+    setInspLog('Buscando "'+modelNo+'" en columna E...');
+
+    var sheetData={found:false,message:'No consultado'};
+    try{
+      var sheetResp=await fetch('/.netlify/functions/sheets',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:modelNo})
+      });
+      sheetData=await sheetResp.json();
+    }catch(e){
+      console.log('Sheets error:',e.message);
+      sheetData={found:false,message:'Error consultando planilla: '+e.message};
+    }
+
+    var sheetNote=sheetData.found
+      ?'✓ Modelo encontrado en checklist Argentina ('+sheetData.count+' registro/s)'
+      :'⚠ Modelo "'+modelNo+'" no encontrado en checklist. '+(sheetData.message||'');
+
+    setInspLog(sheetNote);
+
+    // PASO 3: Análisis final con Claude
+    setInspLabel('Analizando contra criterios ALKON...');
+
+    var checklistInfo=sheetData.found
+      ?'DATOS DEL CHECKLIST ARGENTINA:\n'+JSON.stringify(sheetData.data,null,2)
+      :'MODELO NO ENCONTRADO EN CHECKLIST. Analizar solo con datos del reporte.';
+
+    var analysisPrompt='Sos un auditor de seguridad eléctrica de ALKON Argentina.\n\n'
+      +'DATOS DEL REPORTE:\n'+JSON.stringify(extracted,null,2)+'\n\n'
+      +checklistInfo+'\n\n'
+      +'CRITERIOS DE ANÁLISIS:\n\n'
+      +'1. DESCRIPTION OF PROBLEMS\n'
+      +'Rework automático: enchufe incorrecto, falla en funcionamiento, QR inexistente, voltaje incorrecto, potencia incorrecta, info distinta a la certificada.\n'
+      +'Aprobado con observación: detalles no críticos (índices de protección faltante, etc.)\n\n'
+      +'2. LABEL ON CARTON — Importador correcto:\n'
+      +'HIDROAL SA → productos PEKTRA\n'
+      +'ASISTENCIA MECANICA INTEGRAL → productos DAEWOO\n'
+      +'Si no coincide → rework\n\n'
+      +'3. LABEL ON MACHINE — Debe tener: voltaje, potencia, frecuencia, clase eléctrica.\n'
+      +'Falta info crítica → no aprobado. Falta info menor → aprobado con observación.\n\n'
+      +'4. QR LABEL + LOGO AR — Debe tener QR con logo AR (doble check azul). Si no existe → rework automático.\n\n'
+      +'5. ENCHUFE — Clase I=3 patas | Clase II=2 patas. Si no corresponde → no aprobado.\n\n'
+      +'6. CARGADOR — Si incluye cargador, aplicar mismos criterios al modelo del cargador.\n\n'
+      +'7. INALÁMBRICO — Producto sin enchufe, cargador debe cumplir enchufe correcto.\n\n'
+      +'Responde con análisis detallado y luego este JSON al final:\n'
+      +'{"model_no":"","order_no":"","quantity":"","result":"Aprobado|No aprobado|Aprobado con observaciones","motivo":"","observaciones":""}';
+
+    var analysisResp=await callProxy([
+      {type:'document',source:{type:'base64',media_type:'application/pdf',data:inspB64}},
+      {type:'text',text:analysisPrompt}
+    ],3000);
+
+    var ji=analysisResp.lastIndexOf('{'),je=analysisResp.lastIndexOf('}');
+    var resultData={model_no:modelNo,order_no:extracted.order_no,quantity:extracted.quantity,result:'Error',motivo:'No se pudo parsear resultado',observaciones:''};
+    if(ji!==-1&&je>ji){try{resultData=JSON.parse(analysisResp.slice(ji,je+1));}catch(e){}}
+    var analysisText=ji>0?analysisResp.slice(0,ji).trim():analysisResp;
+
+    inspResultData=resultData;
+    document.getElementById('insp-loading').classList.remove('on');
+
+    // Mostrar nota de checklist
+    var sn=document.getElementById('insp-sheet-note');
+    sn.textContent=sheetNote;sn.className='insp-sheet-note on';
+
+    // Render tabla resultado
+    var badgeClass=resultData.result==='Aprobado'?'badge-ap':resultData.result==='No aprobado'?'badge-no':'badge-obs';
+    var html='<table class="result-table"><thead><tr>'
+      +'<th>Model No.</th><th>Order No.</th><th>Quantity</th><th>Result</th><th>Descripci&oacute;n / Observaciones</th>'
+      +'</tr></thead><tbody><tr>'
+      +'<td><strong>'+esc(resultData.model_no||'-')+'</strong></td>'
+      +'<td>'+esc(resultData.order_no||'-')+'</td>'
+      +'<td>'+esc(resultData.quantity||'-')+'</td>'
+      +'<td><span class="'+badgeClass+'">'+esc(resultData.result||'-')+'</span></td>'
+      +'<td>'+esc(resultData.motivo||'')+(resultData.observaciones?'<br><em style="color:var(--ink50)">'+esc(resultData.observaciones)+'</em>':'')+'</td>'
+      +'</tr></tbody></table>';
+    if(analysisText){
+      html+='<div style="margin-top:16px">'
+        +'<div style="font-family:monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink50);margin-bottom:8px">An&aacute;lisis detallado</div>'
+        +'<div class="insp-detail">'+esc(analysisText)+'</div></div>';
+    }
+    document.getElementById('insp-table-wrap').innerHTML=html;
+    document.getElementById('insp-results').classList.add('on');
+
+  }catch(err){
+    document.getElementById('insp-loading').classList.remove('on');
+    document.getElementById('insp-btn').style.display='flex';
+    alert('Error: '+err.message);
+  }
+}
+
+function exportInspCSV(){
+  if(!inspResultData)return;
+  var r=inspResultData;
+  var csv='Model No.,Order No.,Quantity,Result,Motivo,Observaciones\n'
+    +[r.model_no,r.order_no,r.quantity,r.result,r.motivo,r.observaciones]
+      .map(function(v){return '"'+(v||'').replace(/"/g,'""')+'"';}).join(',');
+  var blob=new Blob([csv],{type:'text/csv'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='inspeccion_'+(r.model_no||'resultado')+'.csv';a.click();
+}
+
+function resetInspeccion(){
+  inspFile=null;inspB64=null;inspResultData=null;
+  document.getElementById('insp-dz').classList.remove('has-file');
+  document.getElementById('insp-dz-txt').textContent='Arrastrá o seleccioná el reporte PDF';
+  document.getElementById('insp-file').value='';
+  document.getElementById('insp-btn').style.display='flex';
+  document.getElementById('insp-btn').disabled=true;
+  document.getElementById('insp-results').classList.remove('on');
+  document.getElementById('insp-sheet-note').className='insp-sheet-note';
 }
 </script>
 </body>
