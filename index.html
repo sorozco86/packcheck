@@ -1205,12 +1205,9 @@ async function runInspeccion(){
     inspResultData=resultData;
     document.getElementById('insp-loading').classList.remove('on');
 
-    // Mostrar nota de checklist
     var sn=document.getElementById('insp-sheet-note');
     sn.textContent=sheetNote;sn.className='insp-sheet-note on';
 
-    // Render tabla resultado
-    var ee=resultData.eficiencia_energetica||{};
     var badgeClass=resultData.result==='Aprobado'?'badge-ap'
       :resultData.result==='No aprobado'?'badge-no'
       :resultData.result==='Verificar'?'badge-verif'
@@ -1226,26 +1223,25 @@ async function runInspeccion(){
       +'<td>'+esc(resultData.motivo||'')+(resultData.observaciones?'<br><em style="color:var(--ink50)">'+esc(resultData.observaciones)+'</em>':'')+'</td>'
       +'</tr></tbody></table>';
 
-    // Bloque especial eficiencia energética
-    if(ee.tiene_etiqueta){
-      var eeOk=ee.coinciden;
+    // Bloque eficiencia energética
+    if(resultData.ee_tiene){
+      var eeOk=resultData.ee_coinciden;
       var eeBg=eeOk?'var(--grn-bg)':'var(--red-bg)';
       var eeBd=eeOk?'var(--grn-bd)':'var(--red-bd)';
       var eeColor=eeOk?'var(--grn)':'var(--red)';
-      var eeIcon=eeOk?'✓':'⚠';
       html+='<div style="margin-top:14px;background:'+eeBg+';border:1px solid '+eeBd+';border-radius:var(--r8);padding:14px 16px">'
-        +'<div style="font-family:monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:'+eeColor+';margin-bottom:8px;font-weight:600">'+eeIcon+' Eficiencia Energ&eacute;tica</div>'
+        +'<div style="font-family:monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:'+eeColor+';margin-bottom:10px;font-weight:600">'
+        +(eeOk?'✓':'⚠')+' Eficiencia Energ&eacute;tica</div>'
         +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:12px">'
         +'<div><div style="font-family:monospace;font-size:8px;color:var(--ink50);text-transform:uppercase;margin-bottom:3px">Clase declarada (texto)</div>'
-        +'<strong style="font-size:16px;color:'+eeColor+'">'+esc(ee.clase_texto||'-')+'</strong></div>'
+        +'<strong style="font-size:18px;color:'+eeColor+'">'+esc(resultData.ee_texto||'-')+'</strong></div>'
         +'<div><div style="font-family:monospace;font-size:8px;color:var(--ink50);text-transform:uppercase;margin-bottom:3px">Posici&oacute;n visual (marcador)</div>'
-        +'<strong style="font-size:16px;color:'+eeColor+'">'+esc(ee.clase_visual||'-')+'</strong></div>'
+        +'<strong style="font-size:18px;color:'+eeColor+'">'+esc(resultData.ee_visual||'-')+'</strong></div>'
         +'<div><div style="font-family:monospace;font-size:8px;color:var(--ink50);text-transform:uppercase;margin-bottom:3px">Resultado</div>'
-        +'<strong style="font-size:16px;color:'+eeColor+'">'+(eeOk?'Coinciden':'NO COINCIDEN')+'</strong></div>'
+        +'<strong style="font-size:14px;color:'+eeColor+'">'+(eeOk?'Coinciden':'NO COINCIDEN')+'</strong></div>'
         +'</div>'
-        +(ee.descripcion?'<div style="margin-top:8px;font-size:11px;color:var(--ink80)">'+esc(ee.descripcion)+'</div>':'')
-        +(ee.pagina?'<div style="margin-top:6px;font-family:monospace;font-size:9px;color:var(--ink50)">Página '+esc(String(ee.pagina))+' del reporte</div>':'')
-        +((!eeOk&&canvasInsp&&ee.pagina)?'<div id="ee-thumb-wrap" style="margin-top:10px"></div>':'')
+        +(resultData.ee_pagina?'<div style="margin-top:8px;font-family:monospace;font-size:9px;color:var(--ink50)">Página '+esc(String(resultData.ee_pagina))+' del reporte</div>':'')
+        +((!eeOk&&canvasInsp&&resultData.ee_pagina)?'<div id="ee-thumb-wrap" style="margin-top:10px"></div>':'')
         +'</div>';
     }
 
@@ -1258,25 +1254,21 @@ async function runInspeccion(){
 
     document.getElementById('insp-table-wrap').innerHTML=html;
 
-    // Generar thumb de la página con la etiqueta EE si hay error
-    if(ee.tiene_etiqueta&&!ee.coinciden&&canvasInsp&&ee.pagina){
+    // Thumb página EE con error
+    if(resultData.ee_tiene&&!resultData.ee_coinciden&&canvasInsp&&resultData.ee_pagina){
       var thumbWrap=document.getElementById('ee-thumb-wrap');
       if(thumbWrap){
-        var pgIdx=Math.max(0,(parseInt(ee.pagina)||1)-1);
-        var offsets=pageOffsetsInsp;
-        if(offsets&&offsets.length>pgIdx){
-          var off=offsets[pgIdx];
-          var thumbW=Math.min(canvasInsp.width,600),scale=thumbW/canvasInsp.width;
-          var cv=document.createElement('canvas');
-          cv.width=thumbW;cv.height=Math.floor(off.h*scale);
-          var ctx2=cv.getContext('2d');
-          ctx2.fillStyle='#fff';ctx2.fillRect(0,0,cv.width,cv.height);
-          ctx2.drawImage(canvasInsp,0,off.y,canvasInsp.width,off.h,0,0,cv.width,cv.height);
-          // Marco rojo
-          ctx2.strokeStyle='#b5271f';ctx2.lineWidth=3;ctx2.strokeRect(2,2,cv.width-4,cv.height-4);
-          var src=cv.toDataURL('image/jpeg',0.88);
-          thumbWrap.innerHTML='<div style="font-family:monospace;font-size:9px;color:var(--red);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">⚠ Etiqueta con error — p.'+esc(String(ee.pagina))+'</div>'
-            +'<img src="'+src+'" style="width:100%;border-radius:4px;border:2px solid var(--red-bd)" alt="Etiqueta EE">';
+        var pgIdx=Math.max(0,(parseInt(resultData.ee_pagina)||1)-1);
+        if(pageOffsetsInsp&&pageOffsetsInsp.length>pgIdx){
+          var off=pageOffsetsInsp[pgIdx];
+          var tw=Math.min(canvasInsp.width,600),ts=tw/canvasInsp.width;
+          var cv2=document.createElement('canvas');cv2.width=tw;cv2.height=Math.floor(off.h*ts);
+          var ctx3=cv2.getContext('2d');
+          ctx3.fillStyle='#fff';ctx3.fillRect(0,0,cv2.width,cv2.height);
+          ctx3.drawImage(canvasInsp,0,off.y,canvasInsp.width,off.h,0,0,cv2.width,cv2.height);
+          ctx3.strokeStyle='#b5271f';ctx3.lineWidth=3;ctx3.strokeRect(2,2,cv2.width-4,cv2.height-4);
+          thumbWrap.innerHTML='<div style="font-family:monospace;font-size:9px;color:var(--red);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">⚠ Etiqueta EE — p.'+esc(String(resultData.ee_pagina))+'</div>'
+            +'<img src="'+cv2.toDataURL('image/jpeg',0.88)+'" style="width:100%;border-radius:4px;border:2px solid var(--red-bd)" alt="EE">';
         }
       }
     }
