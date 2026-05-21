@@ -1181,10 +1181,26 @@ async function runInspeccion(){
       {type:'text',text:analysisPrompt}
     ],4000);
 
-    var ji=analysisResp.lastIndexOf('{'),je=analysisResp.lastIndexOf('}');
+    // Extraer JSON entre marcas
     var resultData={model_no:modelNo,order_no:extracted.order_no,quantity:extracted.quantity,result:'Error',motivo:'No se pudo parsear resultado',observaciones:'',eficiencia_energetica:{tiene_etiqueta:false}};
-    if(ji!==-1&&je>ji){try{resultData=JSON.parse(analysisResp.slice(ji,je+1));}catch(e){}}
-    var analysisText=ji>0?analysisResp.slice(0,ji).trim():analysisResp;
+    var analysisText=analysisResp;
+    try{
+      var startMark='===JSON_START===',endMark='===JSON_END===';
+      var jStart=analysisResp.indexOf(startMark),jEnd=analysisResp.indexOf(endMark);
+      if(jStart!==-1&&jEnd>jStart){
+        var jsonStr=analysisResp.slice(jStart+startMark.length,jEnd).trim();
+        resultData=JSON.parse(jsonStr);
+        analysisText=analysisResp.slice(0,jStart).trim();
+      } else {
+        // Fallback: buscar último JSON objeto completo
+        var ji=analysisResp.lastIndexOf('{"model_no');
+        var je=ji!==-1?analysisResp.indexOf('}',analysisResp.lastIndexOf('"descripcion"')):-1;
+        if(ji!==-1&&je>ji){
+          resultData=JSON.parse(analysisResp.slice(ji,je+2));
+          analysisText=analysisResp.slice(0,ji).trim();
+        }
+      }
+    }catch(e){console.log('Parse error:',e.message,analysisResp.slice(-500));}
 
     inspResultData=resultData;
     document.getElementById('insp-loading').classList.remove('on');
