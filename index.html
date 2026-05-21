@@ -210,6 +210,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--ink
 .result-table tr:hover td{background:var(--ink04)}
 .badge-ap{display:inline-block;padding:3px 10px;border-radius:2px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;font-weight:600;background:var(--grn-bg);color:var(--grn);border:1px solid var(--grn-bd)}
 .badge-no{display:inline-block;padding:3px 10px;border-radius:2px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;font-weight:600;background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)}
+.badge-verif{display:inline-block;padding:3px 10px;border-radius:2px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;font-weight:600;background:#fff3cd;color:#856404;border:1px solid #ffc107}
 .badge-obs{display:inline-block;padding:3px 10px;border-radius:2px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;font-weight:600;background:var(--amb-bg);color:var(--amb);border:1px solid var(--amb-bd)}
 .insp-detail{background:var(--ink04);border:var(--rule);border-radius:var(--r);padding:14px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.7;white-space:pre-wrap;margin-top:14px;max-height:380px;overflow-y:auto;color:var(--ink80)}
 .export-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:transparent;border:var(--rule);border-radius:var(--r);font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:var(--ink50);cursor:pointer;margin-top:12px}
@@ -1041,6 +1042,7 @@ function resetAll(){
 // INSPECCIONES — STATE & LOGIC
 // ══════════════════════════════════════════════════════════════
 var inspFile=null,inspB64=null,inspResultData=null;
+var canvasInsp=null,pageOffsetsInsp=[];
 
 function handleInspFile(input){
   var file=input.files[0];if(!file)return;
@@ -1068,6 +1070,17 @@ async function runInspeccion(){
     // PASO 1: Extraer datos del reporte con Claude
     setInspLabel('Leyendo reporte...');
     setInspLog('Extrayendo información del encabezado...');
+    canvasInsp=null;pageOffsetsInsp=[];
+
+    // Renderizar PDF a canvas para thumbs
+    try{
+      if(isPDF(inspFile)){
+        await loadPdfJs();
+        var pdfRes=await renderPDFInsp(inspB64);
+        canvasInsp=pdfRes.canvas;pageOffsetsInsp=pdfRes.pageOffsets;
+      }
+    }catch(e){console.log('PDF render insp error:',e.message);}
+
 
     var extractPrompt='Analiza este reporte de inspección eléctrica de laboratorio.\n\n'
       +'Extraer:\n'
@@ -1145,16 +1158,31 @@ async function runInspeccion(){
       +'5. ENCHUFE — Clase I=3 patas | Clase II=2 patas. Si no corresponde → no aprobado.\n\n'
       +'6. CARGADOR — Si incluye cargador, aplicar mismos criterios al modelo del cargador.\n\n'
       +'7. INALÁMBRICO — Producto sin enchufe, cargador debe cumplir enchufe correcto.\n\n'
+      +'8. ETIQUETA DE EFICIENCIA ENERGÉTICA (CRÍTICO)\n'
+      +'Si el reporte contiene una etiqueta de eficiencia energética (escala IE1/IE2/IE3/IE4 o A/B/C/D/E/F/G):\n'
+      +'a) Identificar el TEXTO que declara la clase (ej: "IE2", "A", etc.)\n'
+      +'b) Identificar la POSICIÓN VISUAL del marcador/flecha/indicador en la escala\n'
+      +'c) Verificar que el texto declarado Y la posición visual coincidan\n'
+      +'   - Si coinciden → OK\n'
+      +'   - Si NO coinciden (ej: texto dice IE2 pero flecha apunta a IE3) → resultado VERIFICAR\n'
+      +'   - Si no se puede determinar la posición visual claramente → resultado VERIFICAR con nota\n'
+      +'El resultado VERIFICAR implica que el producto NO puede aprobarse sin revisión manual.\n\n'
+      +'RESULTADO FINAL:\n'
+      +'Si cualquier criterio da VERIFICAR → el resultado general es VERIFICAR (no Aprobado).\n\n'
+      +'Incluí en el análisis:\n'
+      +'- Para cada problema encontrado: descripción clara\n'
+      +'- Para eficiencia energética: indicar en qué página del reporte aparece la etiqueta\n'
+      +'  y describir exactamente qué dice el texto vs dónde apunta el marcador visual\n\n'
       +'Responde con análisis detallado y luego este JSON al final:\n'
-      +'{"model_no":"","order_no":"","quantity":"","result":"Aprobado|No aprobado|Aprobado con observaciones","motivo":"","observaciones":""}';
+      +'{"model_no":"","order_no":"","quantity":"","result":"Aprobado|No aprobado|Aprobado con observaciones|Verificar","motivo":"","observaciones":"","eficiencia_energetica":{"tiene_etiqueta":false,"clase_texto":"","clase_visual":"","coinciden":true,"pagina":null,"descripcion":""}}';
 
     var analysisResp=await callProxy([
       {type:'document',source:{type:'base64',media_type:'application/pdf',data:inspB64}},
       {type:'text',text:analysisPrompt}
-    ],3000);
+    ],4000);
 
     var ji=analysisResp.lastIndexOf('{'),je=analysisResp.lastIndexOf('}');
-    var resultData={model_no:modelNo,order_no:extracted.order_no,quantity:extracted.quantity,result:'Error',motivo:'No se pudo parsear resultado',observaciones:''};
+    var resultData={model_no:modelNo,order_no:extracted.order_no,quantity:extracted.quantity,result:'Error',motivo:'No se pudo parsear resultado',observaciones:'',eficiencia_energetica:{tiene_etiqueta:false}};
     if(ji!==-1&&je>ji){try{resultData=JSON.parse(analysisResp.slice(ji,je+1));}catch(e){}}
     var analysisText=ji>0?analysisResp.slice(0,ji).trim():analysisResp;
 
@@ -1166,7 +1194,12 @@ async function runInspeccion(){
     sn.textContent=sheetNote;sn.className='insp-sheet-note on';
 
     // Render tabla resultado
-    var badgeClass=resultData.result==='Aprobado'?'badge-ap':resultData.result==='No aprobado'?'badge-no':'badge-obs';
+    var ee=resultData.eficiencia_energetica||{};
+    var badgeClass=resultData.result==='Aprobado'?'badge-ap'
+      :resultData.result==='No aprobado'?'badge-no'
+      :resultData.result==='Verificar'?'badge-verif'
+      :'badge-obs';
+
     var html='<table class="result-table"><thead><tr>'
       +'<th>Model No.</th><th>Order No.</th><th>Quantity</th><th>Result</th><th>Descripci&oacute;n / Observaciones</th>'
       +'</tr></thead><tbody><tr>'
@@ -1176,12 +1209,62 @@ async function runInspeccion(){
       +'<td><span class="'+badgeClass+'">'+esc(resultData.result||'-')+'</span></td>'
       +'<td>'+esc(resultData.motivo||'')+(resultData.observaciones?'<br><em style="color:var(--ink50)">'+esc(resultData.observaciones)+'</em>':'')+'</td>'
       +'</tr></tbody></table>';
+
+    // Bloque especial eficiencia energética
+    if(ee.tiene_etiqueta){
+      var eeOk=ee.coinciden;
+      var eeBg=eeOk?'var(--grn-bg)':'var(--red-bg)';
+      var eeBd=eeOk?'var(--grn-bd)':'var(--red-bd)';
+      var eeColor=eeOk?'var(--grn)':'var(--red)';
+      var eeIcon=eeOk?'✓':'⚠';
+      html+='<div style="margin-top:14px;background:'+eeBg+';border:1px solid '+eeBd+';border-radius:var(--r8);padding:14px 16px">'
+        +'<div style="font-family:monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:'+eeColor+';margin-bottom:8px;font-weight:600">'+eeIcon+' Eficiencia Energ&eacute;tica</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:12px">'
+        +'<div><div style="font-family:monospace;font-size:8px;color:var(--ink50);text-transform:uppercase;margin-bottom:3px">Clase declarada (texto)</div>'
+        +'<strong style="font-size:16px;color:'+eeColor+'">'+esc(ee.clase_texto||'-')+'</strong></div>'
+        +'<div><div style="font-family:monospace;font-size:8px;color:var(--ink50);text-transform:uppercase;margin-bottom:3px">Posici&oacute;n visual (marcador)</div>'
+        +'<strong style="font-size:16px;color:'+eeColor+'">'+esc(ee.clase_visual||'-')+'</strong></div>'
+        +'<div><div style="font-family:monospace;font-size:8px;color:var(--ink50);text-transform:uppercase;margin-bottom:3px">Resultado</div>'
+        +'<strong style="font-size:16px;color:'+eeColor+'">'+(eeOk?'Coinciden':'NO COINCIDEN')+'</strong></div>'
+        +'</div>'
+        +(ee.descripcion?'<div style="margin-top:8px;font-size:11px;color:var(--ink80)">'+esc(ee.descripcion)+'</div>':'')
+        +(ee.pagina?'<div style="margin-top:6px;font-family:monospace;font-size:9px;color:var(--ink50)">Página '+esc(String(ee.pagina))+' del reporte</div>':'')
+        +((!eeOk&&canvasInsp&&ee.pagina)?'<div id="ee-thumb-wrap" style="margin-top:10px"></div>':'')
+        +'</div>';
+    }
+
+    // Análisis detallado
     if(analysisText){
       html+='<div style="margin-top:16px">'
         +'<div style="font-family:monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink50);margin-bottom:8px">An&aacute;lisis detallado</div>'
         +'<div class="insp-detail">'+esc(analysisText)+'</div></div>';
     }
+
     document.getElementById('insp-table-wrap').innerHTML=html;
+
+    // Generar thumb de la página con la etiqueta EE si hay error
+    if(ee.tiene_etiqueta&&!ee.coinciden&&canvasInsp&&ee.pagina){
+      var thumbWrap=document.getElementById('ee-thumb-wrap');
+      if(thumbWrap){
+        var pgIdx=Math.max(0,(parseInt(ee.pagina)||1)-1);
+        var offsets=pageOffsetsInsp;
+        if(offsets&&offsets.length>pgIdx){
+          var off=offsets[pgIdx];
+          var thumbW=Math.min(canvasInsp.width,600),scale=thumbW/canvasInsp.width;
+          var cv=document.createElement('canvas');
+          cv.width=thumbW;cv.height=Math.floor(off.h*scale);
+          var ctx2=cv.getContext('2d');
+          ctx2.fillStyle='#fff';ctx2.fillRect(0,0,cv.width,cv.height);
+          ctx2.drawImage(canvasInsp,0,off.y,canvasInsp.width,off.h,0,0,cv.width,cv.height);
+          // Marco rojo
+          ctx2.strokeStyle='#b5271f';ctx2.lineWidth=3;ctx2.strokeRect(2,2,cv.width-4,cv.height-4);
+          var src=cv.toDataURL('image/jpeg',0.88);
+          thumbWrap.innerHTML='<div style="font-family:monospace;font-size:9px;color:var(--red);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">⚠ Etiqueta con error — p.'+esc(String(ee.pagina))+'</div>'
+            +'<img src="'+src+'" style="width:100%;border-radius:4px;border:2px solid var(--red-bd)" alt="Etiqueta EE">';
+        }
+      }
+    }
+
     document.getElementById('insp-results').classList.add('on');
 
   }catch(err){
@@ -1189,6 +1272,27 @@ async function runInspeccion(){
     document.getElementById('insp-btn').style.display='flex';
     alert('Error: '+err.message);
   }
+}
+
+async function renderPDFInsp(b64){
+  var raw=atob(b64),arr=new Uint8Array(raw.length);
+  for(var i=0;i<raw.length;i++)arr[i]=raw.charCodeAt(i);
+  var pdf=await window.pdfjsLib.getDocument({data:arr,cMapUrl:'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',cMapPacked:true}).promise;
+  var numPages=pdf.numPages,pages=[],totalH=0,maxW=0;
+  for(var p=1;p<=numPages;p++){
+    var page=await pdf.getPage(p);var vp=page.getViewport({scale:1.5});
+    var cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;
+    await page.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+    pages.push(cv);totalH+=vp.height;if(vp.width>maxW)maxW=vp.width;
+  }
+  var MAX_PX=7800,sd=1.0;
+  if(maxW>MAX_PX)sd=Math.min(sd,MAX_PX/maxW);if(totalH>MAX_PX)sd=Math.min(sd,MAX_PX/totalH);
+  var fw=Math.floor(maxW*sd),fh=Math.floor(totalH*sd);
+  var st=document.createElement('canvas');st.width=fw;st.height=fh;
+  var ctx=st.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,fw,fh);
+  var y=0,pageOffsets=[];
+  pages.forEach(function(cv){var dh=Math.floor(cv.height*sd);ctx.drawImage(cv,0,0,cv.width,cv.height,0,y,fw,dh);pageOffsets.push({y:y,h:dh});y+=dh;});
+  return{canvas:st,pageOffsets:pageOffsets};
 }
 
 function exportInspCSV(){
@@ -1203,7 +1307,7 @@ function exportInspCSV(){
 }
 
 function resetInspeccion(){
-  inspFile=null;inspB64=null;inspResultData=null;
+  inspFile=null;inspB64=null;inspResultData=null;canvasInsp=null;pageOffsetsInsp=[];
   document.getElementById('insp-dz').classList.remove('has-file');
   document.getElementById('insp-dz-txt').textContent='Arrastrá o seleccioná el reporte PDF';
   document.getElementById('insp-file').value='';
